@@ -14,6 +14,10 @@ The playbook gets there by:
 - **Binding results to the exact candidate.** Commands, reports, runtime identity, and evidence stay attached to the code under review.
 - **Finishing with a fresh challenge.** An independent reviewer hunts for weak tests, stale evidence, permissive parsers, and plausible stories unsupported by the results.
 
+These recommendations draw on extensive work by researchers, standards bodies, tool maintainers, and engineering teams. The evidence covers repository instructions and test-driven agents [[1]](https://arxiv.org/abs/2602.11988) [[5]](https://arxiv.org/abs/2605.17242) [[6]](https://arxiv.org/abs/2610.13065), browser testing and software supply-chain practice [[7]](https://playwright.dev/docs/best-practices) [[14]](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-218.pdf) [[15]](https://slsa.dev/spec/v1.2/provenance), and the engineering realities of long-running agents and measured developer productivity [[16]](https://openai.com/index/harness-engineering) [[17]](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) [[19]](https://metr.org/blog/2026-02-24-uplift-update).
+
+The playbook turns that research into defaults an agent can execute. Every major recommendation links to its source, and [`research/practice-map.md`](research/practice-map.md) records how the evidence became a practical rule.
+
 ## Start here
 
 Give your coding agent this prompt:
