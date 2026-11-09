@@ -28,15 +28,9 @@ Keep this overview concise. Link to authoritative detail instead of copying it.
 
 Give each material requirement a stable ID. Use the applicable authority and project vocabulary.
 
-| ID | Requirement | Rationale or authority | Acceptance condition | Evidence link |
+| ID | Requirement | Rationale or authority | Acceptance condition | BDD and evidence links |
 |---|---|---|---|---|
-| R-001 | `<observable behaviour, quality, or constraint>` | `<stakeholder, standard, policy, contract, or technical source>` | `<condition that can be evaluated>` | `<record or check>` |
-
-## Representative scenarios
-
-Add normal, boundary, failure, or recovery scenarios where they help clarify the requirements. Link to a separate journey catalogue when needed.
-
-- `<scenario or journey link>`
+| R-001 | `<observable behaviour, quality, or constraint>` | `<stakeholder, standard, policy, contract, or technical source>` | `<condition that can be evaluated>` | `<journey and verification IDs>` |
 
 ## Assumptions, risks, and decisions
 
@@ -50,5 +44,5 @@ Add normal, boundary, failure, or recovery scenarios where they help clarify the
 
 - Each material requirement identifies its rationale or authority.
 - Each material requirement has an evaluable acceptance condition.
-- Each acceptance condition links to verification or validation evidence.
+- Each acceptance condition links to BDD examples and suitable evidence.
 - Assumptions and unresolved decisions remain visible.

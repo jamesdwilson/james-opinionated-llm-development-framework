@@ -1,44 +1,62 @@
 # AGENTS.md template
 
-Replace each placeholder that applies. Remove unused sections.
+Replace each placeholder that applies. Unused command lines may be removed. Keep every stack role in the authoritative adoption map with `keep`, `add`, `N/A`, `blocked`, or `not run` plus its reason.
 
 ## Product and authorities
 
 - **Product or service:** `<name>`
 - **Purpose:** `<one sentence>`
 - **Project Brief:** `<path>`
-- **Representative journeys:** `<path or included in Project Brief>`
+- **BDD journeys:** `<path>`
 - **Verification and validation record:** `<path>`
+- **Authoritative adoption stack map:** `<path>`
 - **Product authority:** `<owner or document>`
 - **Technical authorities:** `<schemas, interfaces, policies, or source paths>`
 
+## Stack map
+
+- requirements and BDD: `<paths and practice>`
+- runtime and fast tests: `<Bun or existing equivalent>`
+- integration and contract checks: `<commands>`
+- browser journeys: `<Playwright or existing equivalent>`
+- bounded UX review: `<Midscene, human review, validated equivalent, or N/A>`
+- error capture and recovery: `<Bugsink, isolated equivalent, or N/A>`
+- supply-chain checks: `<commands and policy>`
+- candidate identity and review: `<project-native process>`
+
+Missing authorization, unavailable tooling, or an unexecuted required role is `blocked` or `not run`, not N/A. Use N/A only when the product and authorised scope make the role genuinely inapplicable.
+
 ## Commands
 
-List the existing commands relevant to ordinary work in this repository.
+- setup: `<command>`
+- focused test: `<command>`
+- broader deterministic checks: `<command>`
+- browser journeys: `<command>`
+- bounded UX review: `<command or N/A>`
+- error canary and recovery: `<command or N/A>`
+- dependency audit: `<command>`
+- build or packaging: `<command>`
 
-- setup: `<command or none>`
-- focused checks: `<command or none>`
-- broader checks: `<command or none>`
-- build or packaging: `<command or none>`
+## Working rules
 
-## Working boundaries
-
-- Follow the repository's documented conventions and rules for local changes.
-- Read the affected requirements and authoritative sources before editing.
+- Read the affected requirements and BDD examples before editing.
 - Identify consequential ambiguity and seek clarification from the responsible authority.
-- Use the repository's existing development and review process.
-- Distinguish verification against requirements from validation against intended use.
-- Choose testing, inspection, analysis, or demonstration according to the claim.
+- Use RED, GREEN, REFACTOR for changed behaviour.
+- Use a verified characterisation baseline for behaviour-preserving work.
+- Keep deterministic checks responsible for computable behaviour.
+- Keep Midscene within its declared visual questions and validation status.
+- Use synthetic data and isolation for Bugsink exercises.
+- Follow the repository's authorization, security, review, and release rules.
 - Record observed results and evidence limits.
 
 ## Approval boundaries
 
-- dependencies: `<approval rule>`
-- credentials and sensitive data: `<handling rule>`
-- external services and communications: `<approval rule>`
-- deployment and release: `<approval rule>`
-- destructive or irreversible work: `<approval rule>`
+- dependencies: `<rule>`
+- credentials and sensitive data: `<rule>`
+- external services: `<rule>`
+- deployment and release: `<rule>`
+- destructive or irreversible work: `<rule>`
 
 ## Result
 
-Report the outcome, affected requirements, changed files, procedures or commands run, observed results, evidence locations, and unresolved risks or decisions.
+Report the stack map, affected requirements, changed files, commands and procedures, observed results, evidence locations, substitutions, and unresolved risks.

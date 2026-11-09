@@ -1,82 +1,102 @@
 # Adoption instructions
 
-Use this playbook to add a small, research-led context layer to an existing repository.
+Apply the cohesive stack to an existing repository without discarding sound equivalents.
+
+These instructions govern the target repository. The playbook source repository's root `AGENTS.md` and verifier are maintenance tools for the playbook itself.
 
 ## Inputs
 
 You need:
 
-- the target repository;
-- the requested product or code change;
+- the target repository and authorised change;
+- its product, technical, security, and release authorities;
 - authority to inspect files and run existing checks;
-- the target repository's authorization boundaries and responsible owners.
+- approval under the target repository's rules before adding dependencies, services, credentials, or release actions.
 
-## 1. Inspect the repository
+## 1. Inspect the target
 
-Read the material that already governs the work:
+Read:
 
-- repository instructions;
-- product and requirements documentation;
-- build, test, and release commands;
-- schemas, interfaces, and relevant source code;
-- security, privacy, legal, accessibility, or operational policies;
+- repository instructions and product documentation;
+- build, test, browser, audit, and release commands;
+- schemas, interfaces, and affected source code;
+- security, privacy, legal, accessibility, and operational policies;
+- monitoring and recovery paths;
 - current working-tree state and local changes.
 
-Apply changes only to the target repository. This playbook's root `AGENTS.md` and verifier govern maintenance of the playbook itself.
+## 2. Map the stack
 
-This playbook does not select or replace the target repository's infrastructure, lifecycle, or approval process.
+Create a short adoption map:
 
-## 2. Establish the minimum context
+| Role | Existing tool or practice | Keep, add, N/A, blocked, or not run | Reason |
+|---|---|---|---|
+| Project Brief | `<value>` | `<decision>` | `<authority or gap>` |
+| BDD discovery | `<value>` | `<decision>` | `<authority or gap>` |
+| TDD and fast tests | `<value>` | `<decision>` | `<authority or gap>` |
+| Browser journeys | `<value>` | `<decision>` | `<authority or gap>` |
+| Bounded UX review | `<value>` | `<decision>` | `<authority or gap>` |
+| Error capture and recovery | `<value>` | `<decision>` | `<authority or gap>` |
+| Supply-chain checks | `<value>` | `<decision>` | `<authority or gap>` |
+| Candidate evidence and review | `<value>` | `<decision>` | `<authority or gap>` |
 
-Reuse existing documents where they contain the required information. Create or update only what the work needs:
+Use the defaults in `STACK.md` for missing roles. Keep sound equivalents. Mark a role N/A only when the product or authorised change genuinely does not exercise it. Missing authorization, unavailable tooling, or an unexecuted required role is blocked or not run. Preserve every role and its disposition in the authoritative adoption map.
 
-1. **`AGENTS.md`** with authoritative paths, commands, boundaries, and approvals.
-2. **Project Brief** with stakeholders, scope, requirements, constraints, decisions, and acceptance conditions.
-3. **Verification and validation record** linking material claims to purposes, methods, procedures, expected results, observed results, and evidence.
-4. **Journey catalogue**, only when representative scenarios need more space than the Project Brief provides.
+## 3. Establish the context
 
-Use the files in `templates/` as small starting points. Combine, rename, or omit them when the repository already has an equivalent source of truth.
+Reuse existing documents where they contain the required information. Add only missing information:
 
-## 3. Identify ambiguity
+1. target-repository `AGENTS.md` with real paths, commands, boundaries, approvals, and a link to the authoritative adoption map;
+2. Project Brief with requirements, constraints, acceptance conditions, and evidence links;
+3. BDD rules, examples, and questions for the representative slice;
+4. verification and validation record for the evaluated change.
 
-Identify consequential questions that could produce materially different outcomes. Seek targeted clarification from an authoritative source or assign them to the responsible person. Follow the target repository's process for unresolved assumptions.
+The templates may be combined, renamed, or embedded in existing project documentation.
 
-Record assumptions that remain necessary. Do not present them as established facts.
+## 4. Implement one representative slice
 
-## 4. Work through the existing process
+Follow this chain:
 
-Follow the target repository's documented development, review, and release authorities. This playbook does not choose their tools or sequence.
+1. identify the affected requirement and acceptance condition;
+2. map rules, examples, and unresolved questions;
+3. resolve consequential ambiguity or record the responsible assumption;
+4. establish meaningful RED for changed behaviour, or a green characterisation baseline for behaviour-preserving work;
+5. implement the smallest coherent change and reach GREEN;
+6. refactor while relevant checks remain green;
+7. run affected unit, integration, and contract checks;
+8. run the Playwright journey or the target's equivalent browser check;
+9. run bounded Midscene review when the slice contains a useful visual question;
+10. exercise a relevant Bugsink recovery path when operational errors are in scope;
+11. run the target's dependency and supply-chain checks;
+12. bind each final report to the evaluated candidate and relevant environment, keeping RED tied to its earlier candidate;
+13. complete the target repository's independent review and release process.
 
-For each affected requirement:
-
-1. identify the claim that needs evaluation;
-2. decide whether the claim needs verification against a requirement or validation against intended use and stakeholder expectations;
-3. choose a suitable method such as testing, inspection, analysis, or demonstration;
-4. run the procedure or command;
-5. record the observed result and evidence;
-6. state what the evidence does not establish.
-
-Unresolved contradictory evidence means the claim remains unresolved.
+A failed deterministic check remains a failure. Midscene findings are advisory until the project validates that evaluation setup.
 
 ## 5. Report the result
 
-Leave a concise record containing:
+Leave:
 
-- outcome and affected requirements;
+- the adoption stack map;
+- affected requirements and scenarios;
 - changed files;
-- procedures or commands run;
+- procedures and commands run;
 - observed results and evidence locations;
-- unresolved questions, evidence limits, and risks;
-- required owner or next action, when work remains.
+- Midscene validation status and findings where used;
+- Midscene validation-record path, agreement criteria, result, and approver when validated status is claimed;
+- Bugsink isolation, data, recovery, and cleanup results where used;
+- supply-chain results and accepted exceptions;
+- evidence limits, unresolved risks, and responsible owners.
 
 ## Ready-to-use request
 
 ```text
-Apply the research-led playbook to this repository.
-Inspect the target repository and follow its documented authorities and release process.
-Create or update only the Project Brief, representative journeys, verification and validation record,
-and concise AGENTS.md that the work needs.
-Identify consequential ambiguity and seek targeted clarification or record the responsible assumption.
-Connect material requirements to suitable verification or validation evidence.
-Run the relevant existing checks and report results, limits, and unresolved risks.
+Apply the cohesive stack from this playbook to the target repository.
+Read STACK.md, then inspect the target's own instructions and tools.
+Map every stack role to an existing equivalent, a justified default, N/A,
+blocked, or not run. Give the reason for every disposition.
+Keep sound equivalents and add only missing roles within current authority.
+Apply Project Brief, BDD, TDD, deterministic checks, Playwright, bounded Midscene,
+Bugsink recovery, supply-chain checks, and candidate-bound evidence to one
+representative slice. Run the target repository's required checks and report
+results, evidence limits, substitutions, and unresolved risks.
 ```

@@ -1,31 +1,85 @@
-# Verification and validation record template
+# Verification, validation, and evidence record
 
-Use the repository's native identity for the code, document, artefact, or release being evaluated.
+Use the project-native identity for the change, artefact, or release being evaluated.
 
 Verification checks specified requirements. Validation checks intended use and stakeholder expectations. Testing, inspection, analysis, and demonstration can support either purpose.
 
-## Scope
+## Subject
 
-- **Subject:** `<change, candidate, artefact, or release>`
-- **Reference:** `<commit, diff, version, document revision, artefact ID, or other project-native identity>`
+- **Candidate or artefact:** `<commit, version, release artefact, or other project-native identity>`
 - **Affected requirements:** `<IDs>`
+- **BDD journeys:** `<IDs>`
 - **Applicable authorities:** `<requirements, standards, policies, contracts, schemas, or owners>`
 
-## Verification and validation
+## Stack map
 
-| ID | Requirement or claim | Purpose | Method | Procedure or command | Expected result | Observed result | Evidence |
+| Role | Tool or practice used | Version or identity | Substitution or N/A reason |
+|---|---|---|---|
+| runtime and fast tests | `<value>` | `<value>` | `<value>` |
+| browser journeys | `<value>` | `<value>` | `<value>` |
+| bounded UX review | `<value>` | `<value>` | `<value>` |
+| error capture and recovery | `<value>` | `<value>` | `<value>` |
+| supply-chain checks | `<value>` | `<value>` | `<value>` |
+
+## Evidence
+
+| ID | Requirement or claim | Purpose | Owner | Procedure or command | Expected result | Observed result | Evidence |
 |---|---|---|---|---|---|---|---|
-| V-001 | `<claim>` | `<verification or validation>` | `<testing, inspection, analysis, or demonstration>` | `<procedure>` | `<condition>` | `<result>` | `<path, report, observation, or record>` |
+| V-001 | `<claim>` | `<verification, validation, or advisory observation>` | `<test layer, reviewer, or authority>` | `<procedure>` | `<condition>` | `<result>` | `<path, report, observation, or record>` |
+
+Each final-result artefact identifies the evaluated candidate and relevant environment directly or links to a run record that does. Candidate changes invalidate affected final evidence.
+
+## TDD record
+
+- **RED candidate:** `<preimplementation identity>`
+- **RED:** `<check and meaningful failure, or characterisation exception>`
+- **GREEN candidate:** `<final candidate identity>`
+- **GREEN:** `<check and result>`
+- **REFACTOR:** `<cleanup and recheck, or none>`
+
+## Playwright
+
+- journeys: `<IDs or N/A>`
+- command: `<command>`
+- result: `<result and report>`
+
+## Midscene
+
+- status: validated release evidence | advisory | N/A
+- tool, model, prompt, and fixture identity: `<values>`
+- bounded questions: `<questions>`
+- observations: `<visible facts>`
+- validation record: `<path or N/A>`
+- human-labelled sample, agreement criteria, and observed result: `<values or N/A>`
+- responsible approver: `<value or N/A>`
+- responsible human disposition: `<accepted, rejected, unresolved, or N/A>`
+
+Select `validated release evidence` only when the linked validation record covers the exact configuration and its criteria passed. Otherwise use `advisory`.
+
+## Bugsink recovery exercise
+
+- isolation: `<project or instance>`
+- synthetic condition or event: `<value>`
+- expected destination: `<value>`
+- sensitive-field check: `<result>`
+- user-visible behaviour and retained state: `<result>`
+- recovery and cleanup: `<result>`
+
+## Supply chain
+
+- resolved graph or lockfile: `<identity>`
+- audit command and result: `<value>`
+- audit-skipped scoped registries: `<values or none>`
+- release-age policy, new-resolution applicability, exemptions, and result: `<value or N/A>`
+- accepted exceptions and owner: `<value or none>`
 
 ## Evidence limits
 
-For each material conclusion, state conditions the evidence did not cover.
-
-- `<limit, excluded condition, unresolved contradiction, or uncertainty>`
+- `<excluded condition, unresolved contradiction, uncertainty, or method limit>`
 
 ## Result
 
 - **Supported claims:** `<IDs or none>`
 - **Unresolved claims:** `<IDs or none>`
-- **Responsible owner for unresolved claims:** `<owner or none>`
-- **Required next action:** `<action or none>`
+- **Review status:** `<project-native status>`
+- **Responsible owner and next action:** `<value or none>`

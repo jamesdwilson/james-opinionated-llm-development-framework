@@ -3,8 +3,16 @@
 .idea/
 .vscode/
 
-# Local scratch and caches
+# Generated reports and local evidence
 .tmp/
+evidence/
+test-results/
+playwright-report/
+midscene_run/
+coverage/
+
+# Dependencies and caches
+node_modules/
 __pycache__/
 *.py[cod]
 

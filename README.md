@@ -1,37 +1,31 @@
-# James's Research-Led LLM Development Playbook
+# James's Cohesive LLM Development Playbook
 
-> A small set of project facts, examples, and verification links that any coding agent can use.
+> One joined-up stack from requirements to release evidence.
 
-This repository gives a coding agent enough reliable context to work in an existing codebase without importing a new development religion. It keeps the project's tools, architecture, security rules, and release process in charge.
+This repository gives a coding agent a complete working method:
 
-The playbook asks for three things:
+```text
+Project Brief
+  -> BDD rules, examples, and questions
+  -> RED, GREEN, REFACTOR
+  -> unit, integration, and contract checks
+  -> Playwright browser journeys
+  -> bounded Midscene UX review
+  -> Bugsink failure and recovery exercise
+  -> Bun audit and release-age controls
+  -> candidate-bound evidence
+  -> independent challenge and handoff
+```
 
-1. a concise description of the problem, stakeholders, requirements, and constraints;
-2. representative scenarios that reveal ambiguity and support clarification;
-3. a verification and validation record connecting each important claim to suitable evidence.
-
-That is the whole method.
+The pieces belong together. Requirements define the promise. BDD clarifies it. TDD drives implementation. Deterministic checks provide evidence for the exercised behaviour. Playwright exercises the real interface. Midscene adds advisory observations about declared visual questions. An isolated Bugsink exercise checks error capture alongside separately observed application recovery. Supply-chain checks inspect the resolved dependency graph. Evidence and review connect every result to the change being considered.
 
 ## Why use it
 
-- **Easy to adopt.** Reuse existing documents and add only the missing information, using the templates where helpful.
-- **Portable.** It prescribes no runtime, framework, test runner, browser tool, model, or release process.
-- **Traceable.** Requirements connect to scenarios, verification methods, results, and known limits.
-- **Research-led.** Standards and empirical studies support the contents. The repository avoids numerical thresholds and universal workflow claims that the evidence does not establish.
-- **Honest about authority.** The source responsible for each claim stays visible.
-
-## Core rule
-
-Use the authority appropriate to the claim.
-
-- Stakeholders and product requirements define the intended outcome.
-- Applicable laws, standards, policies, and contracts define mandatory constraints.
-- Authoritative schemas, interfaces, and source code define existing technical behaviour.
-- Testing, inspection, analysis, and demonstration provide verification evidence.
-- Validation checks intended use and stakeholder expectations.
-- Research informs process choices within the populations, tasks, and limits that were actually studied.
-
-When sources conflict or leave a consequential gap, record the conflict and resolve it with the responsible person or authority. Do not turn an unsupported preference into a universal rule.
+- **Cohesive.** One chain connects product intent, implementation, runtime behaviour, operations, and release evidence.
+- **Easy to drop in.** Keep working equivalents already present in the target repository. Add only missing roles.
+- **Opinionated.** Bun, Playwright, Midscene, and Bugsink are the default tools for their roles.
+- **Research-aware.** Standards and empirical studies inform the method. Maintainer documentation establishes tool capabilities. James's stack choices remain labelled as choices.
+- **Inspectable.** Every important claim points to a requirement, check, observation, or responsible authority.
 
 ## Start here
 
@@ -40,120 +34,182 @@ Give your coding agent this prompt:
 ```text
 Read https://github.com/jamesdwilson/james-opinionated-llm-development-framework
 
-Read this playbook's ADOPT.md.
-In the target repository, read its own instructions and inspect it before changing it.
-Do not apply this playbook's root AGENTS.md to the target repository.
-Follow the target repository's documented tools, conventions, authorities, and release process.
-Create or update only the Project Brief, representative journeys, and
-verification and validation record that the work needs.
-Identify consequential ambiguity and seek targeted clarification or record the responsible assumption.
-Connect each material requirement to suitable verification or validation evidence.
-Run the relevant existing checks and report the results, limits, and unresolved risks.
+Read this playbook's ADOPT.md and STACK.md.
+In the target repository, read its own instructions and inspect its current stack.
+Map existing tools to the playbook roles and keep sound equivalents.
+Add only the missing roles needed for the authorised work.
+Apply the full chain to one representative slice:
+Project Brief, BDD examples, TDD implementation, deterministic checks,
+Playwright journey, bounded UX review where useful, Bugsink recovery exercise
+where operational errors matter, supply-chain checks, and candidate-bound evidence.
+Run the target repository's required checks and report results, limits, and risks.
 ```
 
-The detailed adoption instructions live in [`ADOPT.md`](ADOPT.md).
+[`ADOPT.md`](ADOPT.md) contains the adoption procedure. [`STACK.md`](STACK.md) defines each role, default tool, substitution rule, and evidence boundary.
 
-## The minimal set
+## What is authoritative
+
+Use the source responsible for each claim:
+
+- stakeholders and product requirements for intended outcomes;
+- laws, standards, policies, and contracts for mandatory constraints;
+- schemas, interfaces, source code, and existing tests for current technical contracts;
+- verification and validation evidence for the claims those methods can actually answer;
+- empirical research within its studied population, tasks, measures, and limitations;
+- official documentation for a tool's supported capabilities.
+
+The stack defaults organise the work. They do not outrank an applicable authority or a proven project-specific constraint.
+
+## The cohesive stack
 
 ### 1. Project Brief
 
-Record:
+Capture purpose, outcomes, stakeholders, context, scope, requirements, quality attributes, constraints, assumptions, risks, decisions, acceptance conditions, and evidence links.
 
-- purpose and desired outcomes;
-- stakeholders and operational context;
-- included and excluded scope;
-- observable requirements;
-- measurable quality requirements where they matter;
-- genuine constraints and their authority;
-- assumptions, risks, and unresolved decisions;
-- acceptance conditions and verification or validation links.
-
-ISO/IEC/IEEE 29148 defines requirements-engineering processes and information items. [[1]](https://www.iso.org/standard/72089.html) NASA's Systems Engineering Handbook covers stakeholder expectations, operational concepts, requirements, verification, and validation. [[2]](https://www.nasa.gov/wp-content/uploads/2018/09/nasa_systems_engineering_handbook_0.pdf) ISO/IEC 25010 supplies a quality model for specifying product qualities. [[3]](https://www.iso.org/standard/78176.html) Goal-oriented requirements engineering connects goals, requirements, and rationale. [[4]](https://webperso.info.ucl.ac.be/~avl/files/RE01.pdf)
+ISO/IEC/IEEE 29148 covers requirements-engineering processes and information items. [[1]](https://www.iso.org/standard/72089.html) NASA's Systems Engineering Handbook covers stakeholder expectations, operational concepts, requirements, verification, and validation. [[2]](https://www.nasa.gov/wp-content/uploads/2018/09/nasa_systems_engineering_handbook_0.pdf) ISO/IEC 25010 supplies a product-quality model. [[3]](https://www.iso.org/standard/78176.html) Goal-oriented requirements engineering connects goals, requirements, and rationale. [[4]](https://webperso.info.ucl.ac.be/~avl/files/RE01.pdf)
 
 Use [`templates/PROJECT_BRIEF.md`](templates/PROJECT_BRIEF.md).
 
-### 2. Representative journeys
+### 2. BDD discovery
 
-Write enough normal, boundary, failure, or recovery scenarios to clarify the affected requirements. NASA's guidance uses operational concepts and scenarios to describe expected use and stakeholder needs. [[2]](https://www.nasa.gov/wp-content/uploads/2018/09/nasa_systems_engineering_handbook_0.pdf) Scenario count and syntax belong to the project. Add a separate catalogue only when the Project Brief would become difficult to use.
+Turn requirements into rules, concrete examples, and unresolved questions. Use Given, When, Then when that syntax helps. Record normal, boundary, failure, and recovery behaviour where relevant.
 
-Research on interactive code generation found value in concrete tests and targeted clarification within the studied tasks and participants. [[7]](https://arxiv.org/abs/2404.10100) ClarifyGPT reported improved benchmark results from identifying ambiguity and asking focused questions. [[8]](https://arxiv.org/abs/2310.10996) These studies support clarification and do not establish one universal implementation sequence.
+Example Mapping is the selected BDD discovery technique. [[13]](https://cucumber.io/docs/bdd/example-mapping/) NASA supports operational scenarios as part of understanding expected use. [[2]](https://www.nasa.gov/wp-content/uploads/2018/09/nasa_systems_engineering_handbook_0.pdf) TiCoder and ClarifyGPT provide empirical support for concrete tests and targeted clarification within their studied tasks. [[7]](https://arxiv.org/abs/2404.10100) [[8]](https://arxiv.org/abs/2310.10996)
 
-Use [`templates/JOURNEYS.md`](templates/JOURNEYS.md) when a separate catalogue helps.
+Use [`templates/JOURNEYS.md`](templates/JOURNEYS.md).
 
-### 3. Verification and validation record
+### 3. TDD implementation
 
-For every material claim, record:
+The playbook's implementation loop is:
 
-- the requirement or authority behind it;
-- the verification method;
-- the procedure or command;
-- the expected result;
-- the observed result and evidence;
-- remaining limits or unresolved risks.
+```text
+RED -> GREEN -> REFACTOR
+```
 
-Verification checks specified requirements. Validation checks intended use and stakeholder expectations. Testing, inspection, analysis, and demonstration can support either purpose. Choose the purpose and method that can answer the claim. A passing test proves only what its oracle, inputs, environment, and scope support.
+Write or identify a meaningful failing check for the behaviour being changed. Make the smallest coherent change that satisfies it. Clean up while the relevant checks remain green. Behaviour-preserving work may begin from a verified characterisation baseline.
 
-A controlled experiment found traceability improved maintenance-task speed and correctness for its participants and projects. [[5]](https://www.patrickmaeder.de/pdf/ICSM2012_maeder_egyed_AssessingEffectOfRequirementsTraceability.pdf) An industrial multi-case study examined the use of tests as requirements and the communication problems around that practice. [[6]](https://doi.org/10.1016/j.infsof.2016.03.008)
+Across 20 diverse web applications, TDDev reports accuracy gains of 15.5 to 23.7 percentage points with sufficiently capable backbones; a stronger tester restored positive gains for a lower-capability backbone. [[15]](https://arxiv.org/abs/2605.17242) TENET reports benefits from representative developer-written tests, retrieval guided by tests, and iterative failure analysis. [[12]](https://arxiv.org/abs/2509.24148) TestSuiteBench shows that coding agents still struggle to create strong repository-level test suites from specifications. [[11]](https://arxiv.org/abs/2610.13065)
+
+Full RED, GREEN, REFACTOR is James's chosen operating discipline. The research supports conditional test-guided repair and does not establish universal benefit or the complete discipline as the superior sequence.
+
+### 4. Deterministic test layers
+
+Use the narrowest layer that can faithfully answer the claim:
+
+- unit checks for pure rules and transformations;
+- integration checks for persistence, services, queues, and adapters;
+- contract checks for schemas and interfaces;
+- browser checks for rendered, stateful user journeys.
+
+Program structure can reduce ambiguity for coding agents. Skeleton Coding reports benefits from structural specifications in its evaluated settings. [[14]](https://arxiv.org/abs/2610.38214)
+
+The exact layer split is a stack convention. Existing project ownership remains valid when it answers the same claims cleanly.
+
+### 5. Bun for JavaScript and TypeScript
+
+Bun is the default runtime, package manager, and test runner for new JavaScript or TypeScript adoption. Its built-in test runner keeps the basic loop compact. [[18]](https://bun.com/docs/test)
+
+Keep a healthy existing runtime when replacing it would add risk or duplicate infrastructure. The role matters more than forced migration.
+
+### 6. Playwright browser journeys
+
+Playwright owns critical rendered journeys: visible state, interaction, permissions, reloads, client-side recovery, and user-observable persistence.
+
+Playwright recommends isolated tests, user-facing assertions, resilient locators, and web-first waiting. [[16]](https://playwright.dev/docs/best-practices) Its planner, generator, and healer agents can assist test creation while executable assertions remain the behavioural evidence. [[17]](https://playwright.dev/docs/test-agents)
+
+### 7. Midscene bounded UX review
+
+Midscene adds AI-assisted interaction and visual assertions through Playwright. [[19]](https://midscenejs.com/integrate-with-playwright.html)
+
+Use it for narrow questions such as:
+
+- Is the required choice understandable?
+- Is the next action visually apparent?
+- Does the completed state explain what happened?
+- Is the recovery path visible after the exercised failure?
+
+Midscene is advisory by default. It cannot overrule a failed deterministic check. Treat its output as release evidence only after the project validates the chosen model, prompt, fixtures, and agreement with responsible human judgement.
+
+### 8. Bugsink failure and recovery exercise
+
+Use synthetic data and an isolated Bugsink project or disposable instance to exercise error capture and a relevant recovery path. Bugsink supplies a self-hosted Sentry-compatible target. [[20]](https://www.bugsink.com/docs/)
+
+The product requirement chooses the failure to exercise. The stack checks that the error reaches the intended destination, sensitive data stays out, user state behaves as specified, and cleanup succeeds.
+
+### 9. Supply-chain controls
+
+For Bun projects:
+
+- commit the lockfile;
+- review dependency-graph changes;
+- run `bun audit` against the resolved graph;
+- use `minimumReleaseAge` when the project's risk policy calls for a publication delay;
+- record exceptions and rollback.
+
+Bun documents its audit command and release-age control. [[21]](https://bun.com/docs/pm/cli/audit) [[22]](https://bun.com/docs/runtime/bunfig) [[27]](https://bun.com/docs/pm/cli/install) NIST's Secure Software Development Framework supplies broader secure-development guidance. [[23]](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-218.pdf)
+
+The release-age filter applies during new resolution and does not retroactively evaluate packages already present in `bun.lock`. An audit may skip a scoped registry that lacks an advisory endpoint without changing the exit code. Record both conditions. The playbook sets no universal quarantine duration. The responsible security authority owns that decision.
+
+### 10. Candidate-bound evidence
+
+Record the project-native candidate identity, exact commands or procedures, observed results, report locations, relevant environment facts, and evidence limits. Use a clean commit, release artefact, or other identity already trusted by the project.
+
+SLSA provenance provides a model for connecting an artefact to its build context. [[24]](https://slsa.dev/spec/v1.2/provenance) A controlled traceability experiment found maintenance benefits for its participants and projects. [[5]](https://www.patrickmaeder.de/pdf/ICSM2012_maeder_egyed_AssessingEffectOfRequirementsTraceability.pdf) An industrial multi-case study documents both the use and communication limits of tests as requirements. [[6]](https://doi.org/10.1016/j.infsof.2016.03.008)
 
 Use [`templates/VERIFICATION.md`](templates/VERIFICATION.md).
 
-## Repository instructions for agents
+### 11. Independent challenge and handoff
 
-This playbook packages authoritative paths, commands, constraints, and authorization boundaries in a short project-specific `AGENTS.md`. Linking to detailed material keeps the entry file usable.
+After the ordinary checks pass, use the target repository's review process to challenge weak tests, stale evidence, missing requirements, and unsupported conclusions. Record what changed, what ran, what passed, what remains uncertain, and who owns the next decision.
 
-One study found generated context files could reduce success and increase inference cost in several evaluated settings. [[9]](https://arxiv.org/abs/2602.11988) Another study associated `AGENTS.md` files with lower median runtime and output-token use while leaving comprehensive semantic-correctness evaluation open. [[10]](https://arxiv.org/abs/2601.20404) Neither study validates this template, its fields, or an ideal length. Those remain packaging choices.
+OpenAI and Anthropic engineering reports emphasise repository legibility, mechanical checks, durable progress, and useful handoffs in long-running agent work. [[25]](https://openai.com/index/harness-engineering) [[26]](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
 
-Use [`templates/AGENTS.md`](templates/AGENTS.md).
+The exact reviewer and handoff format remain project choices.
 
-## Tests and other evidence
+## Repository instructions
 
-Keep the project's existing test strategy. Add or change tests when they are the appropriate verification method for the affected requirement. Review whether the selected evidence can detect the failures that matter.
+Use a concise project-specific `AGENTS.md` to connect the stack to the target repository's real paths and commands. One study found generated context files could reduce success and increase inference cost in several evaluated settings; its aggregate success differences were not statistically significant. [[9]](https://arxiv.org/abs/2602.11988) Another associated existing `AGENTS.md` files with lower median runtime and output-token use while leaving comprehensive semantic-correctness evaluation open. [[10]](https://arxiv.org/abs/2601.20404)
 
-TestSuiteBench reports that coding agents struggle to generate strong repository-level suites from specifications. [[11]](https://arxiv.org/abs/2610.13065) TENET reports benefits from representative developer-written tests, test-guided retrieval, and iterative failure analysis in its evaluated repository tasks. [[12]](https://arxiv.org/abs/2509.24148)
+Neither study validates this template or an ideal file length. [`templates/AGENTS.md`](templates/AGENTS.md) is a packaging choice.
 
-These findings support careful test selection and review. They do not establish one universal testing sequence, layer split, coverage target, or tool.
+## Adoption rule
 
-## What stays project-specific
+Keep an existing tool when it already fills the same role and replacement would add more risk or duplication than value. Record the equivalence in the stack map. Add the default tool when the role is missing, the task needs it, and installation is authorised.
 
-The playbook leaves these decisions with the responsible project and its authorities:
-
-- development lifecycle and implementation sequence;
-- programming languages, runtimes, frameworks, and package managers;
-- test types, tools, coverage goals, and retry policy;
-- security, privacy, legal, accessibility, and regulatory controls;
-- dependency selection, updates, vulnerability handling, and provenance;
-- review independence and release approval;
-- deployment, rollback, recovery, and observability;
-- evidence retention and candidate-identification requirements.
-
-Use applicable standards and domain guidance when those decisions matter. Record local choices as local choices.
+This keeps the stack cohesive without turning adoption into a rewrite.
 
 ## Research boundary
 
-The sources support the information categories, clarification practices, traceability, and evidence limits described above. They do not establish these Markdown filenames, table layouts, or number of documents as optimal. Those are small packaging choices intended to make adoption easy.
+[`research/practice-map.md`](research/practice-map.md) labels each part as:
 
-[`research/practice-map.md`](research/practice-map.md) records what each source supports and where its evidence stops.
+- standard or handbook guidance;
+- empirical evidence;
+- documented capability;
+- engineering report;
+- James's stack choice.
+
+A capability page documents that a tool supports a function. It does not establish universal superiority. A study supports only the population, tasks, measures, and design it examined.
 
 ## Repository map
 
-- [`ADOPT.md`](ADOPT.md): agent-facing adoption instructions.
-- [`AGENTS.md`](AGENTS.md): instructions for maintaining this repository.
+- [`STACK.md`](STACK.md): roles, defaults, substitutions, and evidence boundaries.
+- [`ADOPT.md`](ADOPT.md): agent-facing adoption procedure.
+- [`AGENTS.md`](AGENTS.md): maintenance instructions for this source repository.
 - [`templates/PROJECT_BRIEF.md`](templates/PROJECT_BRIEF.md): requirements overview.
-- [`templates/JOURNEYS.md`](templates/JOURNEYS.md): optional scenario catalogue.
-- [`templates/VERIFICATION.md`](templates/VERIFICATION.md): verification and validation record.
-- [`templates/AGENTS.md`](templates/AGENTS.md): project instruction template.
-- [`examples/minimal-adoption.md`](examples/minimal-adoption.md): worked example.
-- [`research/practice-map.md`](research/practice-map.md): evidence boundaries.
+- [`templates/JOURNEYS.md`](templates/JOURNEYS.md): BDD rules and scenarios.
+- [`templates/VERIFICATION.md`](templates/VERIFICATION.md): verification, validation, and evidence record.
+- [`templates/AGENTS.md`](templates/AGENTS.md): target-repository instruction template.
+- [`checklists/release.md`](checklists/release.md): cohesive-stack completion check.
+- [`examples/cohesive-adoption.md`](examples/cohesive-adoption.md): worked example.
+- [`research/practice-map.md`](research/practice-map.md): evidence map and limits.
 - [`research/sources.json`](research/sources.json): citation ledger.
-- [`tools/verify_playbook.py`](tools/verify_playbook.py): citation and link checks.
+- [`tools/verify_playbook.py`](tools/verify_playbook.py): citation and local-link checks.
 
 ## Verify this repository
 
 ```bash
 python3 tools/verify_playbook.py
 ```
-
-The verifier checks the publication set, citation ledger, clickable citations, and local links. It does not judge whether a source truly supports a claim. That requires editorial review.
 
 ## Sources
 
@@ -169,7 +225,22 @@ The verifier checks the publication set, citation ledger, clickable citations, a
 - [[10]](https://arxiv.org/abs/2601.20404) *On the Impact of AGENTS.md Files on the Efficiency of AI Coding Agents*
 - [[11]](https://arxiv.org/abs/2610.13065) *TestSuiteBench: Coding Agents Struggle to Generate Strong Test Suites from Specifications*
 - [[12]](https://arxiv.org/abs/2509.24148) *TENET: One Step Toward Test-Driven Development for Repository-Level Code Generation*
+- [[13]](https://cucumber.io/docs/bdd/example-mapping/) Cucumber Example Mapping
+- [[14]](https://arxiv.org/abs/2610.38214) *Skeleton Coding: Program Structure as a Specification for Agents*
+- [[15]](https://arxiv.org/abs/2605.17242) *From Runnable to Shippable: Multi-Agent Test-Driven Development for Generating Full-Stack Web Applications from Requirements*
+- [[16]](https://playwright.dev/docs/best-practices) Playwright Best Practices
+- [[17]](https://playwright.dev/docs/test-agents) Playwright Test Agents
+- [[18]](https://bun.com/docs/test) Bun Test Runner
+- [[19]](https://midscenejs.com/integrate-with-playwright.html) Midscene Playwright Integration
+- [[20]](https://www.bugsink.com/docs/) Bugsink Documentation
+- [[21]](https://bun.com/docs/pm/cli/audit) Bun Audit
+- [[22]](https://bun.com/docs/runtime/bunfig) Bun Configuration
+- [[23]](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-218.pdf) NIST Secure Software Development Framework
+- [[24]](https://slsa.dev/spec/v1.2/provenance) SLSA Provenance
+- [[25]](https://openai.com/index/harness-engineering) OpenAI Harness Engineering
+- [[26]](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) Anthropic Effective Harnesses for Long-Running Agents
+- [[27]](https://bun.com/docs/pm/cli/install) Bun Install and Minimum Release Age
 
 ## Status
 
-The repository is ready to adopt. Its packaging is intentionally small. Its claims remain bounded by the cited authorities and studies.
+The cohesive stack is ready to adopt. Tool choices and operating rules are explicit. Research and capability claims remain bounded to what their sources establish.

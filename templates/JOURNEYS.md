@@ -1,6 +1,6 @@
-# Journey catalogue template
+# BDD journey catalogue template
 
-Use this file only when scenarios need more space than the Project Brief provides.
+Use rules, examples, and questions to clarify the affected requirements.
 
 ## J01: `<short stakeholder goal>`
 
@@ -8,24 +8,38 @@ Use this file only when scenarios need more space than the Project Brief provide
 - **Stakeholder or actor:** `<person, role, or system>`
 - **Starting context:** `<relevant state and conditions>`
 
-### Normal scenario
+### Rules
+
+- `<business or product rule>`
+- `<boundary or invariant>`
+
+### Examples
+
+#### Normal
 
 - Given `<starting condition>`
 - When `<action or event>`
 - Then `<observable outcome>`
 
-### Boundary, failure, or recovery scenario
+#### Boundary
 
-Include only the cases needed to clarify the requirement.
+- Given `<boundary condition>`
+- When `<action or event>`
+- Then `<observable outcome>`
 
-- Given `<starting condition or boundary>`
-- When `<action, event, or failure>`
-- Then `<observable outcome or recovery>`
+#### Failure or recovery
 
-### Open questions
+- Given `<starting condition>`
+- When `<controlled failure or unavailable dependency>`
+- Then `<visible behaviour, retained state, recovery, and cleanup>`
 
-- `<question, responsible owner, and resolution path>`
+### Questions
 
-### Verification links
+- `<unresolved question, responsible owner, and resolution path>`
 
-- `<record or check that evaluates the linked requirement>`
+### Evidence links
+
+- TDD or deterministic checks: `<IDs>`
+- Playwright journey: `<ID or N/A>`
+- Midscene question: `<ID, validation status, or N/A>`
+- Bugsink recovery exercise: `<ID or N/A>`
