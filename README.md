@@ -1,243 +1,396 @@
-# James's Opinionated LLM Development Framework
+# James's Opinionated LLM Development Playbook
 
-> Let the model write code. Never let it mark its own homework.
+> Give the agent room to work. Keep proof mechanical.
 
-This repository is an executable research lab for one expensive question: **how do we let LLMs move quickly without letting a convincing pile of green text pass as proof?**
+This repository contains reusable instructions, templates, and checks for LLM-assisted software delivery. Point a coding agent here, choose a profile, and let it adapt the method to your project.
 
-The short answer is deterministic tests, exact candidate identity, hostile review, small tools with narrow jobs, and an almost unreasonable suspicion of cheerful summaries.
+The aim is simple: faster implementation, fewer plausible mistakes, and evidence you can inspect without trusting a victory speech from the same model that wrote the code.
 
-The lab uses a tiny household-task application as its specimen. The app is deliberately boring. The testing problem is not.
+## Start here
 
-## Status
-
-This is a working research framework, not a finished standard and not a magic prompt collection.
-
-The current acceptance contract requires:
-
-- 57 deterministic checks across 15 files;
-- six Playwright browser journeys;
-- two isolated Bugsink runs;
-- five deliberate failure injections;
-- two clean pairs of bounded Midscene reviews;
-- an exact empty dependency audit;
-- candidate and evidence hash reconciliation;
-- an independent adversarial review after the machinery says everything passed.
-
-A green command is evidence. It is not absolution.
-
-## The opinionated bits
-
-### 1. Start with the promise
-
-The North Star, journey catalogue and acceptance inventory are versioned beside the code. They define what the product promises before an agent starts inventing architecture.
-
-Repository guidance can help agents, but more context is not automatically better. A 2026 study of `AGENTS.md` files found that generated context could raise inference cost and, in some settings, reduce task success.[12] We keep instructions short, executable where possible, and tied to real decisions.
-
-### 2. Tests before implementation claims
-
-The framework follows RED, GREEN, then repair. A claimed fix needs a failing counterexample first unless the work is explicitly characterised as documentation-only.
-
-Recent research on full-stack agent development uses iterative test generation, implementation and repair rather than treating one successful generation as delivery.[13] TestSuiteBench reaches the less flattering conclusion: strong repository-level test suites remain difficult for coding agents to produce from specifications.[14] That is why the accepted test inventory is itself reviewed and hashed.
-
-### 3. Deterministic systems outrank model judgement
-
-Bun owns the fast unit, API, persistence, policy and verifier checks. Its test runner is built into the runtime and supports familiar Jest-style primitives.[3]
-
-Playwright owns browser mechanics: visible behaviour, permissions, reloads, state, responsive layouts, provenance and cleanup. Its own guidance recommends testing user-visible behaviour and keeping tests isolated.[1]
-
-Midscene is the mystery shopper, not the judge. It extends Playwright with AI-assisted page understanding and actions,[6] but here it only reviews bounded visible UX questions. It cannot overrule a failing API, persistence, permission, audit or Playwright check.
-
-### 4. One tool, one job
-
-- **Bun** runs JavaScript and the deterministic test suite.
-- **Playwright** proves browser behaviour.
-- **Midscene** judges limited visible friction where exact assertions are a poor fit.
-- **Bugsink** captures one deliberately bounded canary error and proves that recovery still works. Bugsink is a self-hosted error tracker built around the Sentry SDK protocol.[7]
-- **SQLite** gives the sample application real persistence without adding a service zoo.
-- **Astra-high** performs read-only hostile review after the ordinary stack passes.
-- **The closure verifier** checks the evidence rather than trusting filenames, exit codes or somebody saying "looks good".
-
-Playwright also publishes planner, generator and healer agents.[2] We treat those as upstream assistance, not acceptance authority. Letting an agent write both the exam and the answer key is efficient in the same way removing the brakes makes a car lighter.
-
-### 5. The exact bytes matter
-
-Each acceptance run records a candidate fingerprint over the code, tests, policy documents, lockfiles, installed packages, the selected Playwright browser runtime and the isolated Bugsink runtime.
-
-A run passes only if:
-
-- the candidate is unchanged before and after execution;
-- the report names the exact accepted tests;
-- every recorded artefact still matches its hash;
-- browser reports carry the correct execution ID, candidate ID and time interval;
-- stdout and stderr remain separately provable;
-- a later failure cannot be ignored because two earlier runs happened to pass.
-
-This is local integrity checking, not a cryptographic defence against an administrator who controls the whole machine. It is meant to catch stale evidence, accidental substitutions, permissive parsers and convenient storytelling.
-
-### 6. Failure is a first-class test case
-
-The Bugsink lane deliberately injects failures during bootstrap, callbacks, child-process exit, bounded output and oversized responses. Every case must fail in the expected place and still prove cleanup.
-
-Concurrency tests park requests at a server-side barrier before allowing them to proceed. That proves the intended overlap instead of hoping two promises happen to interleave. Research on agents sharing a codebase likewise treats coordination and interference as real system properties rather than clerical details.[15]
-
-### 7. Observability must not become data hoarding
-
-The canary error has a fixed shape. Arbitrary messages, cookies, request bodies, user fields and credentials are not collected. The isolated Bugsink instance uses synthetic state, random loopback ports, fresh databases and complete cleanup.
-
-The existing local Bugsink service is observed but never reused or mutated by the lab. Production-ish systems make dreadful test fixtures.
-
-### 8. Supply-chain security should be boring
-
-Dependencies are pinned. Lockfiles are hashed. Bun's package manager can delay newly published packages with `minimumReleaseAge`, which gives the ecosystem time to discover a bad release before it enters the graph.[4] `bun audit` checks the resolved dependency tree against vulnerability data.[5]
-
-The framework does not churn the lockfile because a newer version exists. It does not run broad automatic "fix everything" commands. It asks whether the vulnerable code is reachable, whether a fixed version exists and whether the upgrade removes more risk than it introduces.
-
-### 9. Independent review comes after green
-
-The final reviewer is read-only and receives an explicit hostile brief. It must re-check prior findings, search for new bypasses, recompute the candidate identity and inspect the evidence chain.
-
-This is not theatre. The hostile reviews in this lab invalidated more than one mechanically green run. They found stale-report replay, parser ambiguity, incomplete browser provenance, mixed audit streams, timing-dependent concurrency tests and a closure rule that could ignore a later failed run.
-
-Long-running agent work benefits from durable progress records, explicit tests and incremental handoffs.[8] OpenAI's harness work makes a similar point from another angle: repository legibility, enforceable invariants and fast feedback loops matter more as agents do more of the implementation.[9]
-
-### 10. Less is a technical requirement
-
-Every dependency, model call, parser and abstraction has to earn rent.
-
-Martin Fowler's harness analysis is useful here: infrastructure is worth carrying when it turns real uncertainty into repeatable signal, not because "agent harness" looks good in a diagram.[10] METR's updated field study is another useful cold shower. Tooling that feels faster does not automatically produce a measured productivity gain in real repositories.[11]
-
-The framework therefore prefers:
-
-- one runtime;
-- one deterministic browser authority;
-- one accepted journey catalogue;
-- one small application with real persistence;
-- pure verification helpers shared by recording and closure;
-- native semantics and stable names instead of locator acrobatics;
-- no abstraction before a second real use exists.
-
-## The loop
+Give your coding agent this prompt:
 
 ```text
-research and product promise
-        ↓
-versioned North Star + journeys + exact accepted checks
-        ↓
-RED test or explicit characterisation
-        ↓
-small implementation change
-        ↓
-Bun deterministic suite
-        ↓
-Playwright browser journeys
-        ↓
-isolated Bugsink + forced failures + cleanup
-        ↓
-exact dependency audit
-        ↓
-bounded Midscene visible-UX reviews
-        ↓
-candidate/evidence closure
-        ↓
-independent hostile review
-        ↓
-PASS, or new counterexample → repair → run the whole thing again
+Read https://github.com/jamesdwilson/james-opinionated-llm-development-framework
+
+Start with ADOPT.md, then read AGENTS.md and the profile files.
+Apply the Standard profile to this repository.
+Preserve the healthy parts of the existing stack.
+Create only the missing project instructions, product promise, journey catalogue,
+acceptance contract, tests, and evidence records.
+Use deterministic checks as release authority.
+Use model judgement only for bounded questions that require human-like perception.
+Run the resulting checks and leave a concise handoff with commands, results,
+changed files, remaining risks, and the next concrete action.
 ```
 
-Yes, running it again is tedious. So is debugging a false release with a toddler asking what the laptop is doing.
+Replace `Standard` with `Lean` for a small prototype or `High Assurance` for costly, sensitive, or difficult-to-reverse work.
+
+The full adoption contract lives in [`ADOPT.md`](ADOPT.md). A ready-to-copy project instruction file lives in [`templates/AGENTS.md`](templates/AGENTS.md).
+
+Standard is the default for a maintained repository. A direct request for Lean or High Assurance controls the choice. The agent can recommend a change after inspecting the project and explaining the main risk.
+
+## What the playbook gives you
+
+- a short repository instruction file for coding agents;
+- a versioned product promise;
+- examples and journeys before implementation;
+- an explicit acceptance hierarchy;
+- deterministic unit, integration, contract, and browser checks;
+- bounded model review for questions about clarity and friction;
+- failure and recovery exercises;
+- dependency pinning, quarantine, and audit guidance;
+- candidate and evidence records for higher-risk releases;
+- an independent adversarial review brief;
+- three profiles that keep the method proportional to the work.
+
+The templates fit any language or framework. The suggested tools favour a small JavaScript or TypeScript stack because they offer a strong default with little plumbing.
+
+The playbook uses a short `AGENTS.md` as its entry point. Research on repository instructions found that context quality matters more than context volume, with generated instructions sometimes increasing cost and reducing success. [[1]](https://arxiv.org/abs/2602.11988) The open `AGENTS.md` format gives agents a predictable place for commands, conventions, and boundaries. [[2]](https://agents.md/)
+
+## Choose the smallest useful profile
+
+### Lean
+
+Use for prototypes, internal tools, and reversible changes.
+
+- concise `AGENTS.md`;
+- North Star;
+- representative journeys;
+- native unit and integration tests;
+- one browser journey for a user-facing product;
+- pinned dependencies and the native audit command;
+- short evidence handoff.
+
+See [`profiles/lean.md`](profiles/lean.md).
+
+### Standard
+
+Use for maintained products and most production work.
+
+Everything in Lean, plus:
+
+- acceptance matrix;
+- RED, GREEN, REFACTOR discipline;
+- browser coverage for critical journeys;
+- deliberate failure and recovery checks;
+- bounded model review where deterministic checks cannot answer the question;
+- reviewed evidence from the exact candidate;
+- fresh independent review before release.
+
+See [`profiles/standard.md`](profiles/standard.md).
+
+### High Assurance
+
+Use when failure carries material financial, privacy, security, legal, or operational cost.
+
+Everything in Standard, plus:
+
+- exact candidate fingerprint;
+- hashed evidence manifest;
+- repeated clean runs;
+- fail-closed parsers and closure checks;
+- isolated observability exercises;
+- forced failures and cleanup proof;
+- read-only hostile review of implementation and acceptance machinery.
+
+See [`profiles/high-assurance.md`](profiles/high-assurance.md).
+
+Use Standard for general adoption. Lean suits explicitly reversible prototypes. High Assurance suits the triggers listed in its profile.
+
+## The method
+
+### 1. Write the product promise
+
+Capture the user, job, desired experience, decision boundaries, and success signals in one page. Keep product language separate from implementation language.
+
+Use [`templates/NORTH_STAR.md`](templates/NORTH_STAR.md).
+
+### 2. Turn promises into rules, examples, and questions
+
+Example Mapping keeps discovery concrete: one story, a small set of rules, examples beneath each rule, and questions where the team still lacks an answer. [[3]](https://cucumber.io/docs/bdd/example-mapping/)
+
+For each important journey, record:
+
+- starting state;
+- user action;
+- visible outcome;
+- stored outcome;
+- permission boundary;
+- recovery path;
+- provenance requirement;
+- open question.
+
+Use [`templates/JOURNEYS.md`](templates/JOURNEYS.md).
+
+### 3. Shape the smallest coherent slice
+
+Build one end-to-end slice with real inputs, real persistence where the product needs it, and a visible result. Program structure can act as a specification for coding agents, reducing ambiguity before test execution begins. [[4]](https://arxiv.org/abs/2610.38214)
+
+Good structure for agents is easy to inspect:
+
+- obvious entry points;
+- one source of truth for each contract;
+- names that match product language;
+- short dependency paths;
+- explicit boundaries;
+- small files with clear ownership.
+
+Add an abstraction on its second real use. Add a dependency when it removes more complexity than it introduces.
+
+### 4. Write the counterexample first
+
+A behaviour change begins with a failing test. A behaviour-preserving adoption task may begin with a focused characterisation or structural verification. The implementation then earns GREEN with the smallest coherent change, followed by cleanup.
+
+Recent full-stack agent research reports stronger functional accuracy from test-driven iterations than from one-pass implementation. [[5]](https://arxiv.org/abs/2605.17242) TestSuiteBench also shows that coding agents still struggle to create strong repository-level test suites from specifications, so the test inventory deserves independent review. [[6]](https://arxiv.org/abs/2610.13065)
+
+The working loop is:
+
+```text
+promise -> example -> failing check -> small change -> green check -> cleanup
+```
+
+### 5. Give each test layer one job
+
+Use the fastest deterministic layer that can prove the claim.
+
+- **Unit tests** own pure rules and transformations.
+- **Integration tests** own persistence, services, queues, and adapters.
+- **Contract tests** own schemas, status codes, compatibility, and boundary behaviour.
+- **Browser tests** own visible user journeys, reloads, permissions, and client-side recovery.
+- **Model review** answers bounded questions about clarity, hierarchy, ambiguity, and friction.
+
+Playwright recommends user-visible assertions, isolated tests, resilient locators, and web-first waiting. [[7]](https://playwright.dev/docs/best-practices) Bun offers a built-in test runner for a compact JavaScript or TypeScript setup. [[8]](https://bun.com/docs/test)
+
+Keep a healthy existing test stack. Apply the authority split with the tools already present.
+
+### 6. Use browser tests as product evidence
+
+A browser check exercises the journey's actions and resulting state.
+
+A useful journey proves:
+
+1. the required state can be created;
+2. the user can discover the next action;
+3. permissions behave as promised;
+4. data survives reload where persistence matters;
+5. errors preserve work and expose recovery;
+6. history and actor identity remain accurate;
+7. cleanup leaves the test environment reusable.
+
+Use native semantic HTML, labels, roles, visible names, and a small number of stable test IDs. These improve human usability, browser locators, and agent visibility at the same time.
+
+Playwright's planner, generator, and healer agents can assist test creation. Release authority stays with the deterministic test result and reviewed journey contract. [[9]](https://playwright.dev/docs/test-agents)
+
+### 7. Give model judgement a narrow brief
+
+Model review adds value when the question requires perception:
+
+- Is this required choice understandable?
+- Is the next action obvious?
+- Does the interface explain who must act?
+- Can a user recover after a visible failure?
+- Does the completed state match the journey promise?
+
+Midscene integrates AI-assisted interaction and assertion with Playwright and can produce review reports. [[10]](https://midscenejs.com/integrate-with-playwright.html)
+
+Use a structured result:
+
+```json
+{
+  "verdict": "GREEN | RED | UNCLEAR",
+  "stopped_at": "short stable label",
+  "evidence": ["visible fact"],
+  "reason": "one concise explanation"
+}
+```
+
+`RED` or `UNCLEAR` on a required product journey stops acceptance. `GREEN` enters the evidence set after deterministic checks pass on the same candidate.
+
+A negative control keeps the reviewer honest. Give it one deliberately ambiguous journey with an expected RED result. That RED passes the calibration check. `GREEN` or `UNCLEAR` fails calibration.
+
+### 8. Exercise failure and recovery
+
+Success-path coverage leaves the fragile parts untouched. Add controlled failures at the boundaries your product depends on:
+
+- startup;
+- database or API access;
+- authentication and permissions;
+- callbacks and child processes;
+- timeouts and oversized responses;
+- browser reloads;
+- partial writes;
+- cleanup.
+
+Each exercise records the expected failure point, visible behaviour, retained state, recovery action, and cleanup result.
+
+For error tracking, use synthetic data and an isolated project or disposable service. Bugsink provides a self-hosted Sentry-compatible error tracking target for this kind of exercise. [[11]](https://www.bugsink.com/docs/)
+
+### 9. Keep supply-chain work predictable
+
+Pin direct dependencies. Commit the lockfile. Review graph changes. Use the package manager's audit command. Delay newly published packages when the ecosystem supports quarantine.
+
+Bun's `minimumReleaseAge` setting can hold back packages published within a chosen window, while `bun audit` checks the installed dependency tree against vulnerability data. [[12]](https://bun.com/docs/pm/cli/audit) [[13]](https://bun.com/docs/runtime/bunfig)
+
+A useful dependency decision records:
+
+- the gap the package closes;
+- exact version;
+- release age;
+- advisory status;
+- transitive graph change;
+- reachable risk;
+- available fixed version;
+- rollback path.
+
+NIST's Secure Software Development Framework recommends integrating secure practices throughout development. [[14]](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-218.pdf) SLSA provenance guidance adds a practical model for linking an artefact to where, when, and how it was produced. [[15]](https://slsa.dev/spec/v1.2/provenance)
+
+### 10. Bind evidence to the candidate
+
+A green result has value when it belongs to the bytes under review.
+
+The Standard profile records:
+
+- a verified clean commit or a working-tree identity;
+- exact command;
+- start and end time;
+- exit code;
+- test counts;
+- report path;
+- changed files;
+- environment facts that affect execution.
+
+For a clean candidate, record the commit and verify that the working tree contains no relevant changes. For a dirty candidate, fingerprint the fully materialised relevant tree. Include each path, file state, type, executable mode, bytes or symlink target, plus a deletion marker for each relevant base path now absent. Sort records by path and use unambiguous length-prefixed fields. Keep generated reports and evidence outputs outside the candidate input set.
+
+The High Assurance profile adds hashes for source inputs, lockfiles, runtime versions, browser binaries, reports, and evidence manifests.
+
+The closure rule is straightforward:
+
+```text
+same candidate + complete accepted checks + intact evidence + independent review
+```
+
+For the same candidate and required check, the latest completed attempt controls the result. An expected RED from an isolated negative control passes that control. A repaired failure remains in history while the changed candidate receives a fresh acceptance run. Missing, malformed, stale, or ambiguous evidence stops closure.
+
+Use [`templates/EVIDENCE.md`](templates/EVIDENCE.md).
+
+### 11. Run a fresh adversarial review
+
+A fresh reviewer receives read-only access and an explicit hostile brief. Its job is to find a counterexample, a bypass, stale evidence, a permissive parser, a weak test, or an unjustified claim.
+
+OpenAI's harness work emphasises repository legibility, enforceable invariants, and fast feedback loops as agent autonomy grows. [[16]](https://openai.com/index/harness-engineering) Anthropic's long-running-agent guidance emphasises durable progress records, incremental work, tests, and useful handoffs. [[17]](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
+
+Use [`templates/ADVERSARIAL_REVIEW.md`](templates/ADVERSARIAL_REVIEW.md).
+
+### 12. Leave a handoff another person can run
+
+A useful handoff contains:
+
+- outcome;
+- changed files;
+- commands executed;
+- exact results;
+- evidence locations;
+- known risks;
+- remaining work;
+- one next action.
+
+A polished summary ranks last in the evidence hierarchy. Keep it short and make every claim traceable.
 
 ## Evidence hierarchy
 
-When signals disagree, the order is deliberate:
+Every applicable required check must pass. When two pieces of evidence address the same claim, use this order:
 
-1. security and permission failures;
-2. deterministic domain, persistence and API checks;
-3. deterministic Playwright journeys;
-4. isolated failure and recovery evidence;
-5. dependency audit;
-6. bounded Midscene UX judgement;
+1. security and permission checks;
+2. domain, persistence, and API checks;
+3. deterministic browser journeys;
+4. failure, recovery, and cleanup evidence;
+5. dependency and provenance checks;
+6. bounded model judgement;
 7. prose summaries.
 
-A Midscene GREEN cannot rescue a deterministic RED. A polished report cannot rescue missing bytes. `UNCLEAR` cannot pass.
+The higher-ranked evidence controls that shared claim. Any required failure blocks acceptance.
 
-## The two model-reviewed journeys
+## Recommended tool split
 
-- **J05 is the negative control.** The interface intentionally presents an unexplained required choice. The expected verdict is `RED / stopped_at_unclear_choice`.
-- **J06 is the corrected journey.** The interface explains the approval choice, shows who must act next, supports recovery and finishes with visible provenance. The expected verdict is `GREEN / completed_goal`.
+| Need | Default | Role |
+|---|---|---|
+| JavaScript runtime and fast tests | Bun | deterministic unit and integration checks |
+| Browser journeys | Playwright | deterministic visible behaviour |
+| Visible UX judgement | Midscene | bounded model review |
+| Error capture exercise | Bugsink or an isolated project in your existing tracker | synthetic canary and recovery proof |
+| Supply-chain check | native package-manager audit | resolved dependency review |
+| Candidate identity | Git plus hashes | bind evidence to exact inputs |
+| Final challenge | fresh agent, model, or human reviewer | hostile review |
 
-If the reviewer starts calling both versions good, the reviewer has stopped being useful.
+Keep existing tools when they cover the same roles. The method travels through its authority boundaries and evidence contracts.
+
+## Rules that keep the playbook lean
+
+- Use the selected profile and its applicability rules.
+- Keep one runtime where the project allows it.
+- Give each tool one job.
+- Share one contract across implementation, tests, and documentation.
+- Prefer native semantics and stable names.
+- Add abstraction on its second real use.
+- Add a dependency after naming the gap it closes.
+- Keep agent instructions short, local, and executable.
+- Preserve raw evidence separately from summaries.
+- Re-run acceptance after any candidate change.
+
+Harness work has value when it turns a named uncertainty into repeatable evidence. Fowler's analysis offers a useful test: carry the infrastructure when the saved effort and reduced risk justify its maintenance cost. [[18]](https://martinfowler.com/articles/are-harnesses-worth-the-cost.html) METR's 2026 update shows why productivity claims need careful study design: selection effects and time-measurement problems made its newer experiment unreliable for estimating current impact. [[19]](https://metr.org/blog/2026-02-24-uplift-update)
 
 ## Repository map
 
-- `NORTH_STAR.md` - the product promise and authority rules.
-- `JOURNEY_CATALOG.md` - accepted behavioural journeys.
-- `ACCEPTED_CHECKS.json` - exact deterministic and browser test inventory.
-- `ACCEPTANCE_MATRIX.md` - what each layer proves and what it does not.
-- `LLM_POLICY.md` / `llm-policy.json` - model roles and reasoning limits.
-- `src/` - the small task application and SQLite-backed server.
-- `public/` - the deliberately plain browser UI.
-- `test/` - unit, API, persistence, policy, concurrency and verifier tests.
-- `e2e/` - Playwright journeys and bounded Midscene review drivers.
-- `scripts/` - candidate hashing, evidence recording, Bugsink isolation, auditing and closure.
-- `research/` - source ledgers, community research and adversarial review records.
-- `stubs/` - fail-closed replacements for powerful transitive packages the accepted path does not use.
+- [`ADOPT.md`](ADOPT.md) - agent-facing adoption contract.
+- [`AGENTS.md`](AGENTS.md) - instructions for agents working with this playbook.
+- [`profiles/`](profiles/) - Lean, Standard, and High Assurance scopes.
+- [`templates/`](templates/) - ready-to-copy project artefacts.
+- [`checklists/release.md`](checklists/release.md) - release evidence checklist.
+- [`examples/standard-adoption.md`](examples/standard-adoption.md) - a compact worked adoption.
+- [`research/practice-map.md`](research/practice-map.md) - recommendation-to-source map.
+- [`research/sources.json`](research/sources.json) - machine-readable citation ledger.
+- [`tools/verify_playbook.py`](tools/verify_playbook.py) - citation, link, and prose guardrails.
 
-Program structure itself can serve as a useful specification for coding agents,[16] so this map is intentionally dull and literal. Dull code is easier for humans, models and future you to inspect.
+## Maintaining the playbook
 
-## Running the portable parts
-
-The repository currently pins Bun 1.4.4.
+Run the zero-dependency verifier after editing prose or sources:
 
 ```bash
-bun install --frozen-lockfile
-bun x --bun playwright install chromium
-bun run test:deterministic
-bun run test:browser
-bun scripts/audit-block.mjs
+python3 tools/verify_playbook.py
 ```
 
-The full Bugsink and exact-candidate closure lanes currently expect an isolated Bugsink 2.6.3 virtual environment and the lab's local runtime configuration. See `scripts/bugsink/README.md` before attempting the complete stack.
+It checks citation and ledger structure, local Markdown links, and the main adoption copy's prose guardrails. Source review remains a separate editorial task.
 
-```bash
-bun run test:stack
-bun run test:reviews
-bun run test:closure
-```
+## A note on repository skills
 
-Do not treat `test:stack` as final acceptance by itself. Independent hostile review remains deliberately outside the self-certifying batch.
+Coding-agent skills work best as narrow workflows with a clear trigger, compact instructions, deterministic scripts where useful, and explicit output. OpenAI's skill guidance recommends keeping `SKILL.md` focused and moving reference material or scripts into linked files. [[20]](https://developers.openai.com/codex/skills/)
 
-## What this framework does not claim
-
-- It does not prove that an LLM-generated implementation is generally correct.
-- It does not replace human product judgement.
-- It does not solve distributed concurrency before the system has multiple writers.
-- It does not make probabilistic UX review deterministic by pretending harder.
-- It does not authenticate evidence against a hostile machine owner.
-- It does not justify every tool in every repository.
-
-It does give the model fewer places to bluff, which is a decent start.
-
-## Research posture
-
-The papers and vendor guidance inform the framework. They do not get to smuggle dependencies into it.
-
-A proposal is admitted only when it closes a demonstrated gap, removes more complexity than it adds, has a narrow owner and survives the same acceptance machinery as the rest of the candidate. The research ledger for this README lives at `research/framework-readme-citation-ledger.json`.
+This playbook starts with `AGENTS.md` because it is portable across coding agents. A project-specific skill becomes worthwhile when the same workflow repeats often enough to deserve its own trigger and script.
 
 ## Sources
 
-[1] https://playwright.dev/docs/best-practices - Playwright best practices
-[2] https://playwright.dev/docs/test-agents - Playwright Test Agents
-[3] https://bun.com/docs/test - Bun test runner
-[4] https://bun.com/docs/runtime/bunfig - Bun configuration
-[5] https://bun.com/docs/pm/cli/audit - Bun audit
-[6] https://midscenejs.com/integrate-with-playwright.html - Midscene.js Playwright integration
-[7] https://www.bugsink.com/docs - Bugsink documentation
-[8] https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents - Effective harnesses for long-running agents
-[9] https://openai.com/index/harness-engineering - Harness engineering
-[10] https://martinfowler.com/articles/are-harnesses-worth-the-cost.html - Are harnesses worth the cost?
-[11] https://metr.org/blog/2026-02-24-uplift-update - Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity
-[12] https://arxiv.org/abs/2602.11988 - Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?
-[13] https://arxiv.org/abs/2605.17242 - From Runnable to Shippable: Multi-Agent Test-Driven Development for Generating Full-Stack Web Applications from Requirements
-[14] https://arxiv.org/abs/2610.13065 - TestSuiteBench: Coding Agents Struggle to Generate Strong Test Suites from Specifications
-[15] https://arxiv.org/abs/2611.00314 - Decentralized Multi-Agent Coordination and Communication in Shared Codebases
-[16] https://arxiv.org/abs/2610.38214 - Skeleton Coding: Program Structure as a Specification for Agents
+- [[1]](https://arxiv.org/abs/2602.11988) *Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?*
+- [[2]](https://agents.md/) AGENTS.md open format
+- [[3]](https://cucumber.io/docs/bdd/example-mapping/) Cucumber Example Mapping
+- [[4]](https://arxiv.org/abs/2610.38214) *Skeleton Coding: Program Structure as a Specification for Agents*
+- [[5]](https://arxiv.org/abs/2605.17242) *From Runnable to Shippable: Multi-Agent Test-Driven Development for Generating Full-Stack Web Applications from Requirements*
+- [[6]](https://arxiv.org/abs/2610.13065) *TestSuiteBench: Coding Agents Struggle to Generate Strong Test Suites from Specifications*
+- [[7]](https://playwright.dev/docs/best-practices) Playwright Best Practices
+- [[8]](https://bun.com/docs/test) Bun Test Runner
+- [[9]](https://playwright.dev/docs/test-agents) Playwright Test Agents
+- [[10]](https://midscenejs.com/integrate-with-playwright.html) Midscene Playwright Integration
+- [[11]](https://www.bugsink.com/docs/) Bugsink Documentation
+- [[12]](https://bun.com/docs/pm/cli/audit) Bun Audit
+- [[13]](https://bun.com/docs/runtime/bunfig) Bun Configuration
+- [[14]](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-218.pdf) NIST Secure Software Development Framework
+- [[15]](https://slsa.dev/spec/v1.2/provenance) SLSA Provenance
+- [[16]](https://openai.com/index/harness-engineering) OpenAI Harness Engineering
+- [[17]](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) Anthropic Effective Harnesses for Long-Running Agents
+- [[18]](https://martinfowler.com/articles/are-harnesses-worth-the-cost.html) Martin Fowler, *Are Harnesses Worth the Cost?*
+- [[19]](https://metr.org/blog/2026-02-24-uplift-update) METR, *We are Changing our Developer Productivity Experiment Design*
+- [[20]](https://developers.openai.com/codex/skills/) OpenAI Codex Skills
+
+## Status
+
+This is an opinionated playbook. Treat it as a strong starting point, then keep the parts that earn their place in your repository.

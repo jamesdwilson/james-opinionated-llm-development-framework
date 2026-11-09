@@ -1,2 +1,0 @@
-import { defineConfig } from '@playwright/test';
-export default defineConfig({ testDir: './e2e', fullyParallel: false, workers: 1, retries: 0, timeout: 180000, expect: { timeout: 5000 }, outputDir: 'test-results', metadata: { labExecutionId: process.env.LAB_EXECUTION_ID || '', labCandidateId: process.env.LAB_CANDIDATE_ID || '' }, reporter: [['list'], ['json', { outputFile: process.env.RESULT_FILE || 'evidence/playwright.json' }]], use: { browserName: 'chromium', viewport: { width: 1280, height: 800 }, trace: 'retain-on-failure', screenshot: 'only-on-failure' } });

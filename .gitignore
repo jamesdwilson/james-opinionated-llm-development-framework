@@ -1,35 +1,30 @@
-# dependencies and package-manager state
+# Local editor and OS files
+.DS_Store
+.idea/
+.vscode/
+
+# Generated or local evidence
+.tmp/
+evidence/
+test-results/
+playwright-report/
+midscene_run/
+coverage/
+
+# Dependencies and caches
 node_modules/
 __pycache__/
 *.py[cod]
 
-# generated browser and model artefacts
-.tmp/
-test-results/
-playwright-report/
-midscene_run/
-
-# local evidence can contain machine paths, large manifests and synthetic event data
-evidence/
-
-# raw model execution traces stay local; publish the reviewed reports and ledgers
-research/**/run.jsonl
-research/**/run.stderr
-research/**/prompt.txt
-research/**/last-message.txt
-
-# local operational records, not framework source
-project-record.json
-codex-result.txt
-ACCEPTANCE_REPORT.md
-LAB_CLOSURE_VERDICT.md
-CODEX_BRIEF.md
-CHANGED_FILES.md
-
-# local databases, secrets and editor noise
-*.sqlite
+# Local environment and credentials
 .env
 .env.*
 !.env.example
-.DS_Store
-coverage/
+*.pem
+*.key
+
+# Local databases and logs
+*.db
+*.sqlite
+*.sqlite3
+*.log

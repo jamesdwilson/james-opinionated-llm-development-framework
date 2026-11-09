@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "accessed": "2026-11-08",
+  "sources": [
+    {
+      "id": 1,
+      "title": "Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?",
+      "url": "https://arxiv.org/abs/2602.11988",
+      "type": "research paper"
+    },
+    {
+      "id": 2,
+      "title": "AGENTS.md",
+      "url": "https://agents.md/",
+      "type": "open format"
+    },
+    {
+      "id": 3,
+      "title": "Example Mapping",
+      "url": "https://cucumber.io/docs/bdd/example-mapping/",
+      "type": "official documentation"
+    },
+    {
+      "id": 4,
+      "title": "Skeleton Coding: Program Structure as a Specification for Agents",
+      "url": "https://arxiv.org/abs/2610.38214",
+      "type": "research paper"
+    },
+    {
+      "id": 5,
+      "title": "From Runnable to Shippable: Multi-Agent Test-Driven Development for Generating Full-Stack Web Applications from Requirements",
+      "url": "https://arxiv.org/abs/2605.17242",
+      "type": "research paper"
+    },
+    {
+      "id": 6,
+      "title": "TestSuiteBench: Coding Agents Struggle to Generate Strong Test Suites from Specifications",
+      "url": "https://arxiv.org/abs/2610.13065",
+      "type": "research paper"
+    },
+    {
+      "id": 7,
+      "title": "Playwright Best Practices",
+      "url": "https://playwright.dev/docs/best-practices",
+      "type": "official documentation"
+    },
+    {
+      "id": 8,
+      "title": "Bun Test Runner",
+      "url": "https://bun.com/docs/test",
+      "type": "official documentation"
+    },
+    {
+      "id": 9,
+      "title": "Playwright Test Agents",
+      "url": "https://playwright.dev/docs/test-agents",
+      "type": "official documentation"
+    },
+    {
+      "id": 10,
+      "title": "Midscene Playwright Integration",
+      "url": "https://midscenejs.com/integrate-with-playwright.html",
+      "type": "official documentation"
+    },
+    {
+      "id": 11,
+      "title": "Bugsink Documentation",
+      "url": "https://www.bugsink.com/docs/",
+      "type": "official documentation"
+    },
+    {
+      "id": 12,
+      "title": "Bun Audit",
+      "url": "https://bun.com/docs/pm/cli/audit",
+      "type": "official documentation"
+    },
+    {
+      "id": 13,
+      "title": "Bun Configuration",
+      "url": "https://bun.com/docs/runtime/bunfig",
+      "type": "official documentation"
+    },
+    {
+      "id": 14,
+      "title": "Secure Software Development Framework",
+      "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-218.pdf",
+      "type": "standard"
+    },
+    {
+      "id": 15,
+      "title": "SLSA Provenance",
+      "url": "https://slsa.dev/spec/v1.2/provenance",
+      "type": "specification"
+    },
+    {
+      "id": 16,
+      "title": "Harness Engineering",
+      "url": "https://openai.com/index/harness-engineering",
+      "type": "engineering report"
+    },
+    {
+      "id": 17,
+      "title": "Effective Harnesses for Long-Running Agents",
+      "url": "https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents",
+      "type": "engineering report"
+    },
+    {
+      "id": 18,
+      "title": "Are Harnesses Worth the Cost?",
+      "url": "https://martinfowler.com/articles/are-harnesses-worth-the-cost.html",
+      "type": "engineering analysis"
+    },
+    {
+      "id": 19,
+      "title": "We are Changing our Developer Productivity Experiment Design",
+      "url": "https://metr.org/blog/2026-02-24-uplift-update",
+      "type": "field study"
+    },
+    {
+      "id": 20,
+      "title": "Codex Skills",
+      "url": "https://developers.openai.com/codex/skills/",
+      "type": "official documentation"
+    }
+  ]
+}

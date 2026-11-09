@@ -1,9 +1,0 @@
-{
-  "name": "puppeteer-core",
-  "version": "24.6.0",
-  "private": true,
-  "type": "module",
-  "exports": {
-    ".": "./index.mjs"
-  }
-}
