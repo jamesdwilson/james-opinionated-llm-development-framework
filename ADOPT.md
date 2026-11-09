@@ -56,7 +56,7 @@ State:
 Create or update the artefacts required by the selected profile:
 
 1. repository `AGENTS.md`;
-2. North Star;
+2. Project Brief;
 3. journey catalogue;
 4. tests for the representative slice;
 5. short evidence handoff;
@@ -109,8 +109,8 @@ Leave a handoff with this shape:
 ### Changed files
 - path: purpose
 
-### Commands and results
-- `command` -> exact result
+### Checks and results
+- `command or procedure` -> exact result
 
 ### Evidence
 - path or artefact: what it proves

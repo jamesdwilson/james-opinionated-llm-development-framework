@@ -10,9 +10,9 @@ Tags show the minimum profile: `[Lean+]`, `[Standard+]`, or `[High Assurance]`. 
 - [ ] `[High Assurance]` Source, tests, instructions, lockfiles, runtime, browser, and generated contracts have defined fingerprints.
 - [ ] `[High Assurance]` Generated reports and evidence outputs sit outside the candidate input set.
 
-## Product promise
+## Project brief
 
-- [ ] `[Lean+]` The North Star describes the released behaviour.
+- [ ] `[Lean+]` The Project Brief records the current purpose, stakeholders, scope, requirements, constraints, and acceptance links.
 - [ ] `[Lean+]` Critical journeys cover the changed behaviour.
 - [ ] `[Lean+]` Open questions have an owner.
 
@@ -81,7 +81,7 @@ This section applies when the product emits operational errors or events.
 
 - [ ] `[Lean+]` Outcome is stated plainly.
 - [ ] `[Lean+]` Changed files are listed.
-- [ ] `[Lean+]` Commands and exact results are listed.
+- [ ] `[Lean+]` Commands or procedures and exact results are listed.
 - [ ] `[Lean+]` Evidence paths are listed.
 - [ ] `[Lean+]` Remaining risks name an owner.
 - [ ] `[Lean+]` One next action is clear.

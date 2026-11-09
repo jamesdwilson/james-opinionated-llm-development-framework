@@ -7,7 +7,7 @@ Replace every `<placeholder>` before use.
 - **Name:** `<product>`
 - **Purpose:** `<one sentence>`
 - **Primary user:** `<user>`
-- **North Star:** `<path>`
+- **Project Brief:** `<path>`
 - **Journeys:** `<path>`
 - **Acceptance contract:** `<path for Standard or High Assurance; Lean may use the journey catalogue and command list>`
 
@@ -23,7 +23,7 @@ Replace every `<placeholder>` before use.
 
 ## Working rules
 
-- Read the North Star and affected journeys before editing.
+- Read the Project Brief and affected journeys before editing.
 - Preserve existing conventions and local changes.
 - Start behaviour changes with a failing check.
 - Use focused characterisation or structural verification for behaviour-preserving adoption.
@@ -32,7 +32,7 @@ Replace every `<placeholder>` before use.
 - Use model review only for the bounded questions named in the acceptance contract.
 - Name the gap before adding a dependency.
 - Add abstraction on its second real use.
-- Record exact commands and results.
+- Record exact commands or procedures and results.
 
 ## Authority boundaries
 
@@ -53,4 +53,4 @@ Replace every `<placeholder>` before use.
 
 ## Handoff
 
-Report outcome, changed files, exact commands and results, evidence paths, remaining risks, and one next action.
+Report outcome, changed files, exact commands or procedures and results, evidence paths, remaining risks, and one next action.

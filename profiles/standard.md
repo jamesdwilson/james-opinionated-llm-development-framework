@@ -34,10 +34,9 @@ Everything in Lean, plus:
 Record:
 
 - a commit after verifying a clean working tree, or a fingerprint of the fully materialised relevant tree covering additions, modifications, deletions, file types, modes, and symlink targets;
-- exact command;
+- exact command or verification procedure;
 - start and end time;
-- exit code;
-- test counts;
+- observed result, including exit code and test counts where applicable;
 - report path;
 - changed files;
 - material runtime and browser versions.

@@ -35,7 +35,7 @@ Run `python3 tools/verify_playbook.py` after changing prose, citations, links, o
 - Add abstraction on its second real use.
 - Prefer native semantics, stable names, and short dependency paths.
 - Keep agent instructions concise and executable.
-- Record exact commands and results.
+- Record exact commands or procedures and results.
 - Leave one concrete next action.
 
 ## Writing style
@@ -65,7 +65,7 @@ Report:
 
 - selected profile and reason;
 - files changed;
-- commands run;
+- commands or procedures run;
 - exact results;
 - evidence paths;
 - remaining risks;

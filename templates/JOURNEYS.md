@@ -5,6 +5,7 @@
 - **Priority:** critical | important | supporting
 - **Profile:** Lean | Standard | High Assurance
 - **Owner:** `<person or role>`
+- **Requirement IDs:** `<R-001, Q-001, or other linked IDs>`
 
 ### Starting state
 

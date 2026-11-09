@@ -8,13 +8,13 @@ The aim is simple: faster implementation, fewer plausible mistakes, and evidence
 
 The playbook gets there by:
 
-- **Briefing the agent properly.** It receives the product promise, repository rules, exact commands, decision boundaries, and definition of done.
+- **Briefing the agent properly.** It receives the project purpose, stakeholders, requirements, constraints, exact commands, and definition of done.
 - **Turning intent into executable examples.** Rules and user journeys are written before the agent starts shaping the implementation.
 - **Giving every claim an authority.** Fast tests prove logic and contracts. Real browser journeys prove user-facing behaviour. Model review handles short questions about clarity and friction.
 - **Binding results to the exact candidate.** Commands, reports, runtime identity, and evidence stay attached to the code under review.
 - **Finishing with a fresh challenge.** An independent reviewer hunts for weak tests, stale evidence, permissive parsers, and plausible stories unsupported by the results.
 
-These recommendations draw on extensive work by researchers, standards bodies, tool maintainers, and engineering teams. The evidence covers repository instructions and test-driven agents [[1]](https://arxiv.org/abs/2602.11988) [[5]](https://arxiv.org/abs/2605.17242) [[6]](https://arxiv.org/abs/2610.13065), browser testing and software supply-chain practice [[7]](https://playwright.dev/docs/best-practices) [[14]](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-218.pdf) [[15]](https://slsa.dev/spec/v1.2/provenance), and the engineering realities of long-running agents and measured developer productivity [[16]](https://openai.com/index/harness-engineering) [[17]](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) [[19]](https://metr.org/blog/2026-02-24-uplift-update).
+These recommendations draw on extensive work by researchers, standards bodies, tool maintainers, and engineering teams. The evidence covers requirements engineering and traceability [[21]](https://www.iso.org/standard/72089.html) [[22]](https://webperso.info.ucl.ac.be/~avl/files/RE01.pdf) [[23]](https://www.patrickmaeder.de/pdf/ICSM2012_maeder_egyed_AssessingEffectOfRequirementsTraceability.pdf), repository instructions and test-guided agents [[1]](https://arxiv.org/abs/2602.11988) [[25]](https://arxiv.org/abs/2404.10100) [[28]](https://arxiv.org/abs/2509.24148), browser testing and software supply-chain practice [[7]](https://playwright.dev/docs/best-practices) [[14]](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-218.pdf) [[15]](https://slsa.dev/spec/v1.2/provenance), and the engineering realities of long-running agents and measured developer productivity [[16]](https://openai.com/index/harness-engineering) [[17]](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) [[19]](https://metr.org/blog/2026-02-24-uplift-update).
 
 The playbook turns that research into defaults an agent can execute. Research-backed recommendations link to their sources. Original synthesis is labelled as James's policy. [`research/practice-map.md`](research/practice-map.md) records the boundary.
 
@@ -28,7 +28,7 @@ Read https://github.com/jamesdwilson/james-opinionated-llm-development-framework
 Start with ADOPT.md, then read AGENTS.md and the profile files.
 Apply the Standard profile to this repository.
 Preserve the healthy parts of the existing stack.
-Create only the missing project instructions, product promise, journey catalogue,
+Create only the missing project instructions, Project Brief, journey catalogue,
 acceptance contract, tests, and evidence records.
 Use deterministic checks as release authority.
 Use model judgement only for bounded questions that require human-like perception.
@@ -45,7 +45,7 @@ Standard is the default for a maintained repository. A direct request for Lean o
 ## What the playbook gives you
 
 - a short repository instruction file for coding agents;
-- a versioned product promise;
+- a versioned Project Brief with traceable requirements;
 - examples and journeys before implementation;
 - an explicit acceptance hierarchy;
 - deterministic unit, integration, contract, and browser checks;
@@ -67,7 +67,7 @@ The playbook uses a short `AGENTS.md` as its entry point. Research on repository
 Use for prototypes, internal tools, and reversible changes.
 
 - concise `AGENTS.md`;
-- North Star;
+- Project Brief;
 - representative journeys;
 - native unit and integration tests;
 - one browser journey for a user-facing product;
@@ -112,19 +112,21 @@ Use Standard for general adoption. Lean suits explicitly reversible prototypes. 
 
 ## The method
 
-### 1. Write the product promise
+### 1. Write the Project Brief
 
-Capture the user, job, desired experience, decision boundaries, and success signals in one page. Keep product language separate from implementation language.
+Capture purpose, desired outcomes, stakeholders, operational context, scope, observable requirements, measurable quality requirements, constraints, assumptions, risks, and open decisions. Give each material requirement a stable ID, rationale, acceptance condition, and verification link.
 
-Product teams already use “North Star” for a guiding measure of customer value and product strategy. [[21]](https://amplitude.com/en-us/north-star) This playbook extends the term to a one-page product brief. The exact template is James's original synthesis and an opinionated default. Example Mapping supplies the researched next step: translating that brief into rules, examples, and open questions. [[3]](https://cucumber.io/docs/bdd/example-mapping/)
+This content follows requirements-engineering standards and research. ISO/IEC/IEEE 29148 defines requirements-engineering processes and information items. [[21]](https://www.iso.org/standard/72089.html) NASA's systems-engineering handbook provides accessible guidance on stakeholder expectations, operational scenarios, well-formed requirements, and verification methods. [[30]](https://www.nasa.gov/wp-content/uploads/2018/09/nasa_systems_engineering_handbook_0.pdf) Goal-oriented requirements engineering links strategic goals to technical requirements and their rationale. [[22]](https://webperso.info.ucl.ac.be/~avl/files/RE01.pdf) ISO/IEC 25010 supplies a quality model for specifying and evaluating consequential product qualities. [[29]](https://www.iso.org/standard/78176.html)
 
-Use [`templates/NORTH_STAR.md`](templates/NORTH_STAR.md).
+The compact Markdown packaging is this playbook's implementation choice. Research supports the contents and traceability. The optimal filename, page count, and section count remain open questions.
 
-### 2. Turn promises into rules, examples, and questions
+Use [`templates/PROJECT_BRIEF.md`](templates/PROJECT_BRIEF.md).
+
+### 2. Turn requirements into scenarios, examples, and questions
 
 Example Mapping keeps discovery concrete: one story, a small set of rules, examples beneath each rule, and questions where the team still lacks an answer. [[3]](https://cucumber.io/docs/bdd/example-mapping/)
 
-For each important journey, record:
+For each important journey, record its requirement IDs and:
 
 - starting state;
 - user action;
@@ -266,10 +268,9 @@ A green result has value when it belongs to the bytes under review.
 The Standard profile records:
 
 - a verified clean commit or a working-tree identity;
-- exact command;
+- exact command or verification procedure;
 - start and end time;
-- exit code;
-- test counts;
+- observed result, including exit code and test counts where applicable;
 - report path;
 - changed files;
 - environment facts that affect execution.
@@ -302,7 +303,7 @@ A useful handoff contains:
 
 - outcome;
 - changed files;
-- commands executed;
+- commands or verification procedures executed;
 - exact results;
 - evidence locations;
 - known risks;
@@ -404,7 +405,16 @@ This playbook starts with `AGENTS.md` because it is portable across coding agent
 - [[18]](https://martinfowler.com/articles/are-harnesses-worth-the-cost.html) Martin Fowler, *Are Harnesses Worth the Cost?*
 - [[19]](https://metr.org/blog/2026-02-24-uplift-update) METR, *We are Changing our Developer Productivity Experiment Design*
 - [[20]](https://developers.openai.com/codex/skills/) OpenAI Codex Skills
-- [[21]](https://amplitude.com/en-us/north-star) Amplitude, *The North Star Playbook*
+- [[21]](https://www.iso.org/standard/72089.html) ISO/IEC/IEEE 29148:2018 Requirements Engineering
+- [[22]](https://webperso.info.ucl.ac.be/~avl/files/RE01.pdf) van Lamsweerde, *Goal-Oriented Requirements Engineering: A Guided Tour*
+- [[23]](https://www.patrickmaeder.de/pdf/ICSM2012_maeder_egyed_AssessingEffectOfRequirementsTraceability.pdf) Mäder and Egyed, *Assessing the Effect of Requirements Traceability for Software Maintenance*
+- [[24]](https://doi.org/10.1016/j.infsof.2016.03.008) Bjarnason et al., *A Multi-Case Study of Agile Requirements Engineering and the Use of Test Cases as Requirements*
+- [[25]](https://arxiv.org/abs/2404.10100) *LLM-Based Test-Driven Interactive Code Generation: User Study and Empirical Evaluation*
+- [[26]](https://arxiv.org/abs/2310.10996) *ClarifyGPT: Empowering LLM-based Code Generation with Intention Clarification*
+- [[27]](https://arxiv.org/abs/2601.20404) *On the Impact of AGENTS.md Files on the Efficiency of AI Coding Agents*
+- [[28]](https://arxiv.org/abs/2509.24148) *TENET: One Step Toward Test-Driven Development for Repository-Level Code Generation*
+- [[29]](https://www.iso.org/standard/78176.html) ISO/IEC 25010:2023 Product Quality Model
+- [[30]](https://www.nasa.gov/wp-content/uploads/2018/09/nasa_systems_engineering_handbook_0.pdf) NASA Systems Engineering Handbook, Revision 2
 
 ## Status
 

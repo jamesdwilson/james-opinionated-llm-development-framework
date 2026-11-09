@@ -24,9 +24,10 @@ The higher-ranked evidence controls that shared claim. Any required failure bloc
 
 ## Required checks
 
-| ID | Claim | Authority | Command | Expected result | Evidence |
-|---|---|---|---|---|---|
-| C01 | `<claim>` | `<test layer>` | `<command>` | `<result>` | `<path>` |
+| Check ID | Requirement IDs | Claim | Authority | Method | Procedure or command | Expected result | Evidence |
+|---|---|---|---|---|---|---|---|
+| C01 | `<R-001, Q-001>` | `<claim>` | `<owner or test layer>` | test | `<command>` | `<result>` | `<path>` |
+| V01 | `<Q-002>` | `<claim>` | `<reviewer or stakeholder>` | inspection | `<procedure>` | `<recorded observation>` | `<report path>` |
 
 ## Model-review boundary
 
@@ -59,7 +60,7 @@ Acceptance requires:
 
 - exact candidate identity;
 - complete required-check inventory;
-- expected exits and counts;
+- expected results, with exits and counts where the method is executable;
 - intact evidence;
 - resolved blockers;
 - independent review where the profile requires it.

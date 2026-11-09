@@ -11,7 +11,7 @@
 ## Required artefacts
 
 - concise repository `AGENTS.md`;
-- North Star;
+- Project Brief;
 - representative journey catalogue;
 - native test commands;
 - short evidence handoff.
@@ -31,4 +31,4 @@ Use the repository's existing tools. Add a tool only when the current stack leav
 
 ## Closure
 
-A Lean change closes when required checks pass on the current candidate, the handoff records exact commands and results, and remaining risks have an owner.
+A Lean change closes when required checks pass on the current candidate, the handoff records exact commands or procedures and results, and remaining risks have an owner.

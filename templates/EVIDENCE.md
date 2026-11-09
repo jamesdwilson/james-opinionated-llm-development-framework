@@ -16,11 +16,12 @@
 - browser: `<name, version, and path or package identity>`
 - material services: `<name and version>`
 
-## Commands
+## Checks
 
-| Check ID | Exact command | Exit | Counts | Report | Hash |
-|---|---|---:|---|---|---|
-| C01 | `<command>` | `<exit>` | `<counts>` | `<path>` | `<hash when required>` |
+| Check ID | Requirement IDs | Method | Procedure or command | Result | Evidence | Hash |
+|---|---|---|---|---|---|---|
+| C01 | `<R-001, Q-001>` | test | `<command>` | `<exit and counts>` | `<report path>` | `<hash when required>` |
+| V01 | `<Q-002>` | inspection | `<review procedure>` | `<recorded observation>` | `<report path>` | `<hash when required>` |
 
 ## Candidate integrity
 
