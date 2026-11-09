@@ -66,3 +66,7 @@ The focused command then passed **15/15**. The complete deterministic suite pass
 The repair changed candidate-bound code, tests, accepted-check authority and research records. The previous candidate and gate8 evidence are therefore historical. The new candidate still requires the complete repeated acceptance sequence and a fresh independent Astra-high hostile review before final closure.
 
 The first complete acceptance attempt for the repaired verifier correctly failed closure. Its second Midscene review encountered a transient upstream 503, retried and produced the expected visible verdict, but Playwright retained the warning in the result's stderr evidence. The stricter verifier rejected both review records and, as intended, would not ignore them merely because another pair passed. This candidate is therefore historical rather than accepted; the transient-failure record is preserved, not relabelled or deleted.
+
+## Repository release attempt
+
+The first repository-release acceptance attempt was also preserved as a failed attempt. The underlying checks ran successfully, but the recorder was invoked with absolute Bun paths and the audit wrapper rather than the acceptance contract's exact canonical commands (`bun ...` and `bun audit --json`). Closure therefore rejected every record instead of quietly treating equivalent-looking commands as proof. The candidate changed after this note, and the release sequence must be rerun using the literal accepted commands.
