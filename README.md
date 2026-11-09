@@ -19,7 +19,7 @@ Project Brief
   -> independent challenge and handoff
 ```
 
-This is meant to work as one system rather than a pile of unrelated tools. The brief defines the job. BDD removes ambiguity. TDD drives the change. Deterministic tests check the facts. Playwright exercises the real interface. Midscene can add a visual second opinion. Bugsink captures errors during a separately checked recovery exercise. Supply-chain checks inspect what you are actually installing. Evidence and review tie the results to the exact change under consideration.
+This is meant to work as one system rather than a pile of unrelated tools. The brief defines the job. BDD removes ambiguity. TDD drives the change. Deterministic tests check the facts. Playwright exercises the real interface. Midscene gives the finished interface a visual sanity check. Bugsink captures errors during a separately checked recovery exercise. Supply-chain checks inspect what you are actually installing. Evidence and review tie the results to the exact change under consideration.
 
 ## Why use it
 
@@ -81,7 +81,7 @@ Treat the stack as a useful default, not a rule you have to follow. It does not 
 | [Deterministic tests](#stack-deterministic-tests) | They give repeatable answers without asking another model. |
 | [Bun](#stack-bun) | It combines the runtime, package manager, and test runner, with fast installs and dependency scripts limited to trusted packages. |
 | [Playwright](#stack-playwright) | It checks what a person can actually see and do in the browser. |
-| [Midscene](#stack-midscene) | It adds an AI second opinion on visual clarity without overruling hard tests. |
+| [Midscene](#stack-midscene) | It is cool because it catches the "this technically works, but feels confusing" problems hard tests usually miss. |
 | [Bugsink](#stack-bugsink) | It proves errors arrive where they should while separate checks verify the product's recovery. |
 | [Supply-chain checks](#stack-supply-chain) | They make dependency changes visible and give risky new releases time to settle when policy calls for it. |
 | [Evidence tied to the build](#stack-candidate-evidence) | It ties every result to the exact version you might ship. |
@@ -155,7 +155,7 @@ Playwright recommends isolated tests, user-facing assertions, resilient locators
 <a id="stack-midscene"></a>
 ### 7. Midscene
 
-Use Midscene as a second pair of eyes for narrow visual and UX questions. It adds AI-assisted interaction and visual assertions through Playwright. [[19]](https://midscenejs.com/integrate-with-playwright.html)
+Midscene is cool because it can look at the rendered interface and call out the annoyingly human stuff hard assertions miss. It notices when a flow technically works but still feels confusing. It adds AI-assisted interaction and visual assertions through Playwright. [[19]](https://midscenejs.com/integrate-with-playwright.html)
 
 Use it for narrow questions such as:
 
