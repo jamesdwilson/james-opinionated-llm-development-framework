@@ -2,7 +2,7 @@
 
 > A practical stack for taking an idea through implementation, browser testing, failure recovery, and release evidence.
 
-Here's how it works. I've made the tough choices and done the research so you don't have to. Start with this stack, keep a project's good existing tools, and replace only what is genuinely missing.
+Here's how it works. I've made the tough choices and done the research so you don't have to. Start with this stack, keep the tools you already like, and add only what is genuinely useful.
 
 The whole thing runs as one chain:
 
@@ -19,15 +19,24 @@ Project Brief
   -> independent challenge and handoff
 ```
 
-This is meant to work as one system, not a bag of fashionable tools. The brief defines the job. BDD removes ambiguity. TDD drives the change. Deterministic tests check the facts. Playwright exercises the real interface. Midscene can add a visual second opinion. Bugsink captures errors during a separately checked recovery exercise. Supply-chain checks inspect what you are actually installing. Evidence and review tie the results to the exact change under consideration.
+This is meant to work as one system rather than a pile of unrelated tools. The brief defines the job. BDD removes ambiguity. TDD drives the change. Deterministic tests check the facts. Playwright exercises the real interface. Midscene can add a visual second opinion. Bugsink captures errors during a separately checked recovery exercise. Supply-chain checks inspect what you are actually installing. Evidence and review tie the results to the exact change under consideration.
 
 ## Why use it
 
 - **Less guesswork.** Every part of the stack has a clear job.
+- **Less, on purpose.** Fewer overlapping tools, dependencies, abstractions, and instructions give people and LLMs less to configure, patch, and misunderstand.
 - **Easy to adopt.** Keep sound tools already in the project and add only the missing pieces.
 - **Opinionated on purpose.** Bun, Playwright, Midscene, and Bugsink are the defaults, so the agent does not reopen the same tooling debate on every task.
 - **Honest about evidence.** Research informs the method, official documentation establishes tool capabilities, and stack preferences stay labelled as preferences.
 - **Easy to inspect.** Important claims point back to a requirement, test, observation, or accountable decision maker.
+
+## Less is more
+
+Use the smallest set of tools, dependencies, abstractions, code paths, and instructions that can prove the job is done. Every extra layer should earn its keep.
+
+That lines up with performance and security, but it is a design direction rather than a magic guarantee. Less unnecessary work can mean less overhead. A smaller dependency set and fewer code paths also leave fewer things to review, update, and defend. Measure the real project instead of assuming that smaller is automatically faster or safer. ISO/IEC 25010 treats performance efficiency, security, and maintainability as explicit product qualities, while NIST's Secure Software Development Framework covers third-party components and secure development practices. [[3]](https://www.iso.org/standard/78176.html) [[23]](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-218.pdf)
+
+The agent research points in the same general direction without proving that less always wins. One study found that generated repository context could increase inference cost and sometimes reduce task success, while Skeleton Coding found benefits from concise structural specifications in its evaluated settings. [[9]](https://arxiv.org/abs/2602.11988) [[14]](https://arxiv.org/abs/2610.38214)
 
 ## Start here
 
@@ -51,7 +60,7 @@ Run the target repository's required checks and report results, limits, and risk
 
 ## What gets the final say
 
-No tool gets to overrule the source that actually owns the decision:
+Each decision should follow the source that actually owns it:
 
 - stakeholders and product requirements for intended outcomes;
 - laws, standards, policies, and contracts for mandatory constraints;
@@ -60,7 +69,7 @@ No tool gets to overrule the source that actually owns the decision:
 - empirical research within its studied population, tasks, measures, and limitations;
 - official documentation for a tool's supported capabilities.
 
-The stack is a strong default, not a religion. It does not outrank the law, a product decision, or a proven project-specific constraint.
+Treat the stack as a useful default, not a rule you have to follow. It does not outrank the law, a product decision, or a proven project-specific constraint.
 
 ## Suggested stack
 
@@ -68,22 +77,22 @@ The stack is a strong default, not a religion. It does not outrank the law, a pr
 | --- | --- |
 | [Project Brief](#stack-project-brief) | It gives the LLM a clear job and cuts down scope drift. |
 | [BDD and Example Mapping](#stack-bdd) | They turn fuzzy requests into concrete rules, examples, and open questions before code. |
-| [TDD](#stack-tdd) | It makes the model prove the problem before fixing it. |
+| [TDD](#stack-tdd) | It gives the model a clear failing example before it changes the code. |
 | [Deterministic tests](#stack-deterministic-tests) | They give repeatable answers without asking another model. |
-| [Bun](#stack-bun) | It puts the runtime, package manager, and test runner in one tool, so there is less tooling to wire together. |
+| [Bun](#stack-bun) | It combines the runtime, package manager, and test runner, with fast installs and dependency scripts limited to trusted packages. |
 | [Playwright](#stack-playwright) | It checks what a person can actually see and do in the browser. |
 | [Midscene](#stack-midscene) | It adds an AI second opinion on visual clarity without overruling hard tests. |
 | [Bugsink](#stack-bugsink) | It proves errors arrive where they should while separate checks verify the product's recovery. |
 | [Supply-chain checks](#stack-supply-chain) | They make dependency changes visible and give risky new releases time to settle when policy calls for it. |
 | [Evidence tied to the build](#stack-candidate-evidence) | It ties every result to the exact version you might ship. |
-| [Fresh eyes before done](#stack-independent-review) | A separate reviewer tries to break the evidence before anyone calls it finished. |
+| [Fresh eyes before done](#stack-independent-review) | A separate reviewer checks the evidence before anyone calls it finished. |
 
 ## How each piece works
 
 <a id="stack-project-brief"></a>
 ### 1. Project Brief
 
-Write down what you are building, who it is for, what good looks like, what is out of scope, and what evidence will count. This is the document that stops the agent from confidently solving the wrong problem.
+Write down what you are building, who it is for, what good looks like, what is out of scope, and what evidence will count. This gives the agent a clear target and helps it stay focused on the problem you actually meant to solve.
 
 ISO/IEC/IEEE 29148 covers requirements-engineering processes and information items. [[1]](https://www.iso.org/standard/72089.html) NASA's Systems Engineering Handbook covers stakeholder expectations, operational concepts, requirements, verification, and validation. [[2]](https://www.nasa.gov/wp-content/uploads/2018/09/nasa_systems_engineering_handbook_0.pdf) ISO/IEC 25010 supplies a product-quality model. [[3]](https://www.iso.org/standard/78176.html) Goal-oriented requirements engineering connects goals, requirements, and rationale. [[4]](https://webperso.info.ucl.ac.be/~avl/files/RE01.pdf)
 
@@ -130,9 +139,11 @@ The exact split is a stack convention. Keep an existing test layer when it alrea
 <a id="stack-bun"></a>
 ### 5. Bun
 
-Bun is the default for new JavaScript or TypeScript work. It puts the runtime, package manager, and test runner in one tool, so there is less tooling to wire together. [[18]](https://bun.com/docs/test)
+Bun is the suggested default for new JavaScript or TypeScript work because it can cover jobs that often need several separate tools in a Node project: the runtime, package manager, and test runner. That usually means less setup, less duplicated configuration, and fewer version seams to explain to an LLM. Its test runner is designed to feel familiar to Jest users. [[18]](https://bun.com/docs/test)
 
-Do not rip out a healthy existing runtime just to make the diagram look pure. The role matters more than forced migration.
+Bun's own benchmark reports `bun install` as up to 25 times faster than npm. Bun also limits dependency lifecycle scripts to trusted packages, including a built-in allowlist. Those are useful defaults, not a promise that every Bun application will be faster or safer than every Node application. [[27]](https://bun.com/docs/pm/cli/install) [[28]](https://bun.com/docs/pm/lifecycle)
+
+If you're a big fan of Node or do not want to use Bun, don't worry about it. Keep Node when it is working well. Bun's package manager can also be used in an existing Node project, so trying it does not have to be an all-or-nothing migration. [[27]](https://bun.com/docs/pm/cli/install)
 
 <a id="stack-playwright"></a>
 ### 6. Playwright
@@ -189,7 +200,7 @@ Use [`templates/VERIFICATION.md`](templates/VERIFICATION.md).
 <a id="stack-independent-review"></a>
 ### 11. Fresh eyes before done
 
-After the ordinary checks pass, give the exact candidate to a separate reviewer and ask them to attack weak tests, stale evidence, missing requirements, and unsupported conclusions. Record what changed, what ran, what passed, what remains uncertain, and who owns the next decision.
+After the ordinary checks pass, give the exact candidate to a separate reviewer and ask them to look for weak tests, stale evidence, missing requirements, and unsupported conclusions. Record what changed, what ran, what passed, what remains uncertain, and who owns the next decision.
 
 OpenAI and Anthropic engineering reports emphasise repository legibility, mechanical checks, durable progress, and useful handoffs in long-running agent work. [[25]](https://openai.com/index/harness-engineering) [[26]](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
 
@@ -203,7 +214,7 @@ Neither study validates this template or tells us the perfect file length. [`tem
 
 ## Adoption rule
 
-Do not replace a good tool just because this README names a different default. Keep it when it already fills the role and replacement would add more risk or duplication than value. Record the equivalence in the stack map. Add the default only when the role is missing, the task needs it, and installation is authorised.
+If an existing tool already does the job well, keep it. There is no need to replace something you like just because this README names a different default. Record the equivalence in the stack map, and add the suggested tool only when the role is missing, the task needs it, and installation is authorised.
 
 The goal is a joined-up method, not a rewrite for the sake of one.
 
@@ -269,6 +280,7 @@ python3 tools/verify_playbook.py
 - [[25]](https://openai.com/index/harness-engineering) OpenAI Harness Engineering
 - [[26]](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) Anthropic Effective Harnesses for Long-Running Agents
 - [[27]](https://bun.com/docs/pm/cli/install) Bun Install and Minimum Release Age
+- [[28]](https://bun.com/docs/pm/lifecycle) Bun Lifecycle Scripts
 
 ## Status
 

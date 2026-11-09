@@ -28,6 +28,7 @@
     {"id": 24, "title": "SLSA Provenance", "url": "https://slsa.dev/spec/v1.2/provenance", "type": "specification"},
     {"id": 25, "title": "Harness Engineering", "url": "https://openai.com/index/harness-engineering", "type": "engineering report"},
     {"id": 26, "title": "Effective Harnesses for Long-Running Agents", "url": "https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents", "type": "engineering report"},
-    {"id": 27, "title": "Bun Install and Minimum Release Age", "url": "https://bun.com/docs/pm/cli/install", "type": "official documentation"}
+    {"id": 27, "title": "Bun Install and Minimum Release Age", "url": "https://bun.com/docs/pm/cli/install", "type": "official documentation"},
+    {"id": 28, "title": "Bun Lifecycle Scripts", "url": "https://bun.com/docs/pm/lifecycle", "type": "official documentation"}
   ]
 }
