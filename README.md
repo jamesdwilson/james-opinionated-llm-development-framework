@@ -6,6 +6,14 @@ This repository contains reusable instructions, templates, and checks for LLM-as
 
 The aim is simple: faster implementation, fewer plausible mistakes, and evidence you can inspect without trusting a victory speech from the same model that wrote the code.
 
+The playbook gets there by:
+
+- **Briefing the agent properly.** It receives the product promise, repository rules, exact commands, decision boundaries, and definition of done.
+- **Turning intent into executable examples.** Rules and user journeys are written before the agent starts shaping the implementation.
+- **Giving every claim an authority.** Fast tests prove logic and contracts. Real browser journeys prove user-facing behaviour. Model review handles short questions about clarity and friction.
+- **Binding results to the exact candidate.** Commands, reports, runtime identity, and evidence stay attached to the code under review.
+- **Finishing with a fresh challenge.** An independent reviewer hunts for weak tests, stale evidence, permissive parsers, and plausible stories unsupported by the results.
+
 ## Start here
 
 Give your coding agent this prompt:
