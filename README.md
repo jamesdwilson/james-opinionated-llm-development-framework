@@ -75,48 +75,50 @@ Treat the stack as a useful default, not a rule you have to follow. It does not 
 
 | Stack | Why |
 | --- | --- |
-| [Project Brief](#stack-project-brief) | It gives the LLM a clear job and cuts down scope drift. |
-| [BDD and Example Mapping](#stack-bdd) | They turn fuzzy requests into concrete rules, examples, and open questions before code. |
-| [TDD](#stack-tdd) | It gives the model a clear failing example before it changes the code. |
-| [Deterministic tests](#stack-deterministic-tests) | They give repeatable answers without asking another model. |
-| [Bun](#stack-bun) | It combines the runtime, package manager, and test runner, with fast installs and dependency scripts limited to trusted packages. |
-| [Playwright](#stack-playwright) | It checks what a person can actually see and do in the browser. |
+| [Project Brief](#stack-project-brief) | It tells the LLM what game we are playing before it starts moving pieces. |
+| [BDD and Example Mapping](#stack-bdd) | They turn "make it work" into examples people can agree on before anyone writes code. |
+| [TDD](#stack-tdd) | It gives the model a real failing target instead of letting it guess what needs fixing. |
+| [Deterministic tests](#stack-deterministic-tests) | They are boring in the best way: same code, same answer, no model mood swings. |
+| [Bun](#stack-bun) | It covers the runtime, installs, and tests in one tool, with fast package installs and dependency scripts limited to trusted packages. |
+| [Playwright](#stack-playwright) | It clicks through the real interface and catches user-visible failures that unit tests often miss. |
 | [Midscene](#stack-midscene) | It is cool because it catches the "this technically works, but feels confusing" problems hard tests usually miss. |
-| [Bugsink](#stack-bugsink) | It proves errors arrive where they should while separate checks verify the product's recovery. |
-| [Supply-chain checks](#stack-supply-chain) | They make dependency changes visible and give risky new releases time to settle when policy calls for it. |
-| [Evidence tied to the build](#stack-candidate-evidence) | It ties every result to the exact version you might ship. |
-| [Fresh eyes before done](#stack-independent-review) | A separate reviewer checks the evidence before anyone calls it finished. |
+| [Bugsink](#stack-bugsink) | It lets you rehearse failure safely and prove the error went where it should. |
+| [Supply-chain checks](#stack-supply-chain) | They show what you are really installing and can give brand-new packages time to settle. |
+| [Evidence tied to the build](#stack-candidate-evidence) | It answers "which exact build passed?" instead of trusting a loose green screenshot. |
+| [Fresh eyes before done](#stack-independent-review) | A separate reviewer checks the work before the builder grades their own homework. |
 
 ## How each piece works
+
+Plain English comes first. The research, caveats, and implementation detail stay underneath for the clankers who want to inspect the machinery.
 
 <a id="stack-project-brief"></a>
 ### 1. Project Brief
 
-Write down what you are building, who it is for, what good looks like, what is out of scope, and what evidence will count. This gives the agent a clear target and helps it stay focused on the problem you actually meant to solve.
+A Project Brief gives the LLM a map before asking it to drive. It says who the product is for, what success looks like, what is out of scope, and what evidence counts. That helps a fluent agent avoid building a polished answer to the wrong question.
 
-ISO/IEC/IEEE 29148 covers requirements-engineering processes and information items. [[1]](https://www.iso.org/standard/72089.html) NASA's Systems Engineering Handbook covers stakeholder expectations, operational concepts, requirements, verification, and validation. [[2]](https://www.nasa.gov/wp-content/uploads/2018/09/nasa_systems_engineering_handbook_0.pdf) ISO/IEC 25010 supplies a product-quality model. [[3]](https://www.iso.org/standard/78176.html) Goal-oriented requirements engineering connects goals, requirements, and rationale. [[4]](https://webperso.info.ucl.ac.be/~avl/files/RE01.pdf)
+**Under the hood:** capture purpose, outcomes, stakeholders, context, scope, requirements, quality attributes, constraints, assumptions, risks, decisions, acceptance conditions, and evidence links. ISO/IEC/IEEE 29148 covers requirements-engineering processes and information items. [[1]](https://www.iso.org/standard/72089.html) NASA's Systems Engineering Handbook covers stakeholder expectations, operational concepts, requirements, verification, and validation. [[2]](https://www.nasa.gov/wp-content/uploads/2018/09/nasa_systems_engineering_handbook_0.pdf) ISO/IEC 25010 supplies a product-quality model. [[3]](https://www.iso.org/standard/78176.html) Goal-oriented requirements engineering connects goals, requirements, and rationale. [[4]](https://webperso.info.ucl.ac.be/~avl/files/RE01.pdf)
 
 Use [`templates/PROJECT_BRIEF.md`](templates/PROJECT_BRIEF.md).
 
 <a id="stack-bdd"></a>
 ### 2. BDD and Example Mapping
 
-Before writing code, turn the request into rules, concrete examples, and unresolved questions. Use Given, When, Then when it helps. Cover the normal path plus the boundaries, failures, and recovery behaviour that matter.
+BDD turns fuzzy language into examples people can actually discuss. "Make checkout simple" is vague. A few concrete examples of what happens, what can go wrong, and how the user recovers give the LLM something solid to build.
 
-Example Mapping is the selected BDD discovery technique. [[13]](https://cucumber.io/docs/bdd/example-mapping/) NASA supports operational scenarios as part of understanding expected use. [[2]](https://www.nasa.gov/wp-content/uploads/2018/09/nasa_systems_engineering_handbook_0.pdf) TiCoder and ClarifyGPT provide empirical support for concrete tests and targeted clarification within their studied tasks. [[7]](https://arxiv.org/abs/2404.10100) [[8]](https://arxiv.org/abs/2310.10996)
+**Under the hood:** turn requirements into rules, examples, and open questions. Use Given, When, Then when it helps, and cover normal, boundary, failure, and recovery behaviour where it matters. Example Mapping is the selected discovery technique. [[13]](https://cucumber.io/docs/bdd/example-mapping/) NASA supports operational scenarios as part of understanding expected use. [[2]](https://www.nasa.gov/wp-content/uploads/2018/09/nasa_systems_engineering_handbook_0.pdf) TiCoder and ClarifyGPT provide empirical support for concrete tests and targeted clarification within their studied tasks. [[7]](https://arxiv.org/abs/2404.10100) [[8]](https://arxiv.org/abs/2310.10996)
 
 Use [`templates/JOURNEYS.md`](templates/JOURNEYS.md).
 
 <a id="stack-tdd"></a>
 ### 3. TDD: RED, GREEN, REFACTOR
 
-Make the change earn its way in:
+TDD makes the model show the problem before it fixes it. RED proves the check can catch the missing or broken behaviour. GREEN shows that the smallest repair satisfies the relevant checks. REFACTOR cleans things up without losing that evidence.
 
 ```text
 RED -> GREEN -> REFACTOR
 ```
 
-Write or identify a meaningful failing check for the behaviour being changed. Make the smallest coherent change that satisfies it. Clean up only while the relevant checks stay green. If behaviour should not change, start from a verified green characterisation instead of manufacturing a failure.
+**Under the hood:** write or identify a meaningful failing check for the behaviour being changed. Make the smallest coherent change that satisfies it. Clean up only while the relevant checks stay green. If behaviour should not change, start from a verified green characterisation instead of manufacturing a failure.
 
 Across 20 diverse web applications, TDDev reports accuracy gains of 15.5 to 23.7 percentage points with sufficiently capable backbones; a stronger tester restored positive gains for a lower-capability backbone. [[15]](https://arxiv.org/abs/2605.17242) TENET reports benefits from representative developer-written tests, retrieval guided by tests, and iterative failure analysis. [[12]](https://arxiv.org/abs/2509.24148) TestSuiteBench shows that coding agents still struggle to create strong repository-level test suites from specifications. [[11]](https://arxiv.org/abs/2610.13065)
 
@@ -125,32 +127,34 @@ Full RED, GREEN, REFACTOR is the chosen operating discipline here. The research 
 <a id="stack-deterministic-tests"></a>
 ### 4. Deterministic tests
 
-Use the simplest test that can answer the question reliably:
+Deterministic tests are boring in the best way. They do not get tired, creative, or persuaded by a confident explanation. The same code and inputs should produce the same answer every time.
+
+**Under the hood:** use the simplest test that can answer the question reliably:
 
 - unit checks for pure rules and transformations;
 - integration checks for persistence, services, queues, and adapters;
 - contract checks for schemas and interfaces;
 - browser checks for rendered, stateful user journeys.
 
-Program structure can reduce ambiguity for coding agents. Skeleton Coding reports benefits from structural specifications in its evaluated settings. [[14]](https://arxiv.org/abs/2610.38214)
+Program structure can also reduce ambiguity for coding agents. Skeleton Coding reports benefits from structural specifications in its evaluated settings. [[14]](https://arxiv.org/abs/2610.38214)
 
 The exact split is a stack convention. Keep an existing test layer when it already answers the same question cleanly.
 
 <a id="stack-bun"></a>
 ### 5. Bun
 
-Bun is the suggested default for new JavaScript or TypeScript work because it can cover jobs that often need several separate tools in a Node project: the runtime, package manager, and test runner. That usually means less setup, less duplicated configuration, and fewer version seams to explain to an LLM. Its test runner is designed to feel familiar to Jest users. [[18]](https://bun.com/docs/test)
+Bun earns its place by replacing a small pile of JavaScript tooling with one fast tool. It can run the code, install packages, and run tests, which means less setup and fewer version seams for people and LLMs to keep straight.
 
-Bun's own benchmark reports `bun install` as up to 25 times faster than npm. Bun also limits dependency lifecycle scripts to trusted packages, including a built-in allowlist. Those are useful defaults, not a promise that every Bun application will be faster or safer than every Node application. [[27]](https://bun.com/docs/pm/cli/install) [[28]](https://bun.com/docs/pm/lifecycle)
+**Under the hood:** Bun's test runner is designed to feel familiar to Jest users. [[18]](https://bun.com/docs/test) Bun's own benchmark reports `bun install` as up to 25 times faster than npm. Bun also limits dependency lifecycle scripts to trusted packages, including a built-in allowlist. Those are useful defaults, not a promise that every Bun application will be faster or safer than every Node application. [[27]](https://bun.com/docs/pm/cli/install) [[28]](https://bun.com/docs/pm/lifecycle)
 
 If you're a big fan of Node or do not want to use Bun, don't worry about it. Keep Node when it is working well. Bun's package manager can also be used in an existing Node project, so trying it does not have to be an all-or-nothing migration. [[27]](https://bun.com/docs/pm/cli/install)
 
 <a id="stack-playwright"></a>
 ### 6. Playwright
 
-Use Playwright for the things that only become true in a real browser: visible state, interaction, permissions, reloads, client-side recovery, and persistence a user can actually observe.
+Playwright closes the awkward gap between "the function passed" and "the app works." It opens the real page, clicks the real controls, reloads, and checks what is actually visible to expose user-facing failures lower-level tests may miss.
 
-Playwright recommends isolated tests, user-facing assertions, resilient locators, and web-first waiting. [[16]](https://playwright.dev/docs/best-practices) Its planner, generator, and healer agents can assist test creation while executable assertions remain the behavioural evidence. [[17]](https://playwright.dev/docs/test-agents)
+**Under the hood:** Playwright owns critical rendered journeys including visible state, interaction, permissions, reloads, client-side recovery, and user-observable persistence. It recommends isolated tests, user-facing assertions, resilient locators, and web-first waiting. [[16]](https://playwright.dev/docs/best-practices) Its planner, generator, and healer agents can assist test creation while executable assertions remain the behavioural evidence. [[17]](https://playwright.dev/docs/test-agents)
 
 <a id="stack-midscene"></a>
 ### 7. Midscene
@@ -164,19 +168,21 @@ Use it for narrow questions such as:
 - Does the completed state explain what happened?
 - Is the recovery path visible after the exercised failure?
 
-Midscene is advisory by default. It cannot overrule a failed deterministic check. Count its output as release evidence only after the project has validated the model, prompt, fixtures, and agreement with responsible human judgement.
+**Under the hood:** Midscene is advisory by default. It cannot overrule a failed deterministic check. Count its output as release evidence only after the project has validated the model, prompt, fixtures, and agreement with responsible human judgement.
 
 <a id="stack-bugsink"></a>
 ### 8. Bugsink
 
-Use synthetic data and an isolated Bugsink project or disposable instance to prove that an error is captured. Check the product's recovery separately with the deterministic or browser layer that owns that behaviour. Bugsink is a self-hosted Sentry-compatible target. [[20]](https://www.bugsink.com/docs/)
+Bugsink lets you rehearse failure before a real user finds it. Trigger a safe synthetic error, prove it reached the error tracker without leaking sensitive data, and separately check that the product recovered the way it promised.
 
-The product requirement chooses the failure worth exercising. Check that the error reaches the right place, sensitive data stays out, user state behaves as promised, and cleanup works.
+**Under the hood:** use synthetic data and an isolated Bugsink project or disposable instance. Bugsink is a self-hosted Sentry-compatible target. [[20]](https://www.bugsink.com/docs/) The product requirement chooses the failure worth exercising. Check capture in Bugsink, verify recovery through the deterministic or browser layer that owns that behaviour, and confirm cleanup works.
 
 <a id="stack-supply-chain"></a>
 ### 9. Supply-chain checks
 
-Keep dependency changes boring and reversible. For Bun projects:
+Supply-chain checks answer the question hidden behind "it installed": what did we actually install? They make dependency changes visible, check known advisories, and can keep very new package releases out until they have had time to settle.
+
+**Under the hood:** keep dependency changes boring and reversible. For Bun projects:
 
 - commit the lockfile;
 - review dependency-graph changes;
@@ -191,18 +197,18 @@ The release-age filter applies during new resolution. It does not go back and ju
 <a id="stack-candidate-evidence"></a>
 ### 10. Evidence tied to the exact build
 
-A green test means very little if nobody knows which bytes produced it. Record the candidate identity, exact commands or procedures, observed results, report locations, relevant environment facts, and evidence limits. Use a clean commit, release artefact, or another identity the project already trusts.
+Evidence tied to the build gets rid of the vague "it passed on my machine yesterday" claim. Every test result points to the exact commit, build, commands, and environment that produced it.
 
-SLSA provenance provides a model for connecting an artefact to its build context. [[24]](https://slsa.dev/spec/v1.2/provenance) A controlled traceability experiment found maintenance benefits for its participants and projects. [[5]](https://www.patrickmaeder.de/pdf/ICSM2012_maeder_egyed_AssessingEffectOfRequirementsTraceability.pdf) An industrial multi-case study documents both the use and communication limits of tests as requirements. [[6]](https://doi.org/10.1016/j.infsof.2016.03.008)
+**Under the hood:** record the project-native candidate identity, exact commands or procedures, observed results, report locations, relevant environment facts, and evidence limits. Use a clean commit, release artefact, or another identity the project already trusts. SLSA provenance provides a model for connecting an artefact to its build context. [[24]](https://slsa.dev/spec/v1.2/provenance) A controlled traceability experiment found maintenance benefits for its participants and projects. [[5]](https://www.patrickmaeder.de/pdf/ICSM2012_maeder_egyed_AssessingEffectOfRequirementsTraceability.pdf) An industrial multi-case study documents both the use and communication limits of tests as requirements. [[6]](https://doi.org/10.1016/j.infsof.2016.03.008)
 
 Use [`templates/VERIFICATION.md`](templates/VERIFICATION.md).
 
 <a id="stack-independent-review"></a>
 ### 11. Fresh eyes before done
 
-After the ordinary checks pass, give the exact candidate to a separate reviewer and ask them to look for weak tests, stale evidence, missing requirements, and unsupported conclusions. Record what changed, what ran, what passed, what remains uncertain, and who owns the next decision.
+Fresh eyes matter because the builder already knows what they intended. A separate reviewer sees only what the exact candidate and its evidence actually prove, which makes weak tests, stale evidence, missing requirements, and overconfident conclusions easier to spot.
 
-OpenAI and Anthropic engineering reports emphasise repository legibility, mechanical checks, durable progress, and useful handoffs in long-running agent work. [[25]](https://openai.com/index/harness-engineering) [[26]](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
+**Under the hood:** record what changed, what ran, what passed, what remains uncertain, and who owns the next decision. OpenAI and Anthropic engineering reports emphasise repository legibility, mechanical checks, durable progress, and useful handoffs in long-running agent work. [[25]](https://openai.com/index/harness-engineering) [[26]](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
 
 The project can choose the reviewer and handoff format. The important bit is that the final challenge is genuinely independent of the person or agent that made the change.
 
