@@ -16,7 +16,7 @@ The playbook gets there by:
 
 These recommendations draw on extensive work by researchers, standards bodies, tool maintainers, and engineering teams. The evidence covers repository instructions and test-driven agents [[1]](https://arxiv.org/abs/2602.11988) [[5]](https://arxiv.org/abs/2605.17242) [[6]](https://arxiv.org/abs/2610.13065), browser testing and software supply-chain practice [[7]](https://playwright.dev/docs/best-practices) [[14]](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-218.pdf) [[15]](https://slsa.dev/spec/v1.2/provenance), and the engineering realities of long-running agents and measured developer productivity [[16]](https://openai.com/index/harness-engineering) [[17]](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) [[19]](https://metr.org/blog/2026-02-24-uplift-update).
 
-The playbook turns that research into defaults an agent can execute. Every major recommendation links to its source, and [`research/practice-map.md`](research/practice-map.md) records how the evidence became a practical rule.
+The playbook turns that research into defaults an agent can execute. Research-backed recommendations link to their sources. Original synthesis is labelled as James's policy. [`research/practice-map.md`](research/practice-map.md) records the boundary.
 
 ## Start here
 
@@ -115,6 +115,8 @@ Use Standard for general adoption. Lean suits explicitly reversible prototypes. 
 ### 1. Write the product promise
 
 Capture the user, job, desired experience, decision boundaries, and success signals in one page. Keep product language separate from implementation language.
+
+Product teams already use “North Star” for a guiding measure of customer value and product strategy. [[21]](https://amplitude.com/en-us/north-star) This playbook extends the term to a one-page product brief. The exact template is James's original synthesis and an opinionated default. Example Mapping supplies the researched next step: translating that brief into rules, examples, and open questions. [[3]](https://cucumber.io/docs/bdd/example-mapping/)
 
 Use [`templates/NORTH_STAR.md`](templates/NORTH_STAR.md).
 
@@ -402,6 +404,7 @@ This playbook starts with `AGENTS.md` because it is portable across coding agent
 - [[18]](https://martinfowler.com/articles/are-harnesses-worth-the-cost.html) Martin Fowler, *Are Harnesses Worth the Cost?*
 - [[19]](https://metr.org/blog/2026-02-24-uplift-update) METR, *We are Changing our Developer Productivity Experiment Design*
 - [[20]](https://developers.openai.com/codex/skills/) OpenAI Codex Skills
+- [[21]](https://amplitude.com/en-us/north-star) Amplitude, *The North Star Playbook*
 
 ## Status
 

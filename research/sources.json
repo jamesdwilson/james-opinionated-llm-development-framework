@@ -121,6 +121,12 @@
       "title": "Codex Skills",
       "url": "https://developers.openai.com/codex/skills/",
       "type": "official documentation"
+    },
+    {
+      "id": 21,
+      "title": "The North Star Playbook",
+      "url": "https://amplitude.com/en-us/north-star",
+      "type": "practitioner guide"
     }
   ]
 }

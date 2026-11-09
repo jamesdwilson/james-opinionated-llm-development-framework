@@ -2,6 +2,12 @@
 
 This file explains how the sources changed the playbook. The README carries the full method and clickable citations.
 
+## Product promise and North Star
+
+**James's policy:** Keep the user, job, desired experience, decision boundaries, and success signals in one short product brief.
+
+**Research boundary:** Product teams use “North Star” for a guiding measure of customer value and product strategy. [[21]](https://amplitude.com/en-us/north-star) The exact one-page template in this playbook is James's original synthesis. Example Mapping supports the following move from product intent to explicit rules, examples, and questions. [[3]](https://cucumber.io/docs/bdd/example-mapping/)
+
 ## Repository instructions
 
 **Practice:** Keep `AGENTS.md` concise, local, and executable. Put build commands, tests, conventions, and safety boundaries in predictable sections.
