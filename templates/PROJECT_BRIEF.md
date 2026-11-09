@@ -1,16 +1,16 @@
 # Project Brief template
 
-This is a concise requirements overview. Link to detailed journeys, schemas, tests, and evidence instead of duplicating them.
+Keep this overview concise. Link to authoritative detail instead of copying it.
 
 ## Purpose and outcomes
 
-- **Problem or opportunity:** `<what needs to change>`
-- **Desired outcome:** `<observable result for stakeholders>`
+- **Problem or opportunity:** `<what needs attention>`
+- **Desired outcome:** `<observable result>`
 - **Success evidence:** `<measure or inspectable condition>`
 
-## Stakeholders and operational context
+## Stakeholders and context
 
-- **Intended users:** `<users and their context>`
+- **Intended users:** `<users and context>`
 - **Other affected stakeholders:** `<operators, maintainers, customers, regulators, or others>`
 - **Operational context:** `<workflow, environment, systems, and interfaces>`
 
@@ -22,45 +22,33 @@ This is a concise requirements overview. Link to detailed journeys, schemas, tes
 
 ### Excluded
 
-- `<explicit exclusion and reason>`
+- `<exclusion and reason>`
 
 ## Requirements
 
-Give each material requirement a stable ID. State observable behaviour, measurable quality, or a genuine constraint.
+Give each material requirement a stable ID. Use the applicable authority and project vocabulary.
 
-| ID | Type | Requirement | Rationale or source | Acceptance condition | Verification link |
-|---|---|---|---|---|---|
-| R-001 | behaviour | `<observable capability or response>` | `<stakeholder, rule, or source>` | `<pass or fail condition>` | `<test, inspection, analysis, demonstration, or validation>` |
-| Q-001 | quality | `<quality attribute with condition and threshold>` | `<risk or stakeholder need>` | `<measurable condition>` | `<verification link>` |
-| C-001 | constraint | `<mandatory interface, policy, technology, or limit>` | `<authority and reason>` | `<compliance condition>` | `<verification link>` |
+| ID | Requirement | Rationale or authority | Acceptance condition | Evidence link |
+|---|---|---|---|---|
+| R-001 | `<observable behaviour, quality, or constraint>` | `<stakeholder, standard, policy, contract, or technical source>` | `<condition that can be evaluated>` | `<record or check>` |
 
 ## Representative scenarios
 
-Link to the journey catalogue and identify at least one normal, boundary, and failure scenario where each applies.
+Add normal, boundary, failure, or recovery scenarios where they help clarify the requirements. Link to a separate journey catalogue when needed.
 
-- **Normal:** `<journey ID and link>`
-- **Boundary:** `<journey ID and link>`
-- **Failure or recovery:** `<journey ID and link>`
+- `<scenario or journey link>`
 
-## Structural constraints and invariants
+## Assumptions, risks, and decisions
 
-Record only consequential implementation boundaries. Link to authoritative code or schema definitions.
-
-- `<interface, data owner, invariant, prohibited dependency, or compatibility rule>`
-
-## Assumptions, risks, and open decisions
-
-| ID | Class | Statement | Owner | Next action or resolution date |
+| ID | Class | Statement | Responsible owner | Resolution or next action |
 |---|---|---|---|---|
-| A-001 | assumption | `<environmental fact believed to hold>` | `<owner>` | `<validation action>` |
-| RISK-001 | risk | `<condition that could defeat an outcome>` | `<owner>` | `<mitigation or learning action>` |
-| D-001 | decision | `<unresolved consequential question>` | `<owner>` | `<decision action and date>` |
+| A-001 | assumption | `<fact believed to hold>` | `<owner>` | `<validation action>` |
+| RISK-001 | risk | `<condition that could defeat an outcome>` | `<owner>` | `<response>` |
+| D-001 | decision | `<unresolved consequential question>` | `<owner>` | `<decision action>` |
 
 ## Traceability check
 
-- Every requirement names its rationale or source.
-- Every requirement names an acceptance condition.
-- Every acceptance condition links to verification evidence.
-- Every unresolved decision has an owner and next action.
-- Detailed behaviour remains in the journey catalogue.
-- Detailed execution evidence remains in the evidence record.
+- Each material requirement identifies its rationale or authority.
+- Each material requirement has an evaluable acceptance condition.
+- Each acceptance condition links to verification or validation evidence.
+- Assumptions and unresolved decisions remain visible.

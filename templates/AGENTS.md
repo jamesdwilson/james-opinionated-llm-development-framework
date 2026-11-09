@@ -1,56 +1,44 @@
 # AGENTS.md template
 
-Replace every `<placeholder>` before use.
+Replace each placeholder that applies. Remove unused sections.
 
-## Product
+## Product and authorities
 
-- **Name:** `<product>`
+- **Product or service:** `<name>`
 - **Purpose:** `<one sentence>`
-- **Primary user:** `<user>`
 - **Project Brief:** `<path>`
-- **Journeys:** `<path>`
-- **Acceptance contract:** `<path for Standard or High Assurance; Lean may use the journey catalogue and command list>`
+- **Representative journeys:** `<path or included in Project Brief>`
+- **Verification and validation record:** `<path>`
+- **Product authority:** `<owner or document>`
+- **Technical authorities:** `<schemas, interfaces, policies, or source paths>`
 
 ## Commands
 
-- install: `<command>`
-- narrow test: `<command>`
-- full deterministic suite: `<command>`
-- browser journeys: `<command>`
-- lint or type check: `<command>`
-- build: `<command>`
-- dependency audit: `<command>`
+List the existing commands relevant to ordinary work in this repository.
 
-## Working rules
+- setup: `<command or none>`
+- focused checks: `<command or none>`
+- broader checks: `<command or none>`
+- build or packaging: `<command or none>`
 
-- Read the Project Brief and affected journeys before editing.
-- Preserve existing conventions and local changes.
-- Start behaviour changes with a failing check.
-- Use focused characterisation or structural verification for behaviour-preserving adoption.
-- Make the smallest coherent implementation change.
-- Use deterministic checks as acceptance authority.
-- Use model review only for the bounded questions named in the acceptance contract.
-- Name the gap before adding a dependency.
-- Add abstraction on its second real use.
-- Record exact commands or procedures and results.
+## Working boundaries
 
-## Authority boundaries
+- Follow the repository's documented conventions and rules for local changes.
+- Read the affected requirements and authoritative sources before editing.
+- Identify consequential ambiguity and seek clarification from the responsible authority.
+- Use the repository's existing development and review process.
+- Distinguish verification against requirements from validation against intended use.
+- Choose testing, inspection, analysis, or demonstration according to the claim.
+- Record observed results and evidence limits.
 
-- unit tests: `<claims>`
-- integration tests: `<claims>`
-- contract tests: `<claims>`
-- browser tests: `<claims>`
-- model review: `<claims>`
-- human approval: `<claims>`
+## Approval boundaries
 
-## Safety boundaries
+- dependencies: `<approval rule>`
+- credentials and sensitive data: `<handling rule>`
+- external services and communications: `<approval rule>`
+- deployment and release: `<approval rule>`
+- destructive or irreversible work: `<approval rule>`
 
-- credentials: `<handling rule>`
-- production data: `<handling rule>`
-- external services: `<handling rule>`
-- deployment: `<approval rule>`
-- destructive changes: `<approval rule>`
+## Result
 
-## Handoff
-
-Report outcome, changed files, exact commands or procedures and results, evidence paths, remaining risks, and one next action.
+Report the outcome, affected requirements, changed files, procedures or commands run, observed results, evidence locations, and unresolved risks or decisions.

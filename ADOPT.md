@@ -1,134 +1,82 @@
-# Adoption contract
+# Adoption instructions
 
-This file is written for the coding agent applying the playbook to another repository.
+Use this playbook to add a small, research-led context layer to an existing repository.
 
-## Input
+## Inputs
 
 You need:
 
 - the target repository;
-- the requested profile: Lean, Standard, or High Assurance, with Standard as the default;
-- the product or change under consideration;
-- authority for file edits and test execution;
-- separate approval for new dependencies, external services, deployment, credentials, or public actions.
+- the requested product or code change;
+- authority to inspect files and run existing checks;
+- the target repository's authorization boundaries and responsible owners.
 
-## Phase 1: inspect
+## 1. Inspect the repository
 
-Read the target repository's:
+Read the material that already governs the work:
 
-- top-level instructions;
-- package or build files;
-- test commands;
-- CI configuration;
-- product documentation;
-- main entry points;
-- recent relevant changes;
-- current working-tree state.
+- repository instructions;
+- product and requirements documentation;
+- build, test, and release commands;
+- schemas, interfaces, and relevant source code;
+- security, privacy, legal, accessibility, or operational policies;
+- current working-tree state and local changes.
 
-Identify:
+Apply changes only to the target repository. This playbook's root `AGENTS.md` and verifier govern maintenance of the playbook itself.
 
-- existing sources of truth;
-- critical user journeys;
-- current test layers;
-- runtime and package manager;
-- browser-test setup;
-- monitoring and recovery path;
-- release process;
-- security and permission boundaries;
-- generated or duplicated contracts;
-- local changes that need preservation.
+This playbook does not select or replace the target repository's infrastructure, lifecycle, or approval process.
 
-## Phase 2: choose scope
+## 2. Establish the minimum context
 
-Use the requested profile. Use Standard when the request leaves the profile open. Recommend a smaller or larger profile when the project evidence supports it.
+Reuse existing documents where they contain the required information. Create or update only what the work needs:
 
-State:
+1. **`AGENTS.md`** with authoritative paths, commands, boundaries, and approvals.
+2. **Project Brief** with stakeholders, scope, requirements, constraints, decisions, and acceptance conditions.
+3. **Verification and validation record** linking material claims to purposes, methods, procedures, expected results, observed results, and evidence.
+4. **Journey catalogue**, only when representative scenarios need more space than the Project Brief provides.
 
-- chosen profile;
-- main risk;
-- existing pieces to keep;
-- missing pieces to add;
-- dependencies under consideration;
-- work that requires separate approval.
+Use the files in `templates/` as small starting points. Combine, rename, or omit them when the repository already has an equivalent source of truth.
 
-## Phase 3: install the method
+## 3. Identify ambiguity
 
-Create or update the artefacts required by the selected profile:
+Identify consequential questions that could produce materially different outcomes. Seek targeted clarification from an authoritative source or assign them to the responsible person. Follow the target repository's process for unresolved assumptions.
 
-1. repository `AGENTS.md`;
-2. Project Brief;
-3. journey catalogue;
-4. tests for the representative slice;
-5. short evidence handoff;
-6. acceptance contract for Standard and High Assurance;
-7. adversarial review brief for Standard and High Assurance;
-8. candidate fingerprint, evidence manifest, and closure rules for High Assurance.
+Record assumptions that remain necessary. Do not present them as established facts.
 
-Use the files in `templates/` as starting points. Adapt paths, commands, and wording to the target repository.
+## 4. Work through the existing process
 
-## Phase 4: prove one representative slice
+Follow the target repository's documented development, review, and release authorities. This playbook does not choose their tools or sequence.
 
-Use the current authorised task as the representative slice. When adoption is the only requested change, choose an existing behaviour and improve its instructions, examples, tests, or evidence while preserving product behaviour.
+For each affected requirement:
 
-1. Write or identify the rule and examples.
-2. Add a failing deterministic check for an authorised behaviour change. Use a focused characterisation or structural verification for behaviour-preserving adoption.
-3. Implement the authorised product change, or repair the acceptance gap found in an adoption-only task.
-4. Run the narrow check.
-5. Run affected integration checks.
-6. Run the browser journey when the product has a UI.
-7. Exercise one relevant failure and recovery path for Standard and High Assurance.
-8. Run the native dependency audit.
-9. Record commands and exact results.
-10. Run fresh independent review for Standard and High Assurance.
+1. identify the claim that needs evaluation;
+2. decide whether the claim needs verification against a requirement or validation against intended use and stakeholder expectations;
+3. choose a suitable method such as testing, inspection, analysis, or demonstration;
+4. run the procedure or command;
+5. record the observed result and evidence;
+6. state what the evidence does not establish.
 
-## Phase 5: close honestly
+Unresolved contradictory evidence means the claim remains unresolved.
 
-Acceptance requires:
+## 5. Report the result
 
-- the selected profile's artefacts;
-- all required deterministic checks passing;
-- browser evidence required by the selected profile: one representative UI journey for Lean, critical UI journeys for Standard and High Assurance;
-- bounded model review only where specified;
-- evidence from the exact candidate;
-- resolved or explicitly accepted risks;
-- fresh review where the profile requires it.
+Leave a concise record containing:
 
-A missing or malformed required record blocks closure.
-
-## Output
-
-Leave a handoff with this shape:
-
-```markdown
-## Adoption result
-
-**Profile:**
-**Outcome:**
-**Representative journey:**
-
-### Changed files
-- path: purpose
-
-### Checks and results
-- `command or procedure` -> exact result
-
-### Evidence
-- path or artefact: what it proves
-
-### Remaining risks
-- risk: owner and next check
-
-### Next action
-- one concrete action
-```
+- outcome and affected requirements;
+- changed files;
+- procedures or commands run;
+- observed results and evidence locations;
+- unresolved questions, evidence limits, and risks;
+- required owner or next action, when work remains.
 
 ## Ready-to-use request
 
 ```text
-Apply the Standard profile from this playbook to the current repository.
-Inspect the repository first and preserve its healthy stack.
-Adapt the template paths, commands, and wording to this repository.
-Install no dependency without naming the gap it closes and receiving approval.
-Prove one representative slice end to end.
-Run the resulting checks and leave the required handoff.
+Apply the research-led playbook to this repository.
+Inspect the target repository and follow its documented authorities and release process.
+Create or update only the Project Brief, representative journeys, verification and validation record,
+and concise AGENTS.md that the work needs.
+Identify consequential ambiguity and seek targeted clarification or record the responsible assumption.
+Connect material requirements to suitable verification or validation evidence.
+Run the relevant existing checks and report results, limits, and unresolved risks.
 ```

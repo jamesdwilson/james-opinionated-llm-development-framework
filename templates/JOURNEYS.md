@@ -1,55 +1,31 @@
 # Journey catalogue template
 
-## J01: `<short user goal>`
+Use this file only when scenarios need more space than the Project Brief provides.
 
-- **Priority:** critical | important | supporting
-- **Profile:** Lean | Standard | High Assurance
-- **Owner:** `<person or role>`
-- **Requirement IDs:** `<R-001, Q-001, or other linked IDs>`
+## J01: `<short stakeholder goal>`
 
-### Starting state
+- **Requirement IDs:** `<linked IDs>`
+- **Stakeholder or actor:** `<person, role, or system>`
+- **Starting context:** `<relevant state and conditions>`
 
-- `<state>`
-
-### Rules
-
-- `<rule>`
-- `<rule>`
-
-### Examples
-
-#### Example A: `<name>`
+### Normal scenario
 
 - Given `<starting condition>`
-- When `<user action>`
-- Then `<visible outcome>`
-- And `<stored or service outcome>`
+- When `<action or event>`
+- Then `<observable outcome>`
 
-#### Example B: `<name>`
+### Boundary, failure, or recovery scenario
 
-- Given `<starting condition>`
-- When `<user action or failure>`
-- Then `<visible recovery behaviour>`
-- And `<retained state or cleanup result>`
+Include only the cases needed to clarify the requirement.
 
-### Permission boundary
-
-`<actor, allowed action, denied action, explanation>`
-
-### Provenance
-
-`<who did what, when, and where the product exposes it>`
-
-### Deterministic evidence
-
-- unit or integration: `<check>`
-- contract: `<check>`
-- browser: `<check>`
-
-### Bounded model question
-
-`<one question about visible clarity, hierarchy, ambiguity, or friction, or "none">`
+- Given `<starting condition or boundary>`
+- When `<action, event, or failure>`
+- Then `<observable outcome or recovery>`
 
 ### Open questions
 
-- `<question and owner>`
+- `<question, responsible owner, and resolution path>`
+
+### Verification links
+
+- `<record or check that evaluates the linked requirement>`

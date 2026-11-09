@@ -2,71 +2,39 @@
 
 ## Mission
 
-Help developers adopt this playbook in an existing repository with the smallest useful change set.
+Keep this repository small, portable, and grounded in standards or empirical research.
+
+These instructions govern maintenance of the playbook source repository. Adoption work follows `ADOPT.md` and the target repository's own instructions.
 
 ## Start here
 
-1. Read `README.md`.
-2. Read `ADOPT.md`.
-3. Use the requested profile. Use Standard when the request leaves the profile open.
-4. Inspect the target repository before proposing files or tools.
-5. Reuse healthy commands, conventions, and test infrastructure.
+1. Read `README.md` and `ADOPT.md`.
+2. Inspect the current working tree before editing.
+3. Preserve the repository's small publication set.
+4. Run `python3 tools/verify_playbook.py` after changing prose, links, or sources.
 
-## Playbook check
+## Research rules
 
-Run `python3 tools/verify_playbook.py` after changing prose, citations, links, or the source ledger.
+- Give every general recommendation a cited authority or study.
+- State the population, task, or scope limits of empirical findings.
+- Treat standards as guidance or requirements within their scope, not proof of productivity gains.
+- Treat tool documentation as capability evidence only.
+- Keep project-specific choices with the project and its responsible authorities.
+- Remove unsupported universal thresholds, workflow sequences, tool defaults, and evidence rankings.
+- Label filenames and table layouts as packaging choices.
 
-## Authority rules
+## Repository rules
 
-- Every applicable required deterministic check must pass.
-- Browser tests own visible mechanics and stateful journeys.
-- Model review answers bounded questions about clarity, hierarchy, ambiguity, and friction.
-- Security and permission failures stop acceptance.
-- `RED` or `UNCLEAR` on a required product journey stops acceptance.
-- Expected `RED` on an isolated negative control passes that control.
-- Evidence belongs to the exact candidate under review.
-- A fresh reviewer challenges implementation and acceptance machinery.
+- Use existing templates before adding another artefact.
+- Keep detailed source mapping in `research/practice-map.md`.
+- Keep citation identities in `research/sources.json`.
+- Keep examples fictional and clearly labelled.
+- Do not add an active product lab, generated reports, credentials, or local evidence.
 
-## Adoption rules
+## Writing
 
-- Create only the artefacts the selected profile requires.
-- Preserve one source of truth for each contract.
-- Name the gap before adding a dependency.
-- Add abstraction on its second real use.
-- Prefer native semantics, stable names, and short dependency paths.
-- Keep agent instructions concise and executable.
-- Record exact commands or procedures and results.
-- Leave one concrete next action.
+Use plain, direct language. State what the evidence supports and where it stops.
 
-## Writing style
+## Handoff
 
-Use plain, direct language. Lead with the recommendation. Prefer concrete verbs and specific nouns.
-
-Avoid:
-
-- formulaic contrasts;
-- throat-clearing introductions;
-- inflated claims;
-- fake quotations;
-- generic conclusions;
-- repeated summaries;
-- decorative jargon;
-- long chains of parenthetical caveats.
-
-## Repository boundary
-
-This repository contains a method, profiles, templates, checklists, examples, and research links. It contains no active product lab.
-
-When applying the method elsewhere, edit the target repository. Keep this repository as the source playbook unless the task explicitly asks for a playbook change.
-
-## Required handoff
-
-Report:
-
-- selected profile and reason;
-- files changed;
-- commands or procedures run;
-- exact results;
-- evidence paths;
-- remaining risks;
-- next concrete action.
+Report changed files, checks run, exact results, evidence limits, and any unresolved source question.

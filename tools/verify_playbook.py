@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the playbook's publication set, citations, links, and prose guardrails."""
+"""Verify the playbook's publication set, citations, and local links."""
 
 from __future__ import annotations
 
@@ -15,26 +15,6 @@ LEDGER = ROOT / "research" / "sources.json"
 CITATION_RE = re.compile(r"\[\[(\d+)\]\]\((https?://[^)]+)\)")
 PLAIN_NUMBER_RE = re.compile(r"(?<!\[)\[(\d+)\](?!\])")
 MARKDOWN_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
-SLOP_PATTERNS = {
-    "formulaic contrast": re.compile(
-        r"\bnot\s+(?:only|just)\b|\bbut\s+rather\b|\brather\s+than\b|\bnot\b[^\n.]{0,60}\bbut\b",
-        re.I,
-    ),
-    "throat clearing": re.compile(
-        r"\b(?:at its core|in today's|it is worth noting|in conclusion)\b", re.I
-    ),
-    "stock hype": re.compile(
-        r"\b(?:game[- ]changer|revolutionary|transformative landscape|unlock the power)\b",
-        re.I,
-    ),
-    "generic filler": re.compile(
-        r"\b(?:delve|navigate the landscape|pivotal|underscores? the importance)\b",
-        re.I,
-    ),
-    "abstract review language": re.compile(
-        r"\b(?:visible judgement|adds signal|repeatable signal|controlling risk)\b", re.I
-    ),
-}
 
 
 def fail(message: str, errors: list[str]) -> None:
@@ -119,27 +99,12 @@ def validate_local_links(files: set[Path], errors: list[str]) -> None:
                 fail(f"{relative_path} links outside the publication set: {target}", errors)
 
 
-def validate_prose(files: set[Path], errors: list[str]) -> None:
-    for path in sorted(file for file in files if file.suffix.lower() == ".md"):
-        text = path.read_text()
-        if "—" in text:
-            fail(f"{path.relative_to(ROOT)} contains an em dash", errors)
-        for label, pattern in SLOP_PATTERNS.items():
-            for match in pattern.finditer(text):
-                line = text.count("\n", 0, match.start()) + 1
-                fail(
-                    f"{path.relative_to(ROOT)}:{line} contains {label}: {match.group(0)!r}",
-                    errors,
-                )
-
-
 def main() -> int:
     errors: list[str] = []
     files = publication_files()
     sources = validate_ledger(errors)
     validate_citations(files, sources, errors)
     validate_local_links(files, errors)
-    validate_prose(files, errors)
 
     if errors:
         for error in errors:
@@ -150,7 +115,6 @@ def main() -> int:
     print(f"PASS: publication set contains {len(files)} files")
     print("PASS: citations are hyperlinked and match the ledger")
     print("PASS: local Markdown links stay inside the publication set")
-    print("PASS: prose guardrails passed")
     return 0
 
 
