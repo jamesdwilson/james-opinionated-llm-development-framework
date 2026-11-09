@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "id": 1,
+      "url": "https://playwright.dev/docs/best-practices",
+      "title": "Playwright best practices",
+      "accessed": "2026-11-08"
+    },
+    {
+      "id": 2,
+      "url": "https://playwright.dev/docs/test-agents",
+      "title": "Playwright Test Agents",
+      "accessed": "2026-11-08"
+    },
+    {
+      "id": 3,
+      "url": "https://bun.com/docs/test",
+      "title": "Bun test runner",
+      "accessed": "2026-11-08"
+    },
+    {
+      "id": 4,
+      "url": "https://bun.com/docs/runtime/bunfig",
+      "title": "Bun configuration",
+      "accessed": "2026-11-08"
+    },
+    {
+      "id": 5,
+      "url": "https://bun.com/docs/pm/cli/audit",
+      "title": "Bun audit",
+      "accessed": "2026-11-08"
+    },
+    {
+      "id": 6,
+      "url": "https://midscenejs.com/integrate-with-playwright.html",
+      "title": "Midscene.js Playwright integration",
+      "accessed": "2026-11-08"
+    },
+    {
+      "id": 7,
+      "url": "https://www.bugsink.com/docs",
+      "title": "Bugsink documentation",
+      "accessed": "2026-11-08"
+    },
+    {
+      "id": 8,
+      "url": "https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents",
+      "title": "Effective harnesses for long-running agents",
+      "accessed": "2026-11-08"
+    },
+    {
+      "id": 9,
+      "url": "https://openai.com/index/harness-engineering",
+      "title": "Harness engineering",
+      "accessed": "2026-11-08"
+    },
+    {
+      "id": 10,
+      "url": "https://martinfowler.com/articles/are-harnesses-worth-the-cost.html",
+      "title": "Are harnesses worth the cost?",
+      "accessed": "2026-11-08"
+    },
+    {
+      "id": 11,
+      "url": "https://metr.org/blog/2026-02-24-uplift-update",
+      "title": "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity",
+      "accessed": "2026-11-08"
+    },
+    {
+      "id": 12,
+      "url": "https://arxiv.org/abs/2602.11988",
+      "title": "Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?",
+      "accessed": "2026-11-08"
+    },
+    {
+      "id": 13,
+      "url": "https://arxiv.org/abs/2605.17242",
+      "title": "From Runnable to Shippable: Multi-Agent Test-Driven Development for Generating Full-Stack Web Applications from Requirements",
+      "accessed": "2026-11-08"
+    },
+    {
+      "id": 14,
+      "url": "https://arxiv.org/abs/2610.13065",
+      "title": "TestSuiteBench: Coding Agents Struggle to Generate Strong Test Suites from Specifications",
+      "accessed": "2026-11-08"
+    },
+    {
+      "id": 15,
+      "url": "https://arxiv.org/abs/2611.00314",
+      "title": "Decentralized Multi-Agent Coordination and Communication in Shared Codebases",
+      "accessed": "2026-11-08"
+    },
+    {
+      "id": 16,
+      "url": "https://arxiv.org/abs/2610.38214",
+      "title": "Skeleton Coding: Program Structure as a Specification for Agents",
+      "accessed": "2026-11-08"
+    }
+  ]
+}

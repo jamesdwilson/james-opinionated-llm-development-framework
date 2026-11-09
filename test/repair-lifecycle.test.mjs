@@ -1,0 +1,11 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {spawn} from 'node:child_process';
+import {trackChild,callbackFlow,existingIdentity,deadline} from '../scripts/bugsink/lifecycle.mjs';
+test('F1 callback errors are awaited and signal-exited children stop',async()=>{const f=callbackFlow();assert.doesNotThrow(()=>f.wrap(()=>{JSON.parse('{');})());assert.throws(()=>f.check(),/Browser callback/);const c=spawn(process.execPath,['-e','setInterval(()=>{},1000)']);const t=trackChild(c);c.kill('SIGTERM');await t.completion;await deadline(t.stop(),100);assert.ok(t.done);const stubborn=spawn(process.execPath,['-e',"process.on('SIGTERM',()=>{});process.stdout.write('ready');setInterval(()=>{},1000)"]);const owned=trackChild(stubborn);await new Promise(r=>stubborn.stdout.once('data',r));await deadline(owned.stop(),4500);assert.equal(stubborn.signalCode,'SIGKILL');});
+test('F7 child output is bounded and child reaped',async()=>{const c=spawn(process.execPath,['-e',"process.stdout.write('x'.repeat(200000));setInterval(()=>{},1000)"]);const t=trackChild(c,1024);await deadline(t.completion);assert.match(t.error.message,/output bound/);assert.ok(t.output.length<=1024);await t.stop();});
+test('F5 absence differs from inspection failure; incarnation is compared',()=>{assert.equal(existingIdentity(()=>{throw {status:1,stdout:'',stderr:''};}).status,'absent');assert.throws(()=>existingIdentity(()=>{throw {status:1,stderr:'denied'};}));assert.throws(()=>existingIdentity(()=>''));const observe=start=>existingIdentity(cmd=>cmd.includes('lsof')?'p123\nn127.0.0.1:8100\n':start);assert.notDeepEqual(observe('start A'),observe('start B'));});
+test('F1 task shutdown forcibly closes an incomplete HTTP connection',async()=>{
+ const {createTaskServer}=await import('../src/server.mjs');const {mkdtemp,rm}=await import('node:fs/promises');const net=await import('node:net');
+ const dir=await mkdtemp('.tmp/shutdown-');const server=createTaskServer({databasePath:dir+'/tasks.sqlite'});const {port}=await server.listen();const socket=net.connect(port,'127.0.0.1');await new Promise(r=>socket.once('connect',r));socket.write('GET / HTTP/1.1\r\n');
+ await new Promise(r=>setTimeout(r,30));
+ const closing=server.close();try{await deadline(closing,200);}finally{socket.destroy();await closing;await rm(dir,{recursive:true,force:true});}
+});

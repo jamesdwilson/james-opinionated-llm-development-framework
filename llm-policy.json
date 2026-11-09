@@ -1,0 +1,8 @@
+{
+  "deterministic": {"roles": ["domain", "persistence", "api", "playwright-mechanics", "bugsink", "audit", "evidence", "cleanup"], "llm": false},
+  "reviewer": {"route": "siwc", "model": "gpt-6-sol", "family": "gpt-6", "planner": "balance", "providerReasoning": "low", "driver": "playwright", "unclearPasses": false, "overridesDeterministicFailure": false},
+  "implementation": {"provider": "openai-codex", "model": "gpt-6-astra", "reasoning": "medium"},
+  "hostileReview": {"provider": "openai-codex", "model": "gpt-6-astra", "reasoning": "medium", "readOnly": true, "independent": true},
+  "escalation": {"layersAtOnce": 1, "triggers": ["repeatable-miss", "long-branching-journey"], "autonomousOnly": ["calibration", "material-ux-change", "exact-release-candidate"]},
+  "gemini": false
+}

@@ -1,0 +1,99 @@
+{
+  "status": "proposed_for_review",
+  "suite": "gherkin-black-box-reasoning",
+  "authority": {
+    "deterministic": "Playwright",
+    "visible_reasoning": "Midscene runGherkinScenario",
+    "holistic_ux_review": "Midscene observation plus structured aiQuery"
+  },
+  "model_policy": {
+    "auth": "siwc",
+    "model": "gpt-6-sol",
+    "planning_effort": "balance",
+    "provider_reasoning": "low",
+    "cache": false,
+    "browser": "chromium",
+    "workers": 1,
+    "max_midscene_only_retries": 1
+  },
+  "scenarios": [
+    {
+      "id": "BDD-R01",
+      "name": "clear approval rule",
+      "expected_midscene": "PASS",
+      "deterministic_twin": [
+        "creator identity",
+        "approval rule",
+        "pending status",
+        "API record",
+        "reload persistence"
+      ]
+    },
+    {
+      "id": "BDD-R02",
+      "name": "ambiguous taxonomy negative control",
+      "expected_midscene": "EXPECTED_ASSERTION_FAILURE",
+      "expected_failure_step": "Then the screen should explain the practical difference before requiring my choice",
+      "deterministic_twin": [
+        "no choice selected",
+        "create disabled",
+        "no task persisted"
+      ]
+    },
+    {
+      "id": "BDD-R03",
+      "name": "creator cannot self-approve",
+      "expected_midscene": "PASS",
+      "deterministic_twin": [
+        "creator actor",
+        "self-approval unavailable",
+        "rejection contract",
+        "status unchanged"
+      ]
+    },
+    {
+      "id": "BDD-R04",
+      "name": "another actor approves with clear confirmation",
+      "expected_midscene": "PASS",
+      "deterministic_twin": [
+        "approver identity",
+        "completed status",
+        "API record",
+        "reload persistence"
+      ]
+    },
+    {
+      "id": "BDD-R05",
+      "name": "validation recovers after correction",
+      "expected_midscene": "PASS",
+      "deterministic_twin": [
+        "stale validation cleared",
+        "submit enabled",
+        "exact task created"
+      ]
+    },
+    {
+      "id": "BDD-R06",
+      "name": "visible failure has a working recovery path",
+      "expected_midscene": "PASS",
+      "deterministic_twin": [
+        "one failed request",
+        "one successful retry",
+        "exactly one persisted task",
+        "error state cleared"
+      ]
+    },
+    {
+      "id": "BDD-R07",
+      "name": "North-Star end-to-end sequence",
+      "expected_midscene": "PASS_AFTER_R01_TO_R06_CALIBRATION",
+      "deterministic_twin": [
+        "complete state sequence",
+        "permissions",
+        "API contracts",
+        "reload persistence",
+        "cleanup"
+      ]
+    }
+  ]
+}

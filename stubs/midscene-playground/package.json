@@ -1,0 +1,9 @@
+{
+  "name": "@midscene/playground",
+  "version": "1.17.4",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.mjs"
+  }
+}

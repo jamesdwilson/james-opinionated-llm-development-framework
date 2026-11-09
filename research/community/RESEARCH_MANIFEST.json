@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-11-08T23:48:07Z",
+  "algorithm": "sha256",
+  "scope": "Two reviewed community-research report and source-ledger sets plus the merged machine and prose decision records; raw model traces remain local and this manifest intentionally excludes itself.",
+  "files": [
+    {
+      "path": "STACK_DECISIONS.json",
+      "sha256": "0f779e2b867792d1c798dcc4950d8990991ac320fbbbca6d0f1d542873831377",
+      "bytes": 8338
+    },
+    {
+      "path": "STACK_DECISIONS.md",
+      "sha256": "39e60391d3da6c8536bdddebae2c0ef70dc5e38680ed39538c518311bc9e6096",
+      "bytes": 5284
+    },
+    {
+      "path": "application/COMMUNITY_STACK_REPORT.json",
+      "sha256": "de4cf44be556cd1f7bed8e9e05b0d9a1c9d9d795501a01243d513651f88fbfe3",
+      "bytes": 17668
+    },
+    {
+      "path": "application/COMMUNITY_STACK_REPORT.md",
+      "sha256": "c3d9b174dab6611eeca8edbef86ad064a1559f5e99d74930083f373aa06d32a6",
+      "bytes": 19976
+    },
+    {
+      "path": "application/SOURCES.json",
+      "sha256": "97dd440d4b57800e7440de46159682cd9d1a5c0461e8a66643cbd58e85b1b7ec",
+      "bytes": 27021
+    },
+
+    {
+      "path": "testing/COMMUNITY_TESTING_REPORT.json",
+      "sha256": "036df748a8d664c09c5d339f7be50c3e7a6b8d55561e640b349a233b38d61dc6",
+      "bytes": 24470
+    },
+    {
+      "path": "testing/COMMUNITY_TESTING_REPORT.md",
+      "sha256": "34668bc665fa42adff737f03f15b4fadc28b186c2afa8568d7ea5f2620cafd22",
+      "bytes": 22687
+    },
+    {
+      "path": "testing/SOURCES.json",
+      "sha256": "cf2f58519e922d34c7b50b21c0e8688c7c75cde72fbbd538f1397ad6e3905676",
+      "bytes": 29736
+    }
+  ]
+}
