@@ -84,7 +84,7 @@ This file separates authorities, empirical findings, tool capabilities, engineer
 
 ## Traceability, provenance, and evidence
 
-**Practice:** Connect requirements, journeys, procedures, results, evidence, and limits to the project-native candidate or artefact identity.
+**Practice:** Connect requirements, journeys, procedures, results, evidence, and limits to the project-native revision or artefact identity.
 
 **Support:** A controlled traceability experiment found maintenance benefits for its participants and projects. [[5]](https://www.patrickmaeder.de/pdf/ICSM2012_maeder_egyed_AssessingEffectOfRequirementsTraceability.pdf) An industrial multi-case study documents the use and communication limits of tests as requirements. [[6]](https://doi.org/10.1016/j.infsof.2016.03.008) SLSA supplies a provenance model for linking artefacts to build context. [[24]](https://slsa.dev/spec/v1.2/provenance)
 

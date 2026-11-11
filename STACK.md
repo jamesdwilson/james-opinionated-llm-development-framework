@@ -28,8 +28,8 @@ Each stage passes a concrete object to the next:
 5. Playwright owns rendered interaction and browser state.
 6. Midscene adds bounded observations about visible clarity.
 7. Bugsink exercises operational error capture and a relevant recovery path.
-8. Supply-chain checks inspect the dependencies used by the candidate.
-9. The verification record connects claims, procedures, results, and limits to the project-native candidate identity.
+8. Supply-chain checks inspect the dependencies used by the revision.
+9. The verification record connects claims, procedures, results, and limits to the project-native revision identity.
 10. Review challenges the complete chain.
 
 A later stage cannot excuse a failed claim owned by an earlier stage. A model observation cannot overrule a failed test. A passing test cannot establish a usability conclusion it never measured.
@@ -96,4 +96,4 @@ Missing authorization, unavailable tooling, or an unexecuted required role is `b
 
 ## Evidence binding
 
-Each final-result artefact identifies the evaluated candidate directly or links to a run record containing the candidate and relevant environment. Record RED against its earlier candidate separately. A candidate change invalidates affected final evidence and requires those checks to run again.
+Each final-result artefact identifies the evaluated revision directly or links to a run record containing the revision and relevant environment. Record RED against its earlier revision separately. A further modification invalidates affected final evidence and requires those checks to run again.

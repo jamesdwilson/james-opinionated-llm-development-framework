@@ -40,10 +40,10 @@ Use the target repository's own release and approval process. Mark a role N/A on
 
 ## Evidence and review
 
-- [ ] The project-native candidate or artefact identity is recorded.
-- [ ] Each final report identifies the evaluated candidate and relevant environment, directly or through a run record.
-- [ ] RED is tied to its earlier candidate and remains separate from final-candidate evidence.
-- [ ] A candidate change caused affected checks to run again.
+- [ ] The project-native revision or artefact identity is recorded.
+- [ ] Each final report identifies the evaluated revision and relevant environment, directly or through a run record.
+- [ ] RED is tied to its earlier revision and remains separate from final-revision evidence.
+- [ ] A further modification caused affected checks to run again.
 - [ ] Commands, procedures, observed results, reports, and evidence limits are recorded.
 - [ ] Tool substitutions or N/A roles have reasons.
 - [ ] Missing authorization, unavailable tooling, and unexecuted required roles are blocked or not run, not N/A.

@@ -69,7 +69,7 @@ Follow this chain:
 9. run bounded Midscene review when the slice contains a useful visual question;
 10. exercise a relevant Bugsink recovery path when operational errors are in scope;
 11. run the target's dependency and supply-chain checks;
-12. bind each final report to the evaluated candidate and relevant environment, keeping RED tied to its earlier candidate;
+12. bind each final report to the evaluated revision and relevant environment, keeping RED tied to its earlier revision;
 13. complete the target repository's independent review and release process.
 
 A failed deterministic check remains a failure. Midscene findings are advisory until the project validates that evaluation setup.
@@ -98,7 +98,7 @@ Map every stack role to an existing equivalent, a justified default, N/A,
 blocked, or not run. Give the reason for every disposition.
 Keep sound equivalents and add only missing roles within current authority.
 Apply Project Brief, BDD, TDD, deterministic checks, Playwright, bounded Midscene,
-Bugsink recovery, supply-chain checks, and candidate-bound evidence to one
+Bugsink recovery, supply-chain checks, and revision-bound evidence to one
 representative slice. Run the target repository's required checks and report
 results, evidence limits, substitutions, and unresolved risks.
 ```

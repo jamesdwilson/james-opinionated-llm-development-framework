@@ -13,7 +13,7 @@ This fictional example shows the cohesive stack applied to an existing Bun web a
 | bounded UX review | Midscene through a project script | use as advisory because local human agreement is not yet measured |
 | error capture | isolated Bugsink project | use synthetic error data |
 | supply chain | Bun lockfile, audit, and project release-age policy | keep existing |
-| candidate and review | clean Git commit and normal pull-request review | keep existing |
+| revision and review | clean Git commit and normal pull-request review | keep existing |
 
 ## Project Brief extract
 
@@ -55,7 +55,7 @@ This fictional example shows the cohesive stack applied to an existing Bun web a
 **RED**
 
 ```text
-candidate: fictional commit abc1200
+revision: fictional commit abc1200
 bun test test/digest-preferences.service.test.ts
 1 failed: controlled failure loses the pending weekday
 ```
@@ -63,7 +63,7 @@ bun test test/digest-preferences.service.test.ts
 **GREEN**
 
 ```text
-candidate: fictional commit abc1234
+revision: fictional commit abc1234
 bun test test/digest-preferences.service.test.ts
 6 passed, 0 failed
 ```
@@ -76,7 +76,7 @@ The form-state update was moved into the existing preference-state module. The f
 
 **Candidate:** fictional clean commit `abc1234`
 
-Each final report records candidate `abc1234` and the relevant runtime, browser, or service environment. The RED report remains attached to fictional preimplementation commit `abc1200`.
+Each final report records revision `abc1234` and the relevant runtime, browser, or service environment. The RED report remains attached to fictional preimplementation commit `abc1200`.
 
 | ID | Requirement or claim | Purpose | Owner | Procedure or command | Observed result | Evidence |
 |---|---|---|---|---|---|---|

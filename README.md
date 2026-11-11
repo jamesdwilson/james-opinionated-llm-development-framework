@@ -15,7 +15,7 @@ Project Brief
   -> bounded Midscene UX review
   -> Bugsink failure and recovery exercise
   -> Bun audit and release-age controls
-  -> candidate-bound evidence
+  -> revision-bound evidence
   -> independent challenge and handoff
 ```
 
@@ -52,7 +52,7 @@ Add only the missing roles needed for the authorised work.
 Apply the full chain to one representative slice:
 Project Brief, BDD examples, TDD implementation, deterministic checks,
 Playwright journey, bounded UX review where useful, Bugsink recovery exercise
-where operational errors matter, supply-chain checks, and candidate-bound evidence.
+where operational errors matter, supply-chain checks, and revision-bound evidence.
 Run the target repository's required checks and report results, limits, and risks.
 ```
 
@@ -90,7 +90,7 @@ Treat the stack as a useful default, not a rule you have to follow. It does not 
 | [Midscene](#stack-midscene) | It is cool because it catches the "this technically works, but feels confusing" problems hard tests usually miss. |
 | [Bugsink](#stack-bugsink) | It lets you rehearse failure safely and prove the error went where it should. |
 | [Supply-chain checks](#stack-supply-chain) | They show what you are really installing and can give brand-new packages time to settle. |
-| [Evidence tied to the build](#stack-candidate-evidence) | It answers "which exact build passed?" instead of trusting a loose green screenshot. |
+| [Evidence tied to the build](#stack-revision-evidence) | It answers "which exact build passed?" instead of trusting a loose green screenshot. |
 | [Fresh eyes before done](#stack-independent-review) | A separate reviewer checks the work before the builder grades their own homework. |
 
 ## How each piece works
@@ -200,19 +200,19 @@ Bun documents its audit command and release-age control. [[21]](https://bun.com/
 
 The release-age filter applies during new resolution. It does not go back and judge packages already present in `bun.lock`. An audit may also skip a scoped registry that has no advisory endpoint without changing the exit code. Record both conditions. This playbook does not set one universal quarantine period; the responsible security authority owns that choice.
 
-<a id="stack-candidate-evidence"></a>
+<a id="stack-revision-evidence"></a>
 ### 10. Evidence tied to the exact build
 
 Evidence tied to the build gets rid of the vague "it passed on my machine yesterday" claim. Every test result points to the exact commit, build, commands, and environment that produced it.
 
-**Under the hood:** record the project-native candidate identity, exact commands or procedures, observed results, report locations, relevant environment facts, and evidence limits. Use a clean commit, release artefact, or another identity the project already trusts. SLSA provenance provides a model for connecting an artefact to its build context. [[24]](https://slsa.dev/spec/v1.2/provenance) A controlled traceability experiment found maintenance benefits for its participants and projects. [[5]](https://www.patrickmaeder.de/pdf/ICSM2012_maeder_egyed_AssessingEffectOfRequirementsTraceability.pdf) An industrial multi-case study documents both the use and communication limits of tests as requirements. [[6]](https://doi.org/10.1016/j.infsof.2016.03.008)
+**Under the hood:** record the project-native revision identity, exact commands or procedures, observed results, report locations, relevant environment facts, and evidence limits. Use a clean commit, release artefact, or another identity the project already trusts. SLSA provenance provides a model for connecting an artefact to its build context. [[24]](https://slsa.dev/spec/v1.2/provenance) A controlled traceability experiment found maintenance benefits for its participants and projects. [[5]](https://www.patrickmaeder.de/pdf/ICSM2012_maeder_egyed_AssessingEffectOfRequirementsTraceability.pdf) An industrial multi-case study documents both the use and communication limits of tests as requirements. [[6]](https://doi.org/10.1016/j.infsof.2016.03.008)
 
 Use [`templates/VERIFICATION.md`](templates/VERIFICATION.md).
 
 <a id="stack-independent-review"></a>
 ### 11. Fresh eyes before done
 
-Fresh eyes matter because the builder already knows what they intended. A separate reviewer sees only what the exact candidate and its evidence actually prove, which makes weak tests, stale evidence, missing requirements, and overconfident conclusions easier to spot.
+Fresh eyes matter because the builder already knows what they intended. A separate reviewer sees only what the exact revision and its evidence actually prove, which makes weak tests, stale evidence, missing requirements, and overconfident conclusions easier to spot.
 
 **Under the hood:** record what changed, what ran, what passed, what remains uncertain, and who owns the next decision. OpenAI and Anthropic engineering reports emphasise repository legibility, mechanical checks, durable progress, and useful handoffs in long-running agent work. [[25]](https://openai.com/index/harness-engineering) [[26]](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
 

@@ -27,13 +27,13 @@ Verification checks specified requirements. Validation checks intended use and s
 |---|---|---|---|---|---|---|---|
 | V-001 | `<claim>` | `<verification, validation, or advisory observation>` | `<test layer, reviewer, or authority>` | `<procedure>` | `<condition>` | `<result>` | `<path, report, observation, or record>` |
 
-Each final-result artefact identifies the evaluated candidate and relevant environment directly or links to a run record that does. Candidate changes invalidate affected final evidence.
+Each final-result artefact identifies the evaluated revision and relevant environment directly or links to a run record that does. Further modifications invalidate affected final evidence.
 
 ## TDD record
 
-- **RED candidate:** `<preimplementation identity>`
+- **RED revision:** `<preimplementation identity>`
 - **RED:** `<check and meaningful failure, or characterisation exception>`
-- **GREEN candidate:** `<final candidate identity>`
+- **GREEN revision:** `<final revision identity>`
 - **GREEN:** `<check and result>`
 - **REFACTOR:** `<cleanup and recheck, or none>`
 

@@ -10,9 +10,9 @@ Two ideas this toolkit keeps separate:
   for local development" is a claim; "ready" alone is not. (The standards
   world: a *qualified environment*, DO-330 tool qualification.) The gate
   below is how a project earns readiness.
-- **An accepted change.** One reviewed change, patch, revision, pick your
-  word, with evidence it does what its brief says: fit for purpose, not
-  just compiling. (The standards world: a *validated candidate*, IEEE V&V
+- **An accepted change.** One reviewed change, patch, revision,
+  modification, pick your word, with evidence it does what its brief says:
+  fit for purpose, not just compiling. (The standards world: a *validated candidate*, IEEE V&V
   plus traceability from brief to test.) The rest of this framework's
   chain owns that side. Readiness comes first, because evidence from an
   unready environment is worthless.
