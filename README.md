@@ -58,6 +58,10 @@ Run the target repository's required checks and report results, limits, and risk
 
 [`ADOPT.md`](ADOPT.md) explains how to bring the stack into an existing project. [`STACK.md`](STACK.md) defines each role, default tool, substitution rule, and evidence boundary.
 
+## The golden development gate
+
+[`golden/`](golden/README.md) defines when a project's development environment itself can be trusted for feature work: one thin native Make contract, environment isolation, synthetic state, safe `make dev`, a start/restart smoke and one bounded review. `golden/adopt.py` audits any project read-only, installs the safely automatable pieces, and writes the exact remaining steps into the project's `GOLDEN.md`. It requires Python 3.9+ by deliberate choice and contains no installer, transaction or receipt machinery: everything it changes is an ordinary reviewable git diff. Prefer not to run a script at all? No problem: the same document [walks through everything it does in plain language](golden/README.md#and-if-youd-rather-not-run-it), so you or your agent can do it by hand and end up in the same place.
+
 ## What gets the final say
 
 Each decision should follow the source that actually owns it:

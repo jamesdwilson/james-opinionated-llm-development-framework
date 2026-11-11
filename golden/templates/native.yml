@@ -1,0 +1,49 @@
+# Optional Golden CI leg. Installed only by `adopt.sh install --ci`.
+# CI is a per-project decision, not a universal gate. Adopt it when the
+# project wants a clean-room platform claim, and claim exactly that platform.
+name: Native development checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: 'true'
+      GOTOOLCHAIN: local
+      GOENV: 'off'
+      GOWORK: 'off'
+      CGO_ENABLED: '0'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version: '@GOV@'
+          cache: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+        with:
+          bun-version: '@BUNV@'
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '@NODEV@'
+      - run: make install
+      - run: make test-e2e-install CHROMIUM_FLAGS=--with-deps
+      - run: make verify
+      - run: make test
+      - run: make test-e2e
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: browser-results
+          path: |
+            e2e/test-results/
+            e2e/playwright-report/
+          retention-days: 7
