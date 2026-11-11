@@ -8,15 +8,19 @@ The whole thing runs as one chain:
 
 ```mermaid
 flowchart LR
-    B["Project Brief"] --> D["BDD rules, examples, and questions"]
-    D --> T["RED, GREEN, REFACTOR"]
-    T --> U["unit, integration, and contract checks"]
-    U --> P["Playwright browser journeys"]
-    P --> M["bounded Midscene UX review"]
-    M --> X["Bugsink failure and recovery exercise"]
-    X --> S["Bun audit and release-age controls"]
-    S --> E["revision-bound evidence"]
-    E --> R["independent challenge and handoff"]
+    subgraph SHAPE["shape it"]
+        B["Project Brief"] --> D["BDD examples"]
+    end
+    subgraph PROVE["prove it"]
+        T["TDD"] --> U["unit, integration,<br/>contract checks"]
+    end
+    subgraph FEEL["exercise it"]
+        P["Playwright journeys"] --> M["Midscene UX"] --> X["Bugsink recovery"]
+    end
+    subgraph BIND["bind it"]
+        S["supply chain"] --> E["revision-bound evidence"] --> R["independent review"]
+    end
+    SHAPE --> PROVE --> FEEL --> BIND
 ```
 
 This is meant to work as one system rather than a pile of unrelated tools. The brief defines the job. BDD removes ambiguity. TDD drives the change. Deterministic tests check the facts. Playwright exercises the real interface. Midscene gives the finished interface a visual sanity check. Bugsink captures errors during a separately checked recovery exercise. Supply-chain checks inspect what you are actually installing. Evidence and review tie the results to the exact change under consideration.

@@ -4,7 +4,13 @@ Use the target repository's own release and approval process. Mark a role N/A on
 
 ```mermaid
 flowchart LR
-    G["gate green"] --> B["brief mapped"] --> J["journeys passed"] --> E["evidence bound<br/>to revision"] --> R["review signed"] --> REL["release"]
+    subgraph PROVE["prove"]
+        G["gate green"] --> B["brief mapped"] --> J["journeys passed"]
+    end
+    subgraph BIND["bind"]
+        E["evidence bound<br/>to revision"] --> R["review signed"]
+    end
+    PROVE --> BIND --> REL["release"]
 ```
 
 ## Intent and examples

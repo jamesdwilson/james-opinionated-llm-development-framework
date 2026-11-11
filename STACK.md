@@ -36,9 +36,19 @@ A later stage cannot excuse a failed claim owned by an earlier stage. A model ob
 
 ```mermaid
 flowchart LR
-    B["brief"] --> BD["bdd"] --> TD["tdd + fast tests"] --> PJ["playwright"] --> MS["midscene"]
-    MS --> BS["bugsink"] --> SC["supply chain"] --> EV["verification record"]
-    EV --> RV["review"]
+    subgraph SPEC["specify"]
+        B["brief"] --> BD["bdd"]
+    end
+    subgraph BUILD["build"]
+        TD["tdd + fast tests"]
+    end
+    subgraph EXER["exercise"]
+        PJ["playwright"] --> MS["midscene"] --> BS["bugsink"]
+    end
+    subgraph ASSURE["assure"]
+        SC["supply chain"] --> EV["verification record"] --> RV["review"]
+    end
+    SPEC --> BUILD --> EXER --> ASSURE
 ```
 
 ## Default commands for a new Bun project

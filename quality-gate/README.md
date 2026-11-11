@@ -59,7 +59,16 @@ is the contract, not the runner.
 
 ```mermaid
 flowchart LR
-    I["install"] --> TI["test-e2e-install"] --> V["verify"] --> T["test"] --> B["build"] --> E["test-e2e"]
+    subgraph DEPS["dependencies"]
+        I["install"] --> TI["test-e2e-install"]
+    end
+    subgraph CHECKS["checks"]
+        V["verify"] --> T["test"]
+    end
+    subgraph OUT["artifacts"]
+        B["build"] --> E["test-e2e"]
+    end
+    DEPS --> CHECKS --> OUT
 ```
 
 ## The rules
