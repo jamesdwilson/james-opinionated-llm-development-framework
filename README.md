@@ -7,7 +7,7 @@ Here's how it works. I've made the tough choices and done the research so you do
 The whole thing runs as one chain:
 
 ```mermaid
-flowchart TD
+flowchart LR
     B["Project Brief"] --> D["BDD rules, examples, and questions"]
     D --> T["RED, GREEN, REFACTOR"]
     T --> U["unit, integration, and contract checks"]
@@ -63,6 +63,11 @@ Run the target repository's required checks and report results, limits, and risk
 Two ideas, kept separate. **A ready environment**: locked deps, honest tests, isolated config, safe startup; when tests pass, believe them, claimed at an exact revision. (Standards: *qualified environment*, DO-330.) **An accepted change**: a reviewed change, patch or revision with evidence it does what its brief says. (A *validated candidate*, IEEE V&V.) The chain above produces the second; it only works on top of the first, because evidence from an unready environment is worthless.
 
 [`quality-gate/`](quality-gate/README.md) owns the first. `python3 quality-gate/doctor` checks any project read-only; `python3 quality-gate/install` writes only missing, reviewable files plus your remaining steps in `GATE.md`. Python 3.9+ is the only requirement. No transactions or receipts: every change is an ordinary git diff. Prefer no script at all? [Do it by hand](quality-gate/README.md#do-it-by-hand).
+
+```mermaid
+flowchart LR
+    QG["quality gate<br/>a ready environment"] -->|evidence you can believe| CH["the chain above<br/>accepted changes"]
+```
 
 ## What gets the final say
 

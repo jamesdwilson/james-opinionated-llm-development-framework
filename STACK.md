@@ -34,6 +34,13 @@ Each stage passes a concrete object to the next:
 
 A later stage cannot excuse a failed claim owned by an earlier stage. A model observation cannot overrule a failed test. A passing test cannot establish a usability conclusion it never measured.
 
+```mermaid
+flowchart LR
+    B["brief"] --> BD["bdd"] --> TD["tdd + fast tests"] --> PJ["playwright"] --> MS["midscene"]
+    MS --> BS["bugsink"] --> SC["supply chain"] --> EV["verification record"]
+    EV --> RV["review"]
+```
+
 ## Default commands for a new Bun project
 
 Adapt paths and scripts to the target repository.
@@ -97,3 +104,9 @@ Missing authorization, unavailable tooling, or an unexecuted required role is `b
 ## Evidence binding
 
 Each final-result artefact identifies the evaluated revision directly or links to a run record containing the revision and relevant environment. Record RED against its earlier revision separately. A further modification invalidates affected final evidence and requires those checks to run again.
+
+```mermaid
+flowchart LR
+    RED["RED<br/>earlier revision<br/>kept separate"] --> MOD["change, patch,<br/>modification"] --> GREEN["GREEN<br/>final revision<br/>evidence bound here"]
+    GREEN -->|further modification| INV["affected evidence invalidated<br/>checks run again"]
+```

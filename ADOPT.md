@@ -6,6 +6,15 @@ These instructions govern the target repository. The playbook source repository'
 
 > **Environment qualification first:** if the target's development environment itself needs to become trustworthy before feature work, start with [`quality-gate/`](quality-gate/README.md): run `python3 quality-gate/doctor` for a read-only report, then `python3 quality-gate/install` and finish the numbered steps it writes into the target's `GATE.md` (canonical checklist: [`checklists/quality-gate.md`](checklists/quality-gate.md)). The full stack below then produces validated candidates inside that qualified environment.
 
+## The adoption path
+
+```mermaid
+flowchart LR
+    I["1. inspect the target"] --> M["2. map the stack"] --> D["3. decide keep,<br/>add, N/A or blocked"]
+    D --> S["4. apply the chain<br/>to one slice"]
+    S --> R["5. run checks,<br/>report results and limits"]
+```
+
 ## Inputs
 
 You need:

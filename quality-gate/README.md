@@ -90,7 +90,7 @@ local macOS development." Linux, containers, deployment, AI services:
 unclaimed, non-blocking, until a feature needs them. CI is opt-in (`--ci`).
 
 ```mermaid
-flowchart TD
+flowchart LR
     F["fresh checkout<br/>nothing copied over"] --> C1["full chain<br/>clean, no new skip, no leakage"]
     C1 --> S["restart smoke<br/>state survives, services close"]
     S --> R["one bounded independent review"]
@@ -107,7 +107,7 @@ automate (safe dev commands, env wiring, the smoke, the run itself) lands
 in `GATE.md` as numbered instructions for you or your agent.
 
 ```mermaid
-flowchart TD
+flowchart LR
     T["target project"] --> A{"detect stack<br/>via adapters"}
     A -->|doctor| R["report and verdict<br/>changes nothing"]
     A -->|install| G{"contract file exists?"}
@@ -150,7 +150,7 @@ entry per stack in `adopt.py`:
 ```
 
 ```mermaid
-flowchart TD
+flowchart LR
     GO["go adapter"] --> CORE["adopt.py core<br/>contract, rules, report, GATE.md"]
     BU["bun adapter"] --> CORE
     PY["python adapter"] --> CORE

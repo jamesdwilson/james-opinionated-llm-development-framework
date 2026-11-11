@@ -3,6 +3,11 @@
 For a human or LLM finishing a quality-gate adoption after `quality-gate/install`.
 Work top to bottom. Do not skip an item and do not weaken a test to pass it.
 
+```mermaid
+flowchart LR
+    C["1. contract shape"] --> S["2. safety properties"] --> SM["3. smoke"] --> A["4. acceptance"] --> AF["5. afterwards"]
+```
+
 ## 1. Contract shape
 
 The six steps, as `python3 gate.py ...`, Make targets, or an equivalent the project already has:

@@ -29,7 +29,18 @@ Verification checks specified requirements. Validation checks intended use and s
 
 Each final-result artefact identifies the evaluated revision and relevant environment directly or links to a run record that does. Further modifications invalidate affected final evidence.
 
+```mermaid
+flowchart LR
+    C["claim"] --> P["procedure"] --> R["result"] --> E["evidence path"]
+    E --> B["bound to the exact revision<br/>and its environment"]
+```
+
 ## TDD record
+
+```mermaid
+flowchart LR
+    RED["RED<br/>meaningful failure"] --> GREEN["GREEN<br/>smallest passing change"] --> REF["REFACTOR<br/>checks stay green"]
+```
 
 - **RED revision:** `<preimplementation identity>`
 - **RED:** `<check and meaningful failure, or characterisation exception>`

@@ -2,6 +2,11 @@
 
 Use the target repository's own release and approval process. Mark a role N/A only with a product-specific reason.
 
+```mermaid
+flowchart LR
+    G["gate green"] --> B["brief mapped"] --> J["journeys passed"] --> E["evidence bound<br/>to revision"] --> R["review signed"] --> REL["release"]
+```
+
 ## Intent and examples
 
 - [ ] The Project Brief identifies authorities, stakeholders, requirements, constraints, acceptance conditions, assumptions, risks, and decisions.

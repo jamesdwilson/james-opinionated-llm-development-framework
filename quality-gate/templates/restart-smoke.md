@@ -6,6 +6,23 @@ It is a bounded development smoke, not another browser-suite programme.
 
 ## What to build
 
+```mermaid
+sequenceDiagram
+    participant D as developer
+    participant A as api (synthetic state)
+    participant U as ui
+    D->>A: start on loopback, strict port
+    D->>U: start
+    D->>U: one ordinary journey, create one entity
+    D->>U: refresh: entity visible
+    D->>A: normal stop
+    D->>U: normal stop
+    D->>A: restart, unchanged
+    D->>U: restart
+    D->>U: identical entity still there
+    D->>D: all owned processes gone, all ports free
+```
+
 One script (any language the project already uses) that:
 
 1. Starts the documented development services (`make api` / `make ui`, or the
