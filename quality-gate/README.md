@@ -1,18 +1,21 @@
 # The quality gate
 
-Two words this toolkit uses precisely, borrowed from the standards world:
+Two ideas this toolkit keeps separate:
 
-- A **qualified environment** is a development setup you can trust to tell
-  you the truth: locked dependencies, honest tests, isolated configuration,
-  safe startup. (Avionics calls this tool qualification, DO-330.) The gate
-  below is how a project earns it, and qualification is always scoped:
-  "qualified for local macOS development" says nothing about Linux or
+- **A setup you can trust.** Locked dependencies, honest tests, isolated
+  configuration, startup that never eats your data. When the tests pass,
+  you can believe them. (The standards world calls this a *qualified
+  environment*; avionics formalises it as tool qualification, DO-330.) The
+  gate below is how a project earns it, and trust is always scoped:
+  "trustworthy for local macOS development" says nothing about Linux or
   production.
-- A **validated candidate** is a change that provably does what its brief
-  says. (IEEE V&V: verified against the spec, validated against the real
-  goal, with traceability from brief to test.) The rest of this framework's
-  chain owns that side. Qualification comes first, because goal-alignment
-  evidence from an untrustworthy environment is worthless.
+- **A change that does what it says.** One reviewed change, with evidence
+  it actually implements its brief, not just that it compiles. (The
+  standards world calls this a *validated candidate*: IEEE V&V, verified
+  against the spec and validated against the real goal, with traceability
+  from brief to test.) The rest of this framework's chain owns that side.
+  Trust in the setup comes first, because evidence from an untrustworthy
+  environment is worthless.
 
 This directory is the quality gate: the prose standard, an installer, a
 read-only checker, and templates. It was proven on a real project (Kept,
@@ -28,7 +31,7 @@ among people working with AI agents. If not, one install from python.org or
 your package manager sorts it.
 
 ```bash
-# doctor: is this project's environment still qualified? Read-only,
+# doctor: is this project's setup still trustworthy? Read-only,
 # changes nothing, run it as often as you like.
 python3 quality-gate/doctor /path/to/project
 
@@ -81,10 +84,10 @@ Every rule here exists because its absence caused a real, observed defect:
 - **No manufactured green.** No broad excludes or new skips. Existing product
   coverage is the floor.
 
-## Qualifying
+## Passing the gate
 
-A project's environment is qualified when one reviewed Git candidate, from a
-fresh checkout with nothing copied over, passes:
+A setup earns its trust when one reviewed Git candidate, from a fresh
+checkout with nothing copied over, passes:
 
 1. The full chain above: clean, no unexpected failure, no new skip, no
    missing tracked input, no environment leakage.
@@ -92,10 +95,10 @@ fresh checkout with nothing copied over, passes:
 3. One bounded independent review of the diff and the results. One review.
    Do not invent more rounds.
 
-Then claim exactly what you proved. "Qualified for local macOS development"
-says nothing about Linux, containers, deployment or AI services, and that's
-fine: those stay visible and non-blocking until a feature needs them. CI is
-likewise your call (`--ci`), not a requirement.
+Then claim exactly what you proved. "Trustworthy for local macOS
+development" says nothing about Linux, containers, deployment or AI
+services, and that's fine: those stay visible and non-blocking until a
+feature needs them. CI is likewise your call (`--ci`), not a requirement.
 
 ## What the tool does, and never does
 
@@ -171,7 +174,7 @@ own adapter. Add a stack by adding one entry to the registry in `adopt.py`:
 
 Historical assurance, containers, AI services, deployment, supply-chain
 attestation and hostile-host threat models all wait until a feature actually
-needs them. They are not part of qualification.
+needs them. They are not part of trusting your setup.
 
 ## Proof and sources
 

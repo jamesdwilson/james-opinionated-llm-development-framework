@@ -1,4 +1,4 @@
-# Qualification checklist
+# Quality gate checklist
 
 For a human or LLM finishing a quality-gate adoption after `quality-gate/install`.
 Work top to bottom. Do not skip an item and do not weaken a test to pass it.
@@ -36,7 +36,7 @@ The six steps, as `python3 gate.py ...`, Make targets, or an equivalent the proj
 - [ ] `install && test-e2e-install && verify && test && test-e2e` clean: no unexpected failure, no new skip, no missing tracked input, no ambient leakage
 - [ ] The smoke passes
 - [ ] One bounded independent review of the exact diff and results
-- [ ] The qualification claim names its exact scope (for example "local macOS development"); unclaimed platforms/services are listed as unclaimed, non-blocking
+- [ ] The trust claim names its exact scope (for example "local macOS development"); unclaimed platforms/services are listed as unclaimed, non-blocking
 
 ## 5. Afterwards
 

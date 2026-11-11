@@ -58,9 +58,9 @@ Run the target repository's required checks and report results, limits, and risk
 
 [`ADOPT.md`](ADOPT.md) explains how to bring the stack into an existing project. [`STACK.md`](STACK.md) defines each role, default tool, substitution rule, and evidence boundary.
 
-## The quality gate: a qualified environment
+## The quality gate: a setup you can trust
 
-Two words this framework uses precisely. A **qualified environment** is a development setup you can trust to tell the truth (avionics calls this tool qualification, DO-330): locked dependencies, honest tests, isolated configuration, safe startup. A **validated candidate** is a change that provably does what its brief says (IEEE V&V plus traceability: verified against the spec, validated against the real goal). The chain above produces validated candidates; it only works on top of a qualified environment, because goal-alignment evidence from an untrustworthy environment is worthless.
+Two ideas this framework keeps separate. **A setup you can trust**: locked dependencies, honest tests, isolated configuration, safe startup; when the tests pass, you can believe them. (The standards world calls this a *qualified environment*, DO-330 tool qualification.) **A change that does what it says**: one reviewed change with evidence it implements its brief. (A *validated candidate* in IEEE V&V terms, with traceability from brief to test.) The chain above produces the second; it only works on top of the first, because evidence from an untrustworthy environment is worthless.
 
 [`quality-gate/`](quality-gate/README.md) owns the environment side: one thin command contract (a generated `gate.py` or an equivalent the project already has), environment isolation, synthetic state, safe dev startup, a start/restart smoke and one bounded review. `python3 quality-gate/doctor` audits any project read-only; `python3 quality-gate/install` writes only the safely automatable pieces and puts your remaining steps in `GATE.md`. It requires Python 3.9+ by deliberate choice and contains no transaction or receipt machinery: everything it changes is an ordinary reviewable git diff. Prefer not to run a script at all? No problem: the same document [walks through everything it does in plain language](quality-gate/README.md#do-it-by-hand-instead), so you or your agent can do it by hand and end up in the same place.
 
