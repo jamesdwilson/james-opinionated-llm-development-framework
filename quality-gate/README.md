@@ -16,6 +16,17 @@ Two ideas, kept separate:
 Proven on Kept, November 2026: 334 web tests, 121 of 125 browser journeys
 green, restart smoke, independent review.
 
+```mermaid
+flowchart LR
+    G["gate.py<br/>the six-command contract"]
+    D["doctor<br/>the readiness check"]
+    E["Ready environment<br/>environment + configuration<br/>at an exact revision, scoped"]
+    C["Accepted change<br/>with evidence against its brief"]
+    G -->|earns| E
+    D -->|confirms| E
+    E -->|makes its evidence believable| C
+```
+
 ## Use it
 
 Python 3.9+ is the only requirement. macOS dev tools, desktop Linux and
@@ -46,6 +57,11 @@ python3 gate.py test-e2e           build once, run the browser suites
 A Makefile, Taskfile or npm scripts with the same steps counts. The shape
 is the contract, not the runner.
 
+```mermaid
+flowchart LR
+    I["install"] --> TI["test-e2e-install"] --> V["verify"] --> T["test"] --> B["build"] --> E["test-e2e"]
+```
+
 ## The rules
 
 Each exists because its absence caused a real defect.
@@ -73,6 +89,14 @@ Then claim exactly what you proved, by revision: "ready at `abc123` for
 local macOS development." Linux, containers, deployment, AI services:
 unclaimed, non-blocking, until a feature needs them. CI is opt-in (`--ci`).
 
+```mermaid
+flowchart TD
+    F["fresh checkout<br/>nothing copied over"] --> C1["full chain<br/>clean, no new skip, no leakage"]
+    C1 --> S["restart smoke<br/>state survives, services close"]
+    S --> R["one bounded independent review"]
+    R --> K["claim by revision:<br/>ready at abc123, scoped"]
+```
+
 ## What the tool does, and never does
 
 Detects the stack, writes only missing files, writes `GATE.md` with your
@@ -81,6 +105,18 @@ hidden machinery.** No transactions, journals or receipts; we built those
 once and they made more work than they saved. Whatever it can't safely
 automate (safe dev commands, env wiring, the smoke, the run itself) lands
 in `GATE.md` as numbered instructions for you or your agent.
+
+```mermaid
+flowchart TD
+    T["target project"] --> A{"detect stack<br/>via adapters"}
+    A -->|doctor| R["report and verdict<br/>changes nothing"]
+    A -->|install| G{"contract file exists?"}
+    G -->|yes| N["never modified<br/>gaps become instructions"]
+    G -->|no| W["write gate.py<br/>version pins included"]
+    W --> M["write GATE.md<br/>found, installed, remaining steps"]
+    N --> M
+    M --> D["ordinary git diff<br/>you review, you commit"]
+```
 
 ## Do it by hand
 
@@ -111,6 +147,17 @@ entry per stack in `adopt.py`:
  "install": ["mytool fetch --locked"], "verify": ["mytool verify"],
  "test": ["mytool test"], "build": ["mytool build --release"],
  "pin": lambda f: [...], "guidance": {"topic": "GATE.md remainder text"}}
+```
+
+```mermaid
+flowchart TD
+    GO["go adapter"] --> CORE["adopt.py core<br/>contract, rules, report, GATE.md"]
+    BU["bun adapter"] --> CORE
+    PY["python adapter"] --> CORE
+    RS["rust adapter"] --> CORE
+    VT["vite/vitest"] --> CORE
+    PW["playwright"] --> CORE
+    CORE --> OUT["gate.py<br/>one composed contract"]
 ```
 
 ## Not required yet
