@@ -1,187 +1,126 @@
 # The quality gate
 
-Two ideas this toolkit keeps separate:
+Two ideas, kept separate:
 
-- **A ready environment.** Locked dependencies, honest tests, isolated
-  configuration, startup that never eats your data. When the tests pass,
-  you can believe them. A readiness claim always names its subject
-  precisely: the environment *and* its configuration, at an exact version
-  or revision, for a stated scope. "Ready on this machine, at this commit,
-  for local development" is a claim; "ready" alone is not. (The standards
-  world: a *qualified environment*, DO-330 tool qualification.) The gate
-  below is how a project earns readiness.
-- **An accepted change.** One reviewed change, patch, revision,
-  modification, pick your word, with evidence it does what its brief says:
-  fit for purpose, not just compiling. (The standards world: a *validated candidate*, IEEE V&V
-  plus traceability from brief to test.) The rest of this framework's
-  chain owns that side. Readiness comes first, because evidence from an
-  unready environment is worthless.
+- **A ready environment.** Locked deps, honest tests, isolated config, safe
+  startup. When the tests pass, believe them. Claims name the environment
+  and its configuration at an exact revision, for a stated scope: "ready on
+  this machine, at this commit, for local development." "Ready" alone is
+  not a claim. (Standards: *qualified environment*, DO-330.)
+- **An accepted change.** One reviewed change, patch, revision or
+  modification, with evidence it does what its brief says. Fit for purpose,
+  not just compiling. (Standards: *validated candidate*, IEEE V&V.) The
+  rest of this framework owns that side. Readiness comes first: evidence
+  from an unready environment is worthless.
 
-This directory is the quality gate: the prose standard, an installer, a
-read-only checker, and templates. It was proven on a real project (Kept,
-November 2026: 334 web tests, 121 of 125 browser journeys passing with zero
-failures, a restart smoke and an independent review).
+Proven on Kept, November 2026: 334 web tests, 121 of 125 browser journeys
+green, restart smoke, independent review.
 
 ## Use it
 
-You need Python 3.9 or newer. That is the only requirement, and you probably
-already have it: Python ships with macOS's developer tools and every desktop
-Linux, comes preinstalled on GitHub's runners, and is the most-used language
-among people working with AI agents. If not, one install from python.org or
-your package manager sorts it.
+Python 3.9+ is the only requirement. macOS dev tools, desktop Linux and
+every GitHub runner already have it.
 
 ```bash
-# doctor: the readiness check. Is this project's environment still ready,
-# at this revision? Read-only, run it as often as you like.
-python3 quality-gate/doctor /path/to/project
-
-# install: install the safe pieces, get your remaining steps in GATE.md.
-python3 quality-gate/install /path/to/project
-
-# Also add an optional CI workflow:
-python3 quality-gate/install /path/to/project --ci
+python3 quality-gate/doctor  /path/to/project          # readiness check; read-only
+python3 quality-gate/install /path/to/project          # install safe pieces, get GATE.md
+python3 quality-gate/install /path/to/project --ci     # plus optional CI workflow
 ```
 
-Install needs a git repository, because every change it makes is meant to be
-read as an ordinary `git diff` before you commit it. doctor needs nothing
-but the project itself.
+install needs a git repo: every change is meant to be read as a `git diff`.
+doctor needs nothing.
 
-## What you get: the contract
+## The contract
 
-Six commands, generated for your stack as a `gate.py` in your project:
+Six commands, generated for your stack as `gate.py`:
 
 ```
-python3 gate.py install            locked dependencies only, frozen install, no lifecycle scripts
-python3 gate.py test-e2e-install   browser test dependencies
-python3 gate.py verify             module integrity, clean diff, pinned tool versions
-python3 gate.py test               the complete native test suite
-python3 gate.py build              the real production artifacts
+python3 gate.py install            locked, frozen deps; no lifecycle scripts
+python3 gate.py test-e2e-install   browser test deps
+python3 gate.py verify             module integrity, clean diff, pinned versions
+python3 gate.py test               the full native suite
+python3 gate.py build              real production artifacts
 python3 gate.py test-e2e           build once, run the browser suites
 ```
 
-Already have a Makefile, Taskfile or npm scripts with the same steps? That
-counts. The shape is the contract, not the tool you run it with.
+A Makefile, Taskfile or npm scripts with the same steps counts. The shape
+is the contract, not the runner.
 
 ## The rules
 
-Every rule here exists because its absence caused a real, observed defect:
+Each exists because its absence caused a real defect.
 
-- **Lockfile required.** A frozen flag alone does not reject a missing
-  lockfile. Check for the file.
-- **Isolated environment.** Explicit child environment, `--no-env-file` on
-  Bun routes, `envDir: false` in Vite configs, and a planted-sentinel test
-  proving stray `.env` files cannot change results.
-- **Synthetic state only.** Dedicated test databases, uploads and runtime
-  directories. Never household config or provider credentials.
-- **Loopback only, strict ports, no server reuse.** Fail if a port is taken;
-  never adopt someone else's service.
-- **The browser runner owns its services**, and they demonstrably close
-  afterwards.
-- **Cleanup never gates tests.** A missing cleanup helper cannot fail a
-  passing test.
-- **Safe `dev` startup.** Never delete the local database on a normal start.
-  State survives a normal stop and restart.
-- **No manufactured green.** No broad excludes or new skips. Existing product
-  coverage is the floor.
+- **Lockfile required.** Frozen flags don't reject a missing lockfile.
+- **Isolated environment.** Explicit child env, `--no-env-file`,
+  `envDir: false`, a sentinel test proving stray `.env` files can't change
+  results.
+- **Synthetic state only.** Never household config or provider credentials.
+- **Loopback, strict ports, no server reuse.** A taken port fails the run.
+- **Browser runner owns its services**, and they close afterwards.
+- **Cleanup never gates tests.**
+- **Safe dev startup.** Never delete the database. State survives restart.
+- **No manufactured green.** No new skips, no broad excludes.
 
-## Passing the gate
+## Passing
 
-An environment is ready when one reviewed Git revision, from a fresh
-checkout with nothing copied over, passes:
+From a fresh checkout with nothing copied over:
 
-1. The full chain above: clean, no unexpected failure, no new skip, no
-   missing tracked input, no environment leakage.
-2. The start/restart smoke (see `templates/restart-smoke.md`).
-3. One bounded independent review of the diff and the results. One review.
-   Do not invent more rounds.
+1. The full chain: clean, no new skip, no missing input, no leakage.
+2. The restart smoke (`templates/restart-smoke.md`).
+3. One bounded independent review. One. No extra rounds.
 
-Then claim exactly what you proved, named by revision: "ready at commit
-`abc123` for local macOS development" says nothing about Linux, containers,
-deployment or AI services, and that's fine: those stay visible and
-non-blocking until a feature needs them. CI is likewise your call (`--ci`),
-not a requirement.
+Then claim exactly what you proved, by revision: "ready at `abc123` for
+local macOS development." Linux, containers, deployment, AI services:
+unclaimed, non-blocking, until a feature needs them. CI is opt-in (`--ci`).
 
 ## What the tool does, and never does
 
-It detects your stack, writes only missing files, and writes `GATE.md`
-with your remaining steps. Three rules always hold: **never overwrite a
-project file, never delete anything, no hidden machinery.** No transactions,
-journals, receipts or rollback protocols; an earlier version of this
-programme built all of that, and the machinery generated more work than it
-saved. Plain files, reviewed like any other change.
+Detects the stack, writes only missing files, writes `GATE.md` with your
+remaining steps. Three rules always: **never overwrite, never delete, no
+hidden machinery.** No transactions, journals or receipts; we built those
+once and they made more work than they saved. Whatever it can't safely
+automate (safe dev commands, env wiring, the smoke, the run itself) lands
+in `GATE.md` as numbered instructions for you or your agent.
 
-What it cannot safely automate (safe `dev` commands, env-isolation wiring,
-the smoke, the acceptance run itself) becomes numbered instructions in
-`GATE.md` for you or your agent.
+## Do it by hand
 
-## Do it by hand instead
+The tool is a convenience. Everything it does:
 
-Happy to. The tool is a convenience, not a requirement. Here is exactly what
-it does, precise enough to follow step for step.
+**doctor** notes the OS; detects toolchains by marker files (`go.mod`,
+`bun.lock`/`package.json`, `pyproject.toml`/`requirements.txt`/`setup.py`/
+`Pipfile`, `Cargo.toml`, `vite.config.*` beside a `package.json` in
+`web/frontend/ui/app/apps/web/client` or root, `playwright*.config.*`
+within three levels); reads versions; checks for `gate.py` or an equivalent
+Makefile, env isolation, and whether dev startup deletes a database; prints
+a verdict. Changes nothing.
 
-**doctor only looks:**
-
-1. Notes the operating system.
-2. Detects toolchains by marker files: `go.mod` is Go; `bun.lock` or
-   `package.json` is Bun; `pyproject.toml`, `requirements.txt`, `setup.py`
-   or `Pipfile` is Python; `Cargo.toml` is Rust; `package.json` beside a
-   `vite.config.*` (in `web/`, `frontend/`, `ui/`, `app/`, `apps/web/`,
-   `client/` or the root) is a Vite frontend, and Vitest if that file
-   mentions it; any `playwright*.config.*` within three directory levels
-   is Playwright.
-3. Reads the versions of whatever it found.
-4. Checks the contract: a `gate.py`, or a Makefile with the six steps,
-   and whether `dev` startup ever deletes a database.
-5. Checks whether every Vite config sets `envDir: false`.
-6. Prints the report and verdict. Changes nothing.
-
-**install writes only missing, reviewable files:**
-
-1. Refuses unless the target is a git repository with a matched toolchain.
-2. If no contract file exists, generates `gate.py`: each toolchain
-   contributes its native commands to the six steps, plus a pin for each
-   tool version found. Existing contract files are never modified; gaps
-   become written instructions.
-3. With `--ci` and no workflows directory, writes one Ubuntu workflow
-   running the same chain, pinned to the detected versions.
-4. With a Vite + Vitest frontend, copies the env-isolation test template
-   if absent.
-5. Writes `GATE.md`: what was found, what was installed, your numbered
-   remaining steps.
-6. Stops. Everything is visible as an ordinary `git diff`.
+**install** refuses non-git targets; generates `gate.py` from the matched
+toolchains with version pins; with `--ci` writes one pinned Ubuntu
+workflow; with Vite+Vitest copies the env-isolation test template; writes
+`GATE.md` (what it found, what it installed, your numbered remaining
+steps). Never modifies existing files. Everything shows in `git diff`.
 
 ## Extend it
 
-The core knows the contract; adapters know toolchains. Adapters for Go, Bun,
-Python and Rust ship today, plus Vite/Vitest and Playwright as framework
-adapters that compose with any of them. A mixed project (Go backend, Bun
-workspace, Vite frontend) gets one composed `gate.py`, each line from its
-own adapter. Add a stack by adding one entry to the registry in `adopt.py`:
+The core knows the contract; adapters know toolchains. Go, Bun, Python and
+Rust ship today; Vite/Vitest and Playwright compose on top. One registry
+entry per stack in `adopt.py`:
 
 ```python
-{
-    "name": "mytool",
-    "detect": detect_mytool,           # facts dict, or None when absent
-    "install": ["mytool fetch --locked"],
-    "verify": ["mytool verify"],
-    "test":   ["mytool test"],
-    "build":  ["mytool build --release"],
-    "pin":    lambda f: [...],          # version pin tuples (name, command, want)
-    "guidance": {"topic": "remainder text for GATE.md"},
-}
+{"name": "mytool", "detect": detect_mytool,
+ "install": ["mytool fetch --locked"], "verify": ["mytool verify"],
+ "test": ["mytool test"], "build": ["mytool build --release"],
+ "pin": lambda f: [...], "guidance": {"topic": "GATE.md remainder text"}}
 ```
 
 ## Not required yet
 
-Historical assurance, containers, AI services, deployment, supply-chain
-attestation and hostile-host threat models all wait until a feature actually
-needs them. They are not part of environment readiness.
+Historical assurance, containers, AI services, deployment, attestation,
+hostile-host models: each waits until a feature needs it.
 
-## Proof and sources
+## Sources
 
-Kept, November 2026: candidate `150b7c9`, 334 web tests, 125 browser tests
-discovered / 121 passed / 4 pre-existing skips / 0 failures, restart smoke,
-independent review PASS. The full reasoning, including the machinery that
-was tried and retired, is in `Golden-Implementation-Playbook-2026-11-11.md`
-(companion to the Golden Development Contract, 2026-11-10; both predate this
-vocabulary but say the same things).
+Kept, November 2026: candidate `150b7c9`, 334 web tests, 121/125 green, 4
+known skips, 0 failures, restart smoke, review PASS. Full reasoning:
+`Golden-Implementation-Playbook-2026-11-11.md` and the Golden Development
+Contract (2026-11-10; both predate this vocabulary, same ideas).
