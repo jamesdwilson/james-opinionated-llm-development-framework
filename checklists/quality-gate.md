@@ -36,10 +36,10 @@ The six steps, as `python3 gate.py ...`, Make targets, or an equivalent the proj
 - [ ] `install && test-e2e-install && verify && test && test-e2e` clean: no unexpected failure, no new skip, no missing tracked input, no ambient leakage
 - [ ] The smoke passes
 - [ ] One bounded independent review of the exact diff and results
-- [ ] The trust claim names its exact scope (for example "local macOS development"); unclaimed platforms/services are listed as unclaimed, non-blocking
+- [ ] The readiness claim names the environment and configuration at an exact revision, with its scope (for example "local macOS development"); unclaimed platforms/services are listed as unclaimed, non-blocking
 
 ## 5. Afterwards
 
-- [ ] The qualifying candidate is an ordinary reviewed Git commit
+- [ ] The accepted change is an ordinary reviewed Git commit
 - [ ] Evidence is preserved; nothing was deleted to look clean
 - [ ] No further acceptance rounds are invented; product development proceeds

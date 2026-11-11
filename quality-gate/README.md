@@ -2,20 +2,20 @@
 
 Two ideas this toolkit keeps separate:
 
-- **A setup you can trust.** Locked dependencies, honest tests, isolated
+- **A ready environment.** Locked dependencies, honest tests, isolated
   configuration, startup that never eats your data. When the tests pass,
-  you can believe them. (The standards world calls this a *qualified
-  environment*; avionics formalises it as tool qualification, DO-330.) The
-  gate below is how a project earns it, and trust is always scoped:
-  "trustworthy for local macOS development" says nothing about Linux or
-  production.
-- **A change that does what it says.** One reviewed change, with evidence
-  it actually implements its brief, not just that it compiles. (The
-  standards world calls this a *validated candidate*: IEEE V&V, verified
-  against the spec and validated against the real goal, with traceability
-  from brief to test.) The rest of this framework's chain owns that side.
-  Trust in the setup comes first, because evidence from an untrustworthy
-  environment is worthless.
+  you can believe them. A readiness claim always names its subject
+  precisely: the environment *and* its configuration, at an exact version
+  or revision, for a stated scope. "Ready on this machine, at this commit,
+  for local development" is a claim; "ready" alone is not. (The standards
+  world: a *qualified environment*, DO-330 tool qualification.) The gate
+  below is how a project earns readiness.
+- **An accepted change.** One reviewed change, patch, revision, pick your
+  word, with evidence it does what its brief says: fit for purpose, not
+  just compiling. (The standards world: a *validated candidate*, IEEE V&V
+  plus traceability from brief to test.) The rest of this framework's
+  chain owns that side. Readiness comes first, because evidence from an
+  unready environment is worthless.
 
 This directory is the quality gate: the prose standard, an installer, a
 read-only checker, and templates. It was proven on a real project (Kept,
@@ -31,8 +31,8 @@ among people working with AI agents. If not, one install from python.org or
 your package manager sorts it.
 
 ```bash
-# doctor: is this project's setup still trustworthy? Read-only,
-# changes nothing, run it as often as you like.
+# doctor: the readiness check. Is this project's environment still ready,
+# at this revision? Read-only, run it as often as you like.
 python3 quality-gate/doctor /path/to/project
 
 # install: install the safe pieces, get your remaining steps in GATE.md.
@@ -86,7 +86,7 @@ Every rule here exists because its absence caused a real, observed defect:
 
 ## Passing the gate
 
-A setup earns its trust when one reviewed Git candidate, from a fresh
+An environment is ready when one reviewed Git revision, from a fresh
 checkout with nothing copied over, passes:
 
 1. The full chain above: clean, no unexpected failure, no new skip, no
@@ -95,10 +95,11 @@ checkout with nothing copied over, passes:
 3. One bounded independent review of the diff and the results. One review.
    Do not invent more rounds.
 
-Then claim exactly what you proved. "Trustworthy for local macOS
-development" says nothing about Linux, containers, deployment or AI
-services, and that's fine: those stay visible and non-blocking until a
-feature needs them. CI is likewise your call (`--ci`), not a requirement.
+Then claim exactly what you proved, named by revision: "ready at commit
+`abc123` for local macOS development" says nothing about Linux, containers,
+deployment or AI services, and that's fine: those stay visible and
+non-blocking until a feature needs them. CI is likewise your call (`--ci`),
+not a requirement.
 
 ## What the tool does, and never does
 
@@ -174,7 +175,7 @@ own adapter. Add a stack by adding one entry to the registry in `adopt.py`:
 
 Historical assurance, containers, AI services, deployment, supply-chain
 attestation and hostile-host threat models all wait until a feature actually
-needs them. They are not part of trusting your setup.
+needs them. They are not part of environment readiness.
 
 ## Proof and sources
 
