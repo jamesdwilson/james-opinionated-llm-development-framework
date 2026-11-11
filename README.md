@@ -120,7 +120,16 @@ Use [`templates/PROJECT_BRIEF.md`](templates/PROJECT_BRIEF.md).
 
 BDD turns fuzzy language into examples people can actually discuss. "Make checkout simple" is vague. A few concrete examples of what happens, what can go wrong, and how the user recovers give the LLM something solid to build.
 
-**Under the hood:** turn requirements into rules, examples, and open questions. Use Given, When, Then when it helps, and cover normal, boundary, failure, and recovery behaviour where it matters. Example Mapping is the selected discovery technique. [[13]](https://cucumber.io/docs/bdd/example-mapping/) NASA supports operational scenarios as part of understanding expected use. [[2]](https://www.nasa.gov/wp-content/uploads/2018/09/nasa_systems_engineering_handbook_0.pdf) TiCoder and ClarifyGPT provide empirical support for concrete tests and targeted clarification within their studied tasks. [[7]](https://arxiv.org/abs/2404.10100) [[8]](https://arxiv.org/abs/2310.10996)
+**Under the hood:**
+
+```mermaid
+flowchart LR
+    R["requirement"] --> E["rules + examples<br/>+ open questions"]
+    E --> G["given, when, then"]
+    G --> N["normal, boundary,<br/>failure, recovery"]
+```
+
+Use Example Mapping for discovery. [[13]](https://cucumber.io/docs/bdd/example-mapping/) NASA supports operational scenarios as part of understanding expected use. [[2]](https://www.nasa.gov/wp-content/uploads/2018/09/nasa_systems_engineering_handbook_0.pdf) TiCoder and ClarifyGPT provide empirical support for concrete tests and targeted clarification within their studied tasks. [[7]](https://arxiv.org/abs/2404.10100) [[8]](https://arxiv.org/abs/2310.10996)
 
 Use [`templates/JOURNEYS.md`](templates/JOURNEYS.md).
 
@@ -129,8 +138,10 @@ Use [`templates/JOURNEYS.md`](templates/JOURNEYS.md).
 
 TDD makes the model show the problem before it fixes it. RED proves the check can catch the missing or broken behaviour. GREEN shows that the smallest repair satisfies the relevant checks. REFACTOR cleans things up without losing that evidence.
 
-```text
-RED -> GREEN -> REFACTOR
+```mermaid
+flowchart LR
+    RED["RED<br/>prove the check<br/>can fail"] --> GREEN["GREEN<br/>smallest change<br/>that passes"] --> REF["REFACTOR<br/>clean up,<br/>checks stay green"]
+    REF -->|next behaviour| RED
 ```
 
 **Under the hood:** write or identify a meaningful failing check for the behaviour being changed. Make the smallest coherent change that satisfies it. Clean up only while the relevant checks stay green. If behaviour should not change, start from a verified green characterisation instead of manufacturing a failure.
@@ -146,10 +157,10 @@ Deterministic tests are boring in the best way. They do not get tired, creative,
 
 **Under the hood:** use the simplest test that can answer the question reliably:
 
-- unit checks for pure rules and transformations;
-- integration checks for persistence, services, queues, and adapters;
-- contract checks for schemas and interfaces;
-- browser checks for rendered, stateful user journeys.
+```mermaid
+flowchart LR
+    U["unit<br/>pure rules"] --> I["integration<br/>persistence, services"] --> C["contract<br/>schemas, interfaces"] --> B["browser<br/>rendered journeys"]
+```
 
 Program structure can also reduce ambiguity for coding agents. Skeleton Coding reports benefits from structural specifications in its evaluated settings. [[14]](https://arxiv.org/abs/2610.38214)
 
@@ -190,7 +201,14 @@ Use it for narrow questions such as:
 
 Bugsink lets you rehearse failure before a real user finds it. Trigger a safe synthetic error, prove it reached the error tracker without leaking sensitive data, and separately check that the product recovered the way it promised.
 
-**Under the hood:** use synthetic data and an isolated Bugsink project or disposable instance. Bugsink is a self-hosted Sentry-compatible target. [[20]](https://www.bugsink.com/docs/) The product requirement chooses the failure worth exercising. Check capture in Bugsink, verify recovery through the deterministic or browser layer that owns that behaviour, and confirm cleanup works.
+**Under the hood:** Bugsink is a self-hosted Sentry-compatible target; use synthetic data and an isolated project. [[20]](https://www.bugsink.com/docs/)
+
+```mermaid
+flowchart LR
+    F["synthetic failure<br/>chosen by the requirement"] --> C["captured in Bugsink<br/>no sensitive data"]
+    C --> R["recovery verified<br/>by its owning layer"]
+    R --> X["cleanup confirmed"]
+```
 
 <a id="stack-supply-chain"></a>
 ### 9. Supply-chain checks
@@ -199,11 +217,11 @@ Supply-chain checks answer the question hidden behind "it installed": what did w
 
 **Under the hood:** keep dependency changes boring and reversible. For Bun projects:
 
-- commit the lockfile;
-- review dependency-graph changes;
-- run `bun audit` against the resolved graph;
-- use `minimumReleaseAge` when the project's risk policy calls for a publication delay;
-- record exceptions and rollback.
+```mermaid
+flowchart LR
+    L["commit the lockfile"] --> R["review graph changes"] --> A["bun audit<br/>resolved graph"]
+    A --> T["minimumReleaseAge<br/>per risk policy"] --> X["record exceptions<br/>and rollback"]
+```
 
 Bun documents its audit command and release-age control. [[21]](https://bun.com/docs/pm/cli/audit) [[22]](https://bun.com/docs/runtime/bunfig) [[27]](https://bun.com/docs/pm/cli/install) NIST's Secure Software Development Framework supplies broader secure-development guidance. [[23]](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-218.pdf)
 
