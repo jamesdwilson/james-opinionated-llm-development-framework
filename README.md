@@ -180,6 +180,10 @@ If you're a big fan of Node or do not want to use Bun, don't worry about it. Kee
 
 Playwright closes the awkward gap between "the function passed" and "the app works." It opens the real page, clicks the real controls, reloads, and checks what is actually visible to expose user-facing failures lower-level tests may miss.
 
+![Playwright trace viewer: every action on a timeline with snapshots](images/playwright-trace-viewer.png)
+
+*The trace viewer: every action on a timeline, with before/after snapshots and the exact click position. Image: Playwright documentation.*
+
 **Under the hood:** Playwright owns critical rendered journeys including visible state, interaction, permissions, reloads, client-side recovery, and user-observable persistence. It recommends isolated tests, user-facing assertions, resilient locators, and web-first waiting. [[16]](https://playwright.dev/docs/best-practices) Its planner, generator, and healer agents can assist test creation while executable assertions remain the behavioural evidence. [[17]](https://playwright.dev/docs/test-agents)
 
 <a id="stack-midscene"></a>
@@ -193,6 +197,10 @@ Use it for narrow questions such as:
 - Is the next action visually apparent?
 - Does the completed state explain what happened?
 - Is the recovery path visible after the exercised failure?
+
+![Midscene playground: natural-language actions against a live page](images/midscene-playground.png)
+
+*The playground: describe an action in words, watch it drive the page visually. Image: Midscene documentation.*
 
 **Under the hood:** Midscene is advisory by default. It cannot overrule a failed deterministic check. Count its output as release evidence only after the project has validated the model, prompt, fixtures, and agreement with responsible human judgement.
 
@@ -209,6 +217,10 @@ flowchart LR
     C --> R["recovery verified<br/>by its owning layer"]
     R --> X["cleanup confirmed"]
 ```
+
+![Bugsink: the stacktrace at the centre of the interface](images/bugsink-stacktrace.webp)
+
+*The stacktrace is the centre of the interface, first thing you see. Image: bugsink.com.*
 
 <a id="stack-supply-chain"></a>
 ### 9. Supply-chain checks
