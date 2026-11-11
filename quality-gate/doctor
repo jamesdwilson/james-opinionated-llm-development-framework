@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# keep-golden: read-only "are we still golden?" report for a project.
-# Thin public name over golden/adopt.py's audit mode. Run it any time;
+# doctor: read-only "is this project's environment still qualified?" report.
+# Thin public name over quality-gate/adopt.py's audit mode. Run it any time;
 # it changes nothing.
 import os
 import runpy

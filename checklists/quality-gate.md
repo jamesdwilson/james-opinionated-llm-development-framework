@@ -1,11 +1,11 @@
-# Golden completion checklist
+# Qualification checklist
 
-For a human or LLM finishing a golden adoption after `golden/adopt.sh install`.
+For a human or LLM finishing a quality-gate adoption after `quality-gate/install`.
 Work top to bottom. Do not skip an item and do not weaken a test to pass it.
 
 ## 1. Contract shape
 
-The six steps, as `python3 golden.py ...`, Make targets, or an equivalent the project already has:
+The six steps, as `python3 gate.py ...`, Make targets, or an equivalent the project already has:
 
 - [ ] `install` refuses a missing lockfile and installs frozen with lifecycle scripts denied
 - [ ] `verify` checks module integrity, diff hygiene and pinned tool versions
@@ -36,10 +36,10 @@ The six steps, as `python3 golden.py ...`, Make targets, or an equivalent the pr
 - [ ] `install && test-e2e-install && verify && test && test-e2e` clean: no unexpected failure, no new skip, no missing tracked input, no ambient leakage
 - [ ] The smoke passes
 - [ ] One bounded independent review of the exact diff and results
-- [ ] The golden claim names its exact scope (for example "local macOS development"); unclaimed platforms/services are listed as unclaimed, non-blocking
+- [ ] The qualification claim names its exact scope (for example "local macOS development"); unclaimed platforms/services are listed as unclaimed, non-blocking
 
 ## 5. Afterwards
 
-- [ ] The golden candidate is an ordinary reviewed Git commit
+- [ ] The qualifying candidate is an ordinary reviewed Git commit
 - [ ] Evidence is preserved; nothing was deleted to look clean
 - [ ] No further acceptance rounds are invented; product development proceeds

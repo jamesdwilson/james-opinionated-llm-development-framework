@@ -1,7 +1,7 @@
-// Golden environment-isolation regression (template).
+// Quality-gate environment-isolation regression (template).
 //
-// Installed by golden/adopt.sh. Adapt the marked lines to this project, then
-// keep this test green in the normal frontend test run.
+// Installed by quality-gate/install. Adapt the marked lines to this project,
+// then keep this test green in the normal frontend test run.
 //
 // What it must prove for this project:
 //   1. A sentinel planted in the parent environment does NOT leak into the
@@ -16,11 +16,11 @@
 
 import { describe, it, expect } from 'vitest'
 
-describe('golden environment isolation', () => {
+describe('quality gate environment isolation', () => {
   it('does not leak the planted parent sentinel into the worker', () => {
-    // The parent runner plants GOLDEN_PARENT_SENTINEL before spawning workers.
-    // TODO: add the sentinel to the parent invocation in the Makefile/scripts.
-    expect(process.env.GOLDEN_PARENT_SENTINEL).toBeUndefined()
+    // The parent runner plants GATE_PARENT_SENTINEL before spawning workers.
+    // TODO: add the sentinel to the parent invocation in gate.py/scripts.
+    expect(process.env.GATE_PARENT_SENTINEL).toBeUndefined()
   })
 
   it('does not expose ambient env-file values', () => {

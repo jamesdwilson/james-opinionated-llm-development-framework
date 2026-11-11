@@ -4,7 +4,7 @@ Apply the cohesive stack to an existing repository without discarding sound equi
 
 These instructions govern the target repository. The playbook source repository's root `AGENTS.md` and verifier are maintenance tools for the playbook itself.
 
-> **Development-gate adoption:** if the target's development environment itself needs to become trustworthy first, start with [`golden/`](golden/README.md): run `python3 golden/adopt.py audit` for a read-only report, then `python3 golden/adopt.py install` and finish the numbered steps it writes into the target's `GOLDEN.md` (canonical checklist: [`checklists/golden.md`](checklists/golden.md)). The full stack below then applies to feature work inside that gate.
+> **Environment qualification first:** if the target's development environment itself needs to become trustworthy before feature work, start with [`quality-gate/`](quality-gate/README.md): run `python3 quality-gate/doctor` for a read-only report, then `python3 quality-gate/install` and finish the numbered steps it writes into the target's `GATE.md` (canonical checklist: [`checklists/quality-gate.md`](checklists/quality-gate.md)). The full stack below then produces validated candidates inside that qualified environment.
 
 ## Inputs
 
