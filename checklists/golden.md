@@ -5,16 +5,18 @@ Work top to bottom. Do not skip an item and do not weaken a test to pass it.
 
 ## 1. Contract shape
 
-- [ ] `make install` refuses a missing lockfile and installs frozen with lifecycle scripts denied
-- [ ] `make verify` checks module integrity, diff hygiene and pinned tool versions
-- [ ] `make test` runs the complete native suite (backend, production typecheck, frontend)
-- [ ] `make build` produces the real production artifacts
-- [ ] `make test-e2e` builds once and runs the established browser suites
-- [ ] No target was excluded or `|| true`'d to manufacture green
+The six steps, as `python3 golden.py ...`, Make targets, or an equivalent the project already has:
+
+- [ ] `install` refuses a missing lockfile and installs frozen with lifecycle scripts denied
+- [ ] `verify` checks module integrity, diff hygiene and pinned tool versions
+- [ ] `test` runs the complete native suite (backend, production typecheck, frontend)
+- [ ] `build` produces the real production artifacts
+- [ ] `test-e2e` builds once and runs the established browser suites
+- [ ] No step was excluded or `|| true`'d to manufacture green
 
 ## 2. Safety properties
 
-- [ ] `make api` / `make ui` / `make dev` never delete the local database
+- [ ] `api` / `ui` / `dev` commands never delete the local database
 - [ ] All services bind `127.0.0.1` with strict ports and fail when occupied
 - [ ] Synthetic database, uploads and runtime directories only; no household config or provider credentials
 - [ ] `envDir: false` in every Vite config; Bun routes use `--no-env-file`
@@ -31,7 +33,7 @@ Work top to bottom. Do not skip an item and do not weaken a test to pass it.
 ## 4. Acceptance
 
 - [ ] Fresh checkout (no copied `node_modules`, build output or runtime state)
-- [ ] `make install && make test-e2e-install && make verify && make test && make test-e2e` clean: no unexpected failure, no new skip, no missing tracked input, no ambient leakage
+- [ ] `install && test-e2e-install && verify && test && test-e2e` clean: no unexpected failure, no new skip, no missing tracked input, no ambient leakage
 - [ ] The smoke passes
 - [ ] One bounded independent review of the exact diff and results
 - [ ] The golden claim names its exact scope (for example "local macOS development"); unclaimed platforms/services are listed as unclaimed, non-blocking
