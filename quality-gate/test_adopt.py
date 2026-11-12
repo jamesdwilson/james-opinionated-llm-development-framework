@@ -3,13 +3,16 @@ Run: python3 -m unittest discover -s quality-gate -p 'test_*.py' -v
 """
 import ast
 import contextlib
+import difflib
 import importlib.util
+import hashlib
 import io
 import json
 import os
 from pathlib import Path
 import runpy
 import shlex
+import socket
 import subprocess
 import sys
 import tempfile
@@ -197,6 +200,373 @@ class AdoptionContracts(unittest.TestCase):
         result = self.run_gate(path, "test")
         self.assertNotEqual(result.returncode, 0)
         self.assertFalse(record.exists())
+
+    # Public reviewed syntax is fixed before implementation. All targets are synthetic.
+    def reviewed(self, *args, target=None):
+        output, errors = io.StringIO(), io.StringIO()
+        with mock.patch.object(subprocess, "run", side_effect=AssertionError("execution forbidden")), \
+             mock.patch.object(subprocess, "Popen", side_effect=AssertionError("execution forbidden")), \
+             mock.patch.object(os, "system", side_effect=AssertionError("execution forbidden")), \
+             mock.patch.object(socket, "socket", side_effect=AssertionError("network forbidden")), \
+             mock.patch("builtins.exec", side_effect=AssertionError("target execution forbidden")), \
+             contextlib.redirect_stdout(output), contextlib.redirect_stderr(errors):
+            code = adopt.main(["adopt.py", "plan", str(self.root if target is None else target), *args])
+        return code, output.getvalue(), errors.getvalue()
+
+    def confirmation(self, output):
+        return output.split("Confirmation SHA256: ", 1)[1].splitlines()[0]
+
+    def literal_gate(self):
+        path = self.root / "gate.py"
+        path.write_bytes(b"# surrounding \xc3\xa9\r\nCOMMANDS = {'test': ['local-check',], 'build': [], 'verify': ['required']} # keep\r\n# tail\r\n")
+        return path
+
+    def test_reviewed_multi_task_preservation_and_idempotence(self):
+        path = self.literal_gate()
+        path.chmod(0o751)
+        before = path.read_bytes()
+        args = ("--command", "test", ".", "new-check", "--command", "build", ".", "build-check")
+        preview = self.reviewed("--preview-gate", *args)
+        self.assertEqual((preview[0], preview[2]), (0, ""))
+        self.assertEqual(preview, self.reviewed("--preview-gate", *args))
+        self.assertEqual(path.read_bytes(), before)
+        self.assertIn("--- ", preview[1])
+        self.assertIn("+++ ", preview[1])
+        fingerprint = self.confirmation(preview[1])
+        self.assertRegex(fingerprint, r"^[0-9a-f]{64}$")
+        self.assertEqual(self.reviewed("--apply-gate", fingerprint, *args)[0], 0)
+        after = path.read_bytes()
+        self.assertTrue(after.startswith(b"# surrounding \xc3\xa9\r\n"))
+        self.assertTrue(after.endswith(b" # keep\r\n# tail\r\n"))
+        self.assertIn(b"'verify': ['required']", after)
+        values = ast.literal_eval(ast.parse(after).body[0].value)
+        self.assertEqual(values['test'], ['local-check', '(cd ./. && (\nnew-check\n))'])
+        self.assertEqual(values['build'], ['(cd ./. && (\nbuild-check\n))'])
+        backup = self.root / 'gate.py.reviewed-backup'
+        self.assertEqual(backup.read_bytes(), before)
+        self.assertEqual(path.stat().st_mode & 0o7777, 0o751)
+        self.assertEqual(backup.stat().st_mode & 0o7777, 0o751)
+        self.assertEqual(self.reviewed('--apply-gate', fingerprint, *args)[0], 2)
+        repeated = self.reviewed('--preview-gate', *args)
+        self.assertNotIn('--- ', repeated[1])
+        snapshot = self.snapshot(self.root)
+        self.assertEqual(self.reviewed('--apply-gate', self.confirmation(repeated[1]), *args)[0], 0)
+        self.assertEqual(snapshot, self.snapshot(self.root))
+
+    def test_reviewed_confirmation_and_stale_refusal(self):
+        path = self.literal_gate()
+        args = ('--command', 'test', '.', 'true')
+        preview = self.reviewed('--preview-gate', *args)
+        self.assertEqual(preview[0], 0, preview)
+        fingerprint = self.confirmation(preview[1])
+        for options in [('--apply-gate',), ('--apply-gate', 'bad'),
+                        ('--apply-gate', '0' * 64), ('--apply-gate', fingerprint, '--preview-gate')]:
+            with self.subTest(options=options):
+                before = self.snapshot(self.root)
+                self.assertEqual(self.reviewed(*options, *args)[0], 2)
+                self.assertEqual(before, self.snapshot(self.root))
+        for changed in [('test', '.', 'false'), ('build', '.', 'true')]:
+            before = self.snapshot(self.root)
+            self.assertEqual(self.reviewed('--apply-gate', fingerprint, '--command', *changed)[0], 2)
+            self.assertEqual(before, self.snapshot(self.root))
+        path.write_bytes(path.read_bytes() + b'# user edit\n')
+        before = self.snapshot(self.root)
+        self.assertEqual(self.reviewed('--apply-gate', fingerprint, *args)[0], 2)
+        self.assertEqual(before, self.snapshot(self.root))
+
+    def test_reviewed_ast_rejections_and_decoys(self):
+        path = self.root / 'gate.py'
+        invalid = ["COMMANDS = {", "COMMANDS = dict(test=[])",
+                   "COMMANDS = {'test': []}\nCOMMANDS = {'test': []}",
+                   "COMMANDS = {'test': [], 'test': []}", "COMMANDS = {'other': []}",
+                   "COMMANDS = {1: []}", "COMMANDS = {'test': 'true'}",
+                   "COMMANDS = {'test': [1]}", "COMMANDS = {'test': ('true',)}",
+                   "COMMANDS = {'test': [f'true']}", "COMMANDS: dict = {'test': []}",
+                   "COMMANDS = other = {'test': []}", "if True:\n COMMANDS = {'test': []}",
+                   "COMMANDS = {'test': []}\nCOMMANDS['test'] = []",
+                   "COMMANDS = {'test': []}\nCOMMANDS.update(test=[])",
+                   "COMMANDS = {'test': []}\nCOMMANDS['test'].append('false')",
+                   "COMMANDS = {'test': []}\nCOMMANDS |= {}",
+                   "# COMMANDS = {'test': []}\nx = \"COMMANDS = {'test': []}\"",
+                   "import re\nx = r\"COMMANDS\\s*=.*\"",
+                   "COMMANDS = {'build': []}"]
+        for source in invalid:
+            with self.subTest(source=source):
+                path.write_text(source)
+                before = self.snapshot(self.root)
+                result = self.reviewed('--preview-gate', '--command', 'test', '.', 'true')
+                self.assertEqual(result[0], 2, result)
+                self.assertNotIn('Confirmation SHA256', result[1])
+                self.assertEqual(before, self.snapshot(self.root))
+        path.write_text("# COMMANDS = {}\nx = \"COMMANDS = {}\"\nr = r'COMMANDS.*='\n"
+                        "COMMANDS = {'test': []}\nraise AssertionError('inert')\n")
+        args = ('--command', 'test', '.', 'echo NEVER_EXECUTE')
+        result = self.reviewed('--preview-gate', *args)
+        self.assertEqual(result[0], 0, result)
+        self.assertEqual(self.reviewed('--apply-gate', self.confirmation(result[1]), *args)[0], 0)
+
+    def reviewed_binding_cases(self):
+        cases = [
+            ('import-alias', 'import os as COMMANDS'),
+            ('from-import', 'from owned import COMMANDS'),
+            ('from-alias', 'from owned import other as COMMANDS'),
+            ('relative-from', 'from .owned import COMMANDS'),
+            ('unaliased-import', 'import COMMANDS'),
+            ('dotted-import', 'import COMMANDS.child'),
+            ('wildcard-import', 'from owned import *'),
+            ('function', 'def COMMANDS(): pass'),
+            ('async-function', 'async def COMMANDS(): pass'),
+            ('class', 'class COMMANDS: pass'),
+            ('exception', 'try: pass\nexcept Exception as COMMANDS: pass'),
+            ('positional-arg', 'def f(COMMANDS): pass'),
+            ('posonly-arg', 'def f(COMMANDS, /): pass'),
+            ('kwonly-arg', 'def f(*, COMMANDS): pass'),
+            ('vararg', 'def f(*COMMANDS): pass'),
+            ('kwarg', 'def f(**COMMANDS): pass'),
+            ('lambda-arg', 'f = lambda COMMANDS: None'),
+            ('nested-definition', 'def outer():\n def COMMANDS(): pass'),
+            ('nested-import', 'def outer():\n import os as COMMANDS'),
+            ('unreachable-class', 'if False:\n class COMMANDS: pass'),
+            ('global-reference', 'def f():\n global COMMANDS'),
+            ('nonlocal-reference', 'def f():\n COMMANDS = {}\n def g():\n  nonlocal COMMANDS'),
+            ('assignment', 'COMMANDS = {}'),
+            ('annotated', 'COMMANDS: dict'),
+            ('augmented', 'COMMANDS |= {}'),
+            ('delete', 'del COMMANDS'),
+            ('loop', 'for COMMANDS in []: pass'),
+            ('comprehension', 'x = [0 for COMMANDS in []]'),
+            ('with-target', 'with manager() as COMMANDS: pass'),
+            ('named-expression', 'if (COMMANDS := {}): pass'),
+            ('alias', 'other = COMMANDS'),
+        ]
+        if hasattr(ast, 'MatchAs'):
+            cases += [('match-as', 'match subject:\n case COMMANDS: pass'),
+                      ('match-nested-as', 'match subject:\n case [other] as COMMANDS: pass'),
+                      ('match-star', 'match subject:\n case [*COMMANDS]: pass'),
+                      ('match-rest', 'match subject:\n case {"key": other, **COMMANDS}: pass')]
+        if hasattr(ast, 'TryStar'):
+            cases += [('exception-group', 'try: pass\nexcept* Exception as COMMANDS: pass')]
+        if hasattr(ast, 'TypeAlias'):
+            cases += [('type-alias', 'type COMMANDS = int'),
+                      ('typevar', 'def f[COMMANDS](): pass'),
+                      ('paramspec', 'def f[**COMMANDS](): pass'),
+                      ('typevartuple', 'class C[*COMMANDS]: pass'),
+                      ('alias-typevar', 'type Other[COMMANDS] = int')]
+        return cases
+
+    def test_reviewed_binding_guard_refusal(self):
+        for name, suffix in self.reviewed_binding_cases():
+            with self.subTest(binding=name):
+                source = ("COMMANDS = {'test': ['exit 7']}\n" + suffix + '\n').encode()
+                # Parse first: malformed test syntax must not masquerade as refusal.
+                ast.parse(source)
+                diagnostic = 'exactly one simple' if name == 'assignment' else 'unsupported COMMANDS'
+                with self.assertRaisesRegex(ValueError, diagnostic):
+                    adopt.reviewed_gate_bytes(source, {'test': ['selected']})
+
+    def test_reviewed_binding_public_preview_refusal(self):
+        self.check_reviewed_binding_public_refusal(apply=False)
+
+    def test_reviewed_binding_public_apply_refusal(self):
+        self.check_reviewed_binding_public_refusal(apply=True)
+
+    def check_reviewed_binding_public_refusal(self, apply):
+        command = 'echo SELECTED_UNEXECUTED > selected-marker'
+        rendered = '(cd ./. && (\n' + command + '\n))'
+        for name, suffix in self.reviewed_binding_cases():
+            with self.subTest(binding=name):
+                target = self.root / name
+                target.mkdir()
+                path = target / 'gate.py'
+                original = ("# keep é\nCOMMANDS = {'test': ['exit 7']}\n" + suffix +
+                            "\nfor cmd in COMMANDS.get('test', []):\n pass\n# tail\n").encode()
+                path.write_bytes(original)
+                (target / 'owned.py').write_text("COMMANDS = {'test': ['exit 9']}\n")
+                # Exact vulnerable insertion and fingerprint, independent of the guard.
+                # RED verifies this confirms a changing apply, not a mismatch refusal.
+                result = original.replace(b"['exit 7']", ("['exit 7', " + ascii(rendered) + ']').encode(), 1)
+                binding = json.dumps([str(path.resolve()), original.hex(), path.stat().st_mode & 0o7777,
+                                      [('test', '.', command)], result.hex()],
+                                     ensure_ascii=True, separators=(',', ':')).encode('ascii')
+                fingerprint = hashlib.sha256(binding).hexdigest()
+                options = ('--apply-gate', fingerprint) if apply else ('--preview-gate',)
+                before = self.snapshot(target)
+                response = self.reviewed(*options, '--command', 'test', '.', command, target=target)
+                # Check every invariant even when the public status is wrong in RED.
+                with self.subTest(invariant='status'):
+                    self.assertEqual(response[0], 2, response)
+                with self.subTest(invariant='diagnostic'):
+                    self.assertIn('exactly one simple' if name == 'assignment' else 'unsupported COMMANDS', response[2])
+                with self.subTest(invariant='no-preview'):
+                    self.assertEqual(response[1], '')
+                with self.subTest(invariant='no-writes'):
+                    self.assertEqual(before, self.snapshot(target))
+                self.assertFalse((target / 'selected-marker').exists())
+
+    def test_reviewed_binding_inert_decoys_and_unrelated_names(self):
+        path = self.root / 'gate.py'
+        original = ("# def COMMANDS(): pass\ntext = 'from owned import COMMANDS'\n"
+                    "regex = r'COMMANDS.*='\nCOMMANDS = {'test': ['exit 7'], 'build': ['exit 9']}\n"
+                    "import owned.COMMANDS\nfrom owned import COMMANDS as other\n"
+                    "import owned as unrelated\ndef f(other, /, *args, flag=None, **kwargs):\n"
+                    " global unrelated\nclass Other: pass\n"
+                    "try: pass\nexcept Exception as other: pass\n")
+        if hasattr(ast, 'MatchAs'):
+            original += 'match subject:\n case {"COMMANDS": other, **rest}: pass\n'
+        if hasattr(ast, 'TypeAlias'):
+            original += 'type OtherAlias[T] = T\n'
+        original = original.encode()
+        path.write_bytes(original)
+        command = 'echo SELECTED_UNEXECUTED > selected-marker'
+        args = ('--command', 'test', '.', command)
+        preview = self.reviewed('--preview-gate', *args)
+        self.assertEqual((preview[0], preview[2]), (0, ''), preview)
+        self.assertEqual(path.read_bytes(), original)
+        self.assertEqual(self.reviewed('--apply-gate', self.confirmation(preview[1]), *args)[0], 0)
+        rendered = '(cd ./. && (\n' + command + '\n))'
+        self.assertEqual(path.read_bytes(), original.replace(b"['exit 7']",
+                         ("['exit 7', " + ascii(rendered) + ']').encode(), 1))
+        self.assertEqual((self.root / 'gate.py.reviewed-backup').read_bytes(), original)
+        self.assertFalse((self.root / 'selected-marker').exists())
+
+    def test_reviewed_target_and_directory_constraints(self):
+        path = self.literal_gate()
+        (self.root / 'outside').symlink_to(self.root.parent, target_is_directory=True)
+        for task, directory, command in [('unknown', '.', 'true'), ('test', '..', 'true'),
+                                          ('test', str(self.root), 'true'), ('test', 'outside', 'true'),
+                                          ('test', 'missing', 'true'), ('test', '.', ' '),
+                                          ('test', '', 'true'), ('test', '.', 'a\x00b')]:
+            with self.subTest(task=task, directory=directory, command=command):
+                before = path.read_bytes()
+                self.assertEqual(self.reviewed('--preview-gate', '--command', task, directory, command)[0], 2)
+                self.assertEqual(path.read_bytes(), before)
+        for target in ['', self.root / 'missing', path]:
+            self.assertEqual(self.reviewed('--preview-gate', '--command', 'test', '.', 'true', target=target)[0], 2)
+        path.rename(self.root / 'original.py')
+        args = ('--preview-gate', '--command', 'test', '.', 'true')
+        self.assertEqual(self.reviewed(*args)[0], 2)
+        path.symlink_to(self.root / 'original.py')
+        self.assertEqual(self.reviewed(*args)[0], 2)
+        path.unlink()
+        path.mkdir()
+        self.assertEqual(self.reviewed(*args)[0], 2)
+        path.rmdir()
+        os.mkfifo(path)
+        self.assertEqual(self.reviewed(*args)[0], 2)
+
+    def test_reviewed_backup_and_temp_collision(self):
+        path = self.literal_gate()
+        args = ('--command', 'test', '.', 'true')
+        preview = self.reviewed('--preview-gate', *args)
+        self.assertEqual(preview[0], 0, preview)
+        for name in ['gate.py.reviewed-backup', 'gate.py.reviewed-tmp']:
+            collision = self.root / name
+            collision.write_text('owned')
+            before = path.read_bytes()
+            self.assertEqual(self.reviewed('--apply-gate', self.confirmation(preview[1]), *args)[0], 2)
+            self.assertEqual(path.read_bytes(), before)
+            self.assertEqual(collision.read_text(), 'owned')
+            collision.rename(self.root / (name + '.retained'))
+
+    def test_reviewed_failure_before_replace_and_final_conflict(self):
+        path = self.literal_gate()
+        args = ('--command', 'test', '.', 'true')
+        preview = self.reviewed('--preview-gate', *args)
+        self.assertEqual(preview[0], 0, preview)
+        before = path.read_bytes()
+        with mock.patch.object(os, 'replace', side_effect=OSError('injected before replace')):
+            self.assertEqual(self.reviewed('--apply-gate', self.confirmation(preview[1]), *args)[0], 2)
+        self.assertEqual(path.read_bytes(), before)
+        self.assertEqual((self.root / 'gate.py.reviewed-backup').read_bytes(), before)
+        # Retain recovery evidence and make room for a new explicitly reviewed attempt.
+        for name in ['gate.py.reviewed-backup', 'gate.py.reviewed-tmp']:
+            (self.root / name).rename(self.root / (name + '.retained'))
+        real_fsync = os.fsync
+        def edit_during_preparation(fd):
+            real_fsync(fd)
+            path.write_bytes(before + b'# concurrent ordinary edit\n')
+        with mock.patch.object(os, 'fsync', side_effect=edit_during_preparation), \
+             mock.patch.object(os, 'replace', side_effect=AssertionError('must refuse conflict')):
+            self.assertEqual(self.reviewed('--apply-gate', self.confirmation(preview[1]), *args)[0], 2)
+        self.assertEqual(path.read_bytes(), before + b'# concurrent ordinary edit\n')
+
+    def test_reviewed_generated_gate_native_and_fail_first(self):
+        path = self.root / 'gate.py'
+        # Existing local commands are explicitly owned fixture checks.
+        source = adopt.emit_gate_py({}, None, None)
+        source = source.replace('echo no test adapter matched & exit 1', 'printf local > local.txt')
+        path.write_text(source)
+        tests = self.root / 'tests'
+        tests.mkdir()
+        native = tests / 'test_native.py'
+        native.write_text('import unittest\nclass Native(unittest.TestCase):\n def test_arithmetic(self): self.assertEqual(2+2, 4)\n')
+        args = ('--command', 'test', '.', shlex.quote(sys.executable) + ' -B -I -m unittest discover -s tests -v')
+        preview = self.reviewed('--preview-gate', *args)
+        self.assertEqual(preview[0], 0, preview)
+        self.assertEqual(self.reviewed('--apply-gate', self.confirmation(preview[1]), *args)[0], 0)
+        result = self.run_gate(path, 'test')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('Ran 1 test', result.stderr)
+        self.assertEqual((self.root / 'local.txt').read_text(), 'local')
+        native.write_text(native.read_text().replace('2+2, 4', '2+2, 5'))
+        result = self.run_gate(path, 'test')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('FAILED (failures=1)', result.stderr)
+        # An original failure must still stop before the appended native test.
+        path.write_text(path.read_text().replace('printf local > local.txt', 'exit 7'))
+        result = self.run_gate(path, 'test')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertNotIn('Ran 1 test', result.stderr)
+
+    def test_reviewed_parentheses_comments_and_exact_diff(self):
+        args = ('--command', 'test', '.', 'true', '--command', 'test', '.', 'true')
+        sources = [b"COMMANDS = {'test': [('old')]}",
+                   b"COMMANDS = {'test': ['old' # keep\n]}",
+                   b"COMMANDS = {'test': ['old', # keep\n]}",
+                   b"COMMANDS = {'test': [ # empty\n]}",
+                   "x='é'; COMMANDS = {'test': ['é']}".encode(),
+                   b"\xef\xbb\xbfCOMMANDS = {'test': []}\r\n"]
+        for index, before in enumerate(sources):
+            with self.subTest(source=before):
+                case_root = self.root / ('literal-' + str(index))
+                case_root.mkdir()
+                path = case_root / 'gate.py'
+                path.write_bytes(before)
+                preview = self.reviewed('--preview-gate', *args, target=case_root)
+                self.assertEqual(preview[0], 0, preview)
+                self.assertEqual(self.reviewed('--apply-gate', self.confirmation(preview[1]), *args, target=case_root)[0], 0)
+                tree = ast.parse(path.read_bytes())
+                assignment = next(node for node in tree.body if isinstance(node, ast.Assign)
+                                  and isinstance(node.targets[0], ast.Name) and node.targets[0].id == 'COMMANDS')
+                values = ast.literal_eval(assignment.value)['test']
+                self.assertEqual(values[-1], '(cd ./. && (\ntrue\n))')
+                self.assertEqual(len(values), 1 if index in [3, 5] else 2)
+                self.assertTrue(all(isinstance(value, str) for value in values))
+                # The decoded diff must describe precisely the bytes actually applied.
+                diff = list(difflib.diff_bytes(difflib.unified_diff, before.splitlines(keepends=True),
+                            path.read_bytes().splitlines(keepends=True), fromfile=b'a/gate.py', tofile=b'b/gate.py'))
+                exact = b''.join(line if line.endswith(b'\n') else line + b'\n\\ No newline at end of file\n'
+                                 for line in diff)
+                line = preview[1].split('recover diff bytes):\n', 1)[1].splitlines()[0]
+                self.assertEqual(json.loads(line).encode('utf-8'), exact)
+
+    def test_reviewed_mode_and_target_binding(self):
+        path = self.literal_gate()
+        args = ('--command', 'test', '.', 'true')
+        preview = self.reviewed('--preview-gate', *args)
+        self.assertEqual(preview[0], 0, preview)
+        fingerprint = self.confirmation(preview[1])
+        alias = self.root / 'alias'
+        alias.symlink_to(self.root, target_is_directory=True)
+        self.assertEqual(self.reviewed('--preview-gate', *args, target=alias), preview)
+        other = self.root / 'other'
+        other.mkdir()
+        (other / 'gate.py').write_bytes(path.read_bytes())
+        self.assertEqual(self.reviewed('--apply-gate', fingerprint, *args, target=other)[0], 2)
+        path.chmod(0o700 if path.stat().st_mode & 0o777 != 0o700 else 0o600)
+        before = self.snapshot(self.root)
+        self.assertEqual(self.reviewed('--apply-gate', fingerprint, *args)[0], 2)
+        self.assertEqual(before, self.snapshot(self.root))
 
     def generated(self, marker="pyproject.toml", requirements=False):
         (self.root / marker).write_text("" if marker != "pyproject.toml" else "[project]\nname='fixture'\nversion='0.0.0'\n")

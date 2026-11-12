@@ -332,15 +332,84 @@ checks. The entries replace only selected `COMMANDS` lists, so merge every
 required existing check into the reviewed lists before pasting. Update the
 repository's authoritative adoption map and inspect the ordinary diff. For a
 Makefile or other existing owner, transfer the selections into its native recipes.
-Execution and auto-apply remain separately authorised/manual. Execute the ordinary
-`python3 gate.py test` or other selected task only with the target's authority.
+Reviewed application is available through the explicit opt-in below. Execute the
+ordinary `python3 gate.py test` or other selected task only with the target's authority.
 Command planning supplies proposed, unexecuted selections. Native-runner inference,
-automatic script matching, automatic application and readiness certification remain
+automatic script matching, general application and readiness certification remain
 outside this capability.
 
-Six `test_plan_*` tests cover selection, deterministic preview, invalid inputs,
+The `test_plan_*` regressions cover selection, deterministic preview, invalid inputs,
 escaping, forbidden subprocesses, inert poison files and unchanged target bytes.
 Owned synthetic manual application exercises the ordinary generated `gate.py test`
 entrypoint, directory/order preservation, fail-first stopping and whole-command
 gating after a directory disappears. These are local synthetic implementation
-checks pending independent acceptance, with platform portability unproven.
+checks supported by bounded independent acceptance, with platform portability unproven.
+
+### Reviewed gate application contract
+
+The bounded implementation uses the following opt-in syntax. Review
+the exact diff and `Confirmation SHA256` line from preview. Supply that value
+explicitly on the second invocation, with identical target and selections.
+
+```sh
+python3 quality-gate/adopt.py plan /path/to/project --preview-gate \
+  --command test . 'python3 -m unittest discover -s tests -v'
+python3 quality-gate/adopt.py plan /path/to/project --apply-gate FINGERPRINT \
+  --command test . 'python3 -m unittest discover -s tests -v'
+```
+
+The mode option must follow TARGET and precede all selections. Plain `plan` keeps
+its read-only paste-ready behaviour. Preview reads existing `TARGET/gate.py` as
+inert text with the stdlib AST. Exactly one module-level simple `COMMANDS = {...}`
+assignment is supported, with unique known task-string keys and literal lists of
+strings. Selected tasks must already exist. Unsupported assignments, mutations,
+syntax and shapes are refused. UTF-8 source with an optional BOM is supported.
+Direct COMMANDS reads are restricted to task iteration through `COMMANDS.get(...)`
+or `COMMANDS[...]`. Aliases and other references require manual adaptation. This
+includes additional `COMMANDS` bindings in any scope: imports, definition names,
+parameters, exception targets, pattern captures and type parameters when supported
+by the running parser. Wildcard imports are refused because their bound names are
+unknown. `global` and `nonlocal COMMANDS` declarations are also unsupported semantic
+references. Unrelated names, strings and comments remain inert. This is a bounded
+source-shape check, with arbitrary target behaviour still requiring source review.
+Preview creates no file and executes no target code.
+
+The unified diff is printed as a JSON-escaped UTF-8 string so control characters
+stay inert. JSON decoding recovers its exact bytes, including line endings and
+missing-final-newline markers. An empty string means no proposed change.
+
+Application appends missing exact rendered commands after existing checks in each
+selected list. Existing commands, unselected tasks and surrounding bytes are kept.
+Unsuitable defaults require an explicit manual decision. The SHA-256 confirmation
+binds canonical target, original bytes, permission mode, ordered selections and
+resulting bytes. Apply requires the preview's expected value and refuses stale
+content or changed selections. Running gate tasks requires separate authority.
+
+A changing apply exclusively creates `gate.py.reviewed-backup` containing the
+original bytes and mode, and `gate.py.reviewed-tmp` containing the complete new
+file. It flushes both files, rechecks original identity/content/mode immediately
+before atomic replacement, and preserves permission mode. Existing backup/temp
+paths cause refusal. These fixed paths bound retained recovery files. Interrupted
+or failed preparation can leave these files for manual inspection and recovery.
+Keep or relocate the backup before another changing apply. No recovery file is
+automatically deleted. A fresh preview after application yields an empty diff,
+and confirmed no-change apply writes nothing, even with the retained backup.
+Reusing the old fingerprint after a changing apply refuses.
+
+The supported workflow has one implementation writer. Final rechecking handles
+ordinary stale edits. Arbitrary hostile concurrent writers and every filesystem
+race remain outside the guarantee. Local Python/macOS synthetic evidence is the
+admission boundary. General installer behaviour, runner inference, execution and
+readiness certification require separate work and evidence.
+
+The `test_reviewed_*` regressions exercise this opt-in capability with synthetic local
+fixtures. They cover byte/mode preservation, native unittest execution and failure
+propagation, confirmation and stale-edit refusal, AST shapes and decoys, bounded
+recovery, injected pre-replacement failure, exact diffs and idempotence. The complete
+owning suite passed 49 tests. Bounded independent source review and binding-refusal
+closure passed. A fresh blind consumer used public documentation to preserve its
+required check, add two native tests, expose a deliberate failure, restore them and
+make a second reviewed update. Its public product copy stayed unchanged. Command
+selection, JSON-diff inspection and backup relocation remained manual friction.
+These are local synthetic observations, not general consumer or platform readiness.
+The existing read-only plan tests remain in place.

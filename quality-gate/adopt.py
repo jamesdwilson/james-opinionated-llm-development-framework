@@ -13,15 +13,23 @@ Design rules (learned the expensive way):
 - Detection, plain file writes and a generated GATE.md. No transactions,
   journals, receipts or rollback machinery. Every change is an ordinary
   git diff reviewed like any other.
-- Never overwrite a project file. Never modify an existing Makefile.
+- Scaffolding preserves existing project files. Reviewed gate application requires
+  explicit preview confirmation. Never modify an existing Makefile.
   Anything unsafe to automate becomes a numbered instruction instead.
 
 Usage:
   adopt.py plan TARGET_DIR --command TASK DIRECTORY COMMAND [--command ...]
+  adopt.py plan TARGET_DIR --preview-gate --command TASK DIRECTORY COMMAND [...]
+  adopt.py plan TARGET_DIR --apply-gate FINGERPRINT --command TASK DIRECTORY COMMAND [...]
   adopt.py audit  TARGET_DIR          read-only status report
   adopt.py install TARGET_DIR [--ci]  install missing safe pieces + GATE.md
 """
 
+import ast
+import contextlib
+import difflib
+import hashlib
+import io
 import json
 import os
 import platform
@@ -29,6 +37,8 @@ import shlex
 import shutil
 import subprocess
 import sys
+import stat
+import tokenize
 from datetime import datetime, timezone
 
 ORDER = ["install", "test-e2e-install", "verify", "test", "build", "test-e2e"]
@@ -413,6 +423,175 @@ def emit_gate_py(found, pw, vite):
         build_dirs=fmt(build_dirs, 0), commands=fmt(commands, 1))
 
 
+def read_reviewed_gate(path):
+    """Read a regular nonsymlink gate and capture ordinary conflict identity."""
+    if not stat.S_ISREG(os.lstat(path).st_mode):
+        raise ValueError("gate.py must be a regular nonsymlink file")
+    flags = os.O_RDONLY | os.O_NONBLOCK | os.O_NOFOLLOW
+    with os.fdopen(os.open(path, flags), "rb") as stream:
+        metadata = os.fstat(stream.fileno())
+        if not stat.S_ISREG(metadata.st_mode):
+            raise ValueError("gate.py must be a regular nonsymlink file")
+        content = stream.read()
+    identity = (metadata.st_dev, metadata.st_ino, metadata.st_mode,
+                metadata.st_size, metadata.st_mtime_ns, metadata.st_ctime_ns)
+    return content, identity
+
+
+def reviewed_gate_bytes(original, commands):
+    """Insert only missing commands using AST byte positions, retaining source bytes."""
+    encoding, _ = tokenize.detect_encoding(io.BytesIO(original).readline)
+    if encoding not in ("utf-8", "utf-8-sig"):
+        raise ValueError("reviewed gate requires UTF-8 source")
+    text = original.decode(encoding)
+    tree = ast.parse(text)
+    assignments = [node for node in tree.body if isinstance(node, ast.Assign)
+                   and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
+                   and node.targets[0].id == "COMMANDS"]
+    if len(assignments) != 1:
+        raise ValueError("exactly one simple module-level COMMANDS assignment required")
+    assignment = assignments[0]
+    parents = {child: node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)}
+    # Only ordinary task iteration reads are admitted. Aliases and indirect
+    # mutation are outside this bounded editor's supported gate shape.
+    # These declarations store bound identifiers outside ast.Name. Inspect all
+    # scopes, just as for Name targets below; this is a shape check, not scope
+    # resolution or a guarantee about arbitrary Python behaviour.
+    named_bindings = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.ExceptHandler) + tuple(
+        getattr(ast, name) for name in ("MatchAs", "MatchStar", "TypeVar", "ParamSpec", "TypeVarTuple")
+        if hasattr(ast, name))
+    match_mapping = getattr(ast, "MatchMapping", ())
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            # `import a.b` binds a; `import a.b as c` binds c.
+            names = [alias.asname or alias.name.split(".")[0] for alias in node.names]
+        elif isinstance(node, ast.ImportFrom):
+            names = [alias.asname or alias.name for alias in node.names]
+            if any(alias.name == "*" for alias in node.names):
+                raise ValueError("unsupported COMMANDS binding: wildcard import")
+        elif isinstance(node, named_bindings):
+            names = [node.name]
+        elif isinstance(node, ast.arg):
+            names = [node.arg]
+        elif isinstance(node, match_mapping):
+            names = [node.rest]
+        elif isinstance(node, (ast.Global, ast.Nonlocal)):
+            if "COMMANDS" in node.names:
+                raise ValueError("unsupported COMMANDS scope declaration")
+            names = []
+        else:
+            names = []
+        if "COMMANDS" in names:
+            raise ValueError("unsupported COMMANDS binding")
+        if not isinstance(node, ast.Name) or node.id != "COMMANDS" or node is assignment.targets[0]:
+            continue
+        parent = parents[node]
+        read = parent
+        if isinstance(parent, ast.Attribute) and parent.attr == "get":
+            read = parents.get(parent)
+            if not isinstance(read, ast.Call) or read.func is not parent:
+                raise ValueError("unsupported COMMANDS reference or mutation")
+        elif not isinstance(parent, ast.Subscript) or not isinstance(parent.ctx, ast.Load):
+            raise ValueError("unsupported COMMANDS reference or mutation")
+        owner = parents.get(read)
+        if not isinstance(owner, ast.For) or owner.iter is not read or not isinstance(node.ctx, ast.Load):
+            raise ValueError("unsupported COMMANDS reference or mutation")
+    value = assignment.value
+    if not isinstance(value, ast.Dict):
+        raise ValueError("COMMANDS must be a literal dictionary")
+    lists = {}
+    for key, items in zip(value.keys, value.values):
+        if not isinstance(key, ast.Constant) or not isinstance(key.value, str) or key.value not in ORDER:
+            raise ValueError("COMMANDS keys must be known task strings")
+        if key.value in lists:
+            raise ValueError("duplicate COMMANDS task: " + ascii(key.value))
+        if not isinstance(items, ast.List) or any(not isinstance(item, ast.Constant)
+                                                or not isinstance(item.value, str) for item in items.elts):
+            raise ValueError("COMMANDS values must be literal lists of strings")
+        lists[key.value] = items
+    # AST columns count UTF-8 bytes. A BOM is outside those columns.
+    lines = text.encode("utf-8").splitlines(keepends=True)
+    offsets = [len(original) - len(text.encode("utf-8"))]
+    for line in lines:
+        offsets.append(offsets[-1] + len(line))
+    edits = []
+    for task, selected in commands.items():
+        if task not in lists:
+            raise ValueError("selected task absent from COMMANDS: " + ascii(task))
+        items = lists[task]
+        present = [item.value for item in items.elts]
+        missing = []
+        for command in selected:
+            if command not in present:
+                missing.append(command)
+                present.append(command)
+        if not missing:
+            continue
+        # Tokenization distinguishes an existing trailing comma from comments
+        # and parenthesized literals without interpreting Python text ourselves.
+        segment = ast.get_source_segment(text, items)
+        tokens = [token for token in tokenize.generate_tokens(io.StringIO(segment).readline)
+                  if token.type not in (tokenize.NL, tokenize.NEWLINE, tokenize.COMMENT,
+                                        tokenize.ENDMARKER, tokenize.INDENT, tokenize.DEDENT)]
+        trailing_comma = tokens[-2].string == ","
+        prefix = ", " if items.elts and not trailing_comma else " "
+        position = offsets[items.end_lineno - 1] + items.end_col_offset - 1
+        insertion = prefix + ", ".join(ascii(command) for command in missing)
+        edits.append((position, insertion.encode("ascii")))
+    result = original
+    for position, insertion in sorted(edits, reverse=True):
+        result = result[:position] + insertion + result[position:]
+    # Fail closed if the resulting source cannot be parsed.
+    ast.parse(result)
+    return result
+
+
+def apply_reviewed_gate(path, original, identity, result):
+    """Prepare bounded recovery files and atomically replace after a final check."""
+    backup, temporary = path + ".reviewed-backup", path + ".reviewed-tmp"
+    for recovery in (backup, temporary):
+        if os.path.lexists(recovery):
+            raise ValueError("recovery path already exists: " + ascii(recovery))
+    mode = stat.S_IMODE(identity[2])
+    for destination, content in ((backup, original), (temporary, result)):
+        with os.fdopen(os.open(destination, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "wb") as stream:
+            stream.write(content)
+            stream.flush()
+            os.fchmod(stream.fileno(), mode)
+            os.fsync(stream.fileno())
+    if read_reviewed_gate(path) != (original, identity):
+        raise ValueError("gate.py changed during preparation; recovery files retained")
+    os.replace(temporary, path)
+
+
+def reviewed_gate(target, selections, commands, expected):
+    path = os.path.join(target, "gate.py")
+    original, identity = read_reviewed_gate(path)
+    result = reviewed_gate_bytes(original, commands)
+    binding = json.dumps([path, original.hex(), stat.S_IMODE(identity[2]), selections, result.hex()],
+                         ensure_ascii=True, separators=(",", ":")).encode("ascii")
+    fingerprint = hashlib.sha256(binding).hexdigest()
+    if expected is not None:
+        if expected != fingerprint:
+            raise ValueError("confirmation mismatch; preview the unchanged target and selections first")
+        if result != original:
+            apply_reviewed_gate(path, original, identity, result)
+        print("Applied reviewed gate.py." if result != original else "No changes to gate.py.")
+        print("Selected commands remain unexecuted; task execution requires separate authority.")
+        return 0
+    # JSON framing keeps terminal controls inert. Explicit missing-newline
+    # markers make the unified diff describe those source bytes as well.
+    diff_lines = difflib.diff_bytes(difflib.unified_diff,
+                 original.splitlines(keepends=True), result.splitlines(keepends=True),
+                 fromfile=b"a/gate.py", tofile=b"b/gate.py", lineterm=b"\n")
+    diff = b"".join(line if line.endswith(b"\n") else line + b"\n\\ No newline at end of file\n"
+                    for line in diff_lines)
+    print("Exact unified diff as a JSON-escaped UTF-8 string (decode to recover diff bytes):")
+    print(json.dumps(diff.decode("utf-8"), ensure_ascii=True))
+    print("Confirmation SHA256: " + fingerprint)
+    return 0
+
+
 def plan(argv):
     """Validate explicit selections completely before rendering an inert preview."""
     def invalid(message):
@@ -428,6 +607,17 @@ def plan(argv):
     if not os.path.isdir(target):
         return invalid("target not found: " + ascii(argv[2]))
     arguments = argv[3:]
+    reviewed = False
+    expected = None
+    if arguments and arguments[0] == "--preview-gate":
+        reviewed = True
+        arguments = arguments[1:]
+    elif arguments and arguments[0] == "--apply-gate":
+        if len(arguments) < 2 or len(arguments[1]) != 64 or any(c not in "0123456789abcdef" for c in arguments[1]):
+            return invalid("--apply-gate requires the expected preview SHA256 fingerprint")
+        reviewed = True
+        expected = arguments[1]
+        arguments = arguments[2:]
     if not arguments:
         return invalid("at least one --command is required")
     selections = []
@@ -441,6 +631,8 @@ def plan(argv):
         arguments = arguments[4:]
         if task not in ORDER:
             return invalid("unknown task: " + ascii(task) + "; choose " + ", ".join(ORDER))
+        if reviewed and "\x00" in command:
+            return invalid("command contains NUL for " + ascii(task))
         if not command.strip():
             return invalid("command must be nonblank for " + ascii(task))
         if os.path.isabs(directory):
@@ -477,8 +669,19 @@ def plan(argv):
     lines += ["Remaining manual tasks: " + (", ".join(task for task in ORDER if task not in commands) or "none unselected"),
               "Remaining manual roles: Project Brief, BDD discovery, TDD and fast tests, Browser journeys, "
               "Bounded UX review, Error capture and recovery, Supply-chain checks, Candidate evidence and review.",
-              "Review applicability, prerequisites, required checks and evidence for every role/task.",
-              "Paste-ready entries for the existing generated COMMANDS dict (run gate.py from the target root):",
+              "Review applicability, prerequisites, required checks and evidence for every role/task."]
+    if reviewed:
+        try:
+            # Buffer output so refusals never publish a partial preview/confirmation.
+            with io.StringIO() as output, contextlib.redirect_stdout(output):
+                status = reviewed_gate(target, selections, commands, expected)
+                rendered = output.getvalue()
+            print("\n".join(lines))
+            print(rendered, end="")
+            return status
+        except (OSError, ValueError, SyntaxError, UnicodeError, RecursionError) as error:
+            return invalid(ascii(str(error)))
+    lines += ["Paste-ready entries for the existing generated COMMANDS dict (run gate.py from the target root):",
               "Replace selected COMMANDS entries only after human/agent review preserving all existing required checks.",
               "Selected lists replace each selected task's whole list. Review and merge required checks before applying.",
               "Execution and auto-apply remain separately authorised/manual.",

@@ -77,9 +77,15 @@ Partial selection is supported. Invalid selection or no selection exits 2 withou
 snippet. See the [validation and manual-application contract](quality-gate/README.md#explicit-command-plan).
 After human/agent review preserving all existing required checks, manually replace
 only selected `COMMANDS` lists, update the authoritative adoption map and review
-the diff. Execution and auto-apply remain separately authorised/manual. Broader
-role mapping remains manual. This preview executes no selected command and supplies
-no readiness certificate.
+the diff. For an existing supported literal gate, the
+[reviewed application option](quality-gate/README.md#reviewed-gate-application-contract)
+previews an exact diff with `plan TARGET --preview-gate --command ...`. Apply with
+`plan TARGET --apply-gate FINGERPRINT --command ...` using the preview value and
+identical selections. This candidate appends missing commands, preserves existing
+checks and refuses stale bytes. Unsuitable defaults require an explicit manual
+decision. Gate execution requires separate authority. Broader role mapping
+remains manual. This preview executes no selected command and supplies no readiness
+certificate.
 
 ## 3. Establish the context
 

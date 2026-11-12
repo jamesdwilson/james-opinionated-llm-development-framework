@@ -49,9 +49,47 @@ This public `install` writes scaffolding; it does not install project dependenci
 
 Existing `gate.py` and Makefile are preserved; `GATE.md` is overwritten on every scaffold run. Keep manual notes in the adoption map. Without scaffold authority, use the [manual procedure](quality-gate/README.md#do-it-by-hand) and an existing native owner; that alternative was not exercised here.
 
-Read `gate.py` and `GATE.md`. Manually paste the reviewed plan's selected entry into the existing `COMMANDS` dictionary, replacing only that task's list. In this fixture the emitted unittest list replaced the default pytest `test` list; every other entry stayed intact. There were no other required fixture tests. Existing consumers must merge all their required checks. For a Makefile or another owner, transfer reviewed selections into its native recipes. Automatic application and conflict rechecking are unimplemented.
+Read `gate.py` and `GATE.md`. Manually paste the reviewed plan's selected entry into the existing `COMMANDS` dictionary, replacing only that task's list. In this fixture the emitted unittest list replaced the default pytest `test` list; every other entry stayed intact. There were no other required fixture tests. Existing consumers must merge all their required checks. For a Makefile or another owner, transfer reviewed selections into its native recipes. That historical manual replacement remains an explicit fixture decision. The
+opt-in successor below appends commands while retaining every existing check.
 
 Update the adoption map from proposed to applied. Review `git status --short`, tracked diffs and complete new-file contents: `git diff` omits untracked scaffolding. The fixture's WALK-1 requirement linked the arithmetic pass/failure scenario to its native command. Browser/UX and service work were N/A with reasons, dependency review recorded stdlib-only scope, and candidate evidence/review remained manual. Generic generated instructions do not waive a real product's applicable requirements.
+
+### Optional reviewed application to an existing literal gate
+
+This successor candidate was exercised separately in synthetic local fixtures.
+After reviewing the current checks, preview the additive change with the same
+selection interface. The mode option follows TARGET and precedes selections.
+
+```sh
+"$PYTHON" -B "$FRAMEWORK/quality-gate/adopt.py" plan "$TARGET" --preview-gate \
+  --command test . "$PYTHON -B -I -m unittest discover -s tests -v"
+"$PYTHON" -B "$FRAMEWORK/quality-gate/adopt.py" plan "$TARGET" --apply-gate FINGERPRINT \
+  --command test . "$PYTHON -B -I -m unittest discover -s tests -v"
+```
+
+Replace `FINGERPRINT` with the exact `Confirmation SHA256` value after reviewing
+the JSON-escaped unified diff. JSON decoding yields the exact diff bytes. The
+second command requires identical selectors and unchanged gate bytes/mode.
+Existing selected commands stay first. A default pytest command would therefore
+still run before the appended unittest command. Removing an unsuitable default
+requires a separate explicit manual decision and a fresh preview.
+
+Only an existing supported simple literal `COMMANDS` dictionary is edited. This
+creates no new gate, runs no task and supplies no readiness certificate. The
+changing apply preserves mode and original bytes in `gate.py.reviewed-backup`,
+uses exclusive `gate.py.reviewed-tmp` preparation and rechecks original identity
+and bytes immediately before atomic replacement. Existing recovery paths refuse.
+Keep or relocate retained recovery files manually before a later changing apply.
+After successful application, fresh preview has an empty diff and confirmed
+no-change apply writes nothing. See the [full bounded contract and recovery
+limits](quality-gate/README.md#reviewed-gate-application-contract).
+
+Synthetic checks and bounded independent review demonstrated preserved local commands,
+appended native unittest success, deliberate assertion failure and original fail-first
+stopping. A blind consumer also completed adoption, failure/restoration and a second
+reviewed update using only public guidance, while preserving its existing check.
+It selected commands and relocated the first backup manually. Review role applicability
+and update the adoption map before separately authorised task execution.
 
 ## 4. Run the native test and gate
 
@@ -73,4 +111,4 @@ Record the candidate/tree identity, environment, commands, working directories, 
 
 This run supports local scaffolding and manual native-test adoption for this fixture. No generated dependency-install, verify, build or browser task ran. Service/restart, live providers, deployment and cross-platform acceptance remain unproven. Gate test does not itself prove environment isolation.
 
-Supported today: file-derived inspection, bounded package declarations, validated explicit preview, scaffolding and manual transfer into existing commands. Role disposition, authorisation, preserving checks, diff review and result interpretation remain manual. Automatic application, general runner/component or monorepo detection, automatic LLM mapping and portable shell behaviour remain proposed or unproven. See the [ranked remaining backlog](CONSUMER-ADOPTION.md#remaining-backlog-ranked). The documented path and raw results have been checked; no universal readiness claim follows from this handover.
+Supported today: file-derived inspection, bounded package declarations, validated explicit preview, scaffolding and manual transfer into existing commands. Role disposition, authorisation, preserving checks, diff review and result interpretation remain manual. The bounded literal-gate application candidate awaits independent acceptance. General application, runner/component or monorepo detection, automatic LLM mapping and portable shell behaviour remain proposed or unproven. See the [ranked remaining backlog](CONSUMER-ADOPTION.md#remaining-backlog-ranked). The documented path and raw results have been checked; no universal readiness claim follows from this handover.

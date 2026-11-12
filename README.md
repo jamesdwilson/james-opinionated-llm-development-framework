@@ -29,7 +29,7 @@ Keep the conclusions separate: **environment ready**, **change accepted**, and *
 
 Start with the target repository's instructions and **one authorised task**.
 
-Use the [consumer walkthrough](WALKTHROUGH.md) for the concise operator path: inspect, supply an explicit plan, apply reviewed commands manually, run the native test and report the scoped result.
+Use the [consumer walkthrough](WALKTHROUGH.md) for the concise operator path: inspect, supply an explicit plan, apply reviewed commands, run the native test and report the scoped result.
 
 - **Prepare the environment:** use [`quality-gate/`](quality-gate/README.md). Its `doctor` reports recognised configuration; it does not certify readiness. `install` creates missing scaffolding and regenerates `GATE.md` with remaining steps. The tool requires Python 3.9+, installation requires Git, and generated tasks require the project's native toolchains. Prefer no script? [Follow the manual procedure](quality-gate/README.md#do-it-by-hand).
 - **Apply the workflow:** follow [`ADOPT.md`](ADOPT.md), using [`STACK.md`](STACK.md) to map the roles to existing tools. Keep sound equivalents. Add a tool only when the task needs its role and installation is authorised.
@@ -44,7 +44,10 @@ using STACK.md; keep sound equivalents. Work on one bounded change.
 Run the required checks and report results, evidence limits and unresolved gaps.
 ```
 
-**Current status:** the playbook and Python adoption scaffolding exist. The [walkthrough](WALKTHROUGH.md) documents the verified local synthetic Python path: scaffolding, manual command application and native test success/failure. This is bounded adoption evidence, not complete environment readiness. The [adoption-kit evidence](quality-gate/README.md) covers limited synthetic-fixture checks, not a complete consumer installation. Toybox has bounded independent acceptance for owned dependencies, a cold-copy installation and a no-recording journey, not automatic framework adoption. Kept's local acceptance is retained-record attribution because its referenced final review and raw evidence are unavailable in the current corpus. CFA's later setup remains partial. See [field evidence and limits](research/field-lessons.md) and the [supported/manual scope and proposed consumer capability map](CONSUMER-ADOPTION.md#consumer-capability-state-map).
+**Current status:** the playbook and Python adoption scaffolding exist. The [walkthrough](WALKTHROUGH.md) documents the verified local synthetic Python path: scaffolding, manual command application and native test success/failure. A reviewed-application capability adds opt-in diff preview and fingerprint-confirmed
+updates to an existing supported literal `gate.py`. Bounded independent source review
+and a blind local consumer attempt passed, including preservation and repeat use.
+This is bounded adoption evidence, not complete environment readiness. The [adoption-kit evidence](quality-gate/README.md) covers limited synthetic-fixture checks, not a complete consumer installation. Toybox has bounded independent acceptance for owned dependencies, a cold-copy installation and a no-recording journey, not automatic framework adoption. Kept's local acceptance is retained-record attribution because its referenced final review and raw evidence are unavailable in the current corpus. CFA's later setup remains partial. See [field evidence and limits](research/field-lessons.md) and the [supported/manual scope and proposed consumer capability map](CONSUMER-ADOPTION.md#consumer-capability-state-map).
 
 ## The workflow
 
