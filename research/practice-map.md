@@ -66,13 +66,13 @@ This file separates authorities, empirical findings, tool capabilities, engineer
 
 **Boundary:** Documentation establishes capability, not agreement with representative users. Midscene remains advisory until the target project validates its model, prompt, fixtures, and human agreement.
 
-## Bugsink
+## Diagnostics and recovery
 
 **Role:** Isolated synthetic error capture and recovery exercise.
 
 **Documented capability:** Bugsink provides a self-hosted Sentry-compatible error tracking target. [[20]](https://www.bugsink.com/docs/)
 
-**Boundary:** Bugsink is the stack default. The affected product requirement chooses the failure, expected user behaviour, recovery, and data boundary.
+**Boundary:** Bugsink is a historical example, not the new-install default. Telemetry and hosting selection are parked; [DIAGNOSTICS.md](../DIAGNOSTICS.md) preserves the research without activation authority. Native failure/recovery checks remain independent. No empirical claim of superior agent productivity is established. The affected product requirement chooses the failure, expected user behaviour, recovery and data boundary.
 
 ## Supply chain
 

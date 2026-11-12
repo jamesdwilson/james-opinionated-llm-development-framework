@@ -4,7 +4,9 @@ Apply the cohesive stack to an existing repository without discarding sound equi
 
 These instructions govern the target repository. The playbook source repository's root `AGENTS.md` and verifier are maintenance tools for the playbook itself.
 
-> **Environment qualification first:** if the target's development environment itself needs to become trustworthy before feature work, start with [`quality-gate/`](quality-gate/README.md): run `python3 quality-gate/doctor` for a read-only report, then `python3 quality-gate/install` and finish the numbered steps it writes into the target's `GATE.md` (canonical checklist: [`checklists/quality-gate.md`](checklists/quality-gate.md)). The full stack below then produces validated candidates inside that qualified environment.
+> **Setup checks first:** if the target cannot reliably build, run and check changes, start with [`quality-gate/`](quality-gate/README.md). `doctor` audits configuration; `install` adds missing scaffolding. Neither command certifies readiness. Run the target's real checks, then assess each change against its ticket and brief. See the [checklist](checklists/quality-gate.md).
+
+> **Telemetry is parked:** [DIAGNOSTICS.md](DIAGNOSTICS.md) is a preserved draft, not an adoption prerequisite. Do not install or activate a provider. Keep the Python 3.9+ adoption core dependency-free and continue native failure/recovery checks independently.
 
 ## The adoption path
 
@@ -25,6 +27,8 @@ You need:
 - approval under the target repository's rules before adding dependencies, services, credentials, or release actions.
 
 ## 1. Inspect the target
+
+Start from its normal install, test, build and dev commands. Check what those commands actually execute before adding tooling. Keep useful application and isolation repairs; do not make a historical assurance ledger or custom installer a prerequisite for ordinary development. [CFA and Kept field lessons](research/field-lessons.md) explain the boundary.
 
 Read:
 
@@ -76,7 +80,7 @@ Follow this chain:
 7. run affected unit, integration, and contract checks;
 8. run the Playwright journey or the target's equivalent browser check;
 9. run bounded Midscene review when the slice contains a useful visual question;
-10. exercise a relevant Bugsink recovery path when operational errors are in scope;
+10. exercise minimal diagnostic capture and independently check recovery when operational errors are in scope;
 11. run the target's dependency and supply-chain checks;
 12. bind each final report to the evaluated revision and relevant environment, keeping RED tied to its earlier revision;
 13. complete the target repository's independent review and release process.
@@ -94,7 +98,7 @@ Leave:
 - observed results and evidence locations;
 - Midscene validation status and findings where used;
 - Midscene validation-record path, agreement criteria, result, and approver when validated status is claimed;
-- Bugsink isolation, data, recovery, and cleanup results where used;
+- diagnostic isolation, field allowlist, opt-out, data, recovery and cleanup results where used;
 - supply-chain results and accepted exceptions;
 - evidence limits, unresolved risks, and responsible owners.
 
@@ -107,7 +111,7 @@ Map every stack role to an existing equivalent, a justified default, N/A,
 blocked, or not run. Give the reason for every disposition.
 Keep sound equivalents and add only missing roles within current authority.
 Apply Project Brief, BDD, TDD, deterministic checks, Playwright, bounded Midscene,
-Bugsink recovery, supply-chain checks, and revision-bound evidence to one
+minimal diagnostics and recovery, supply-chain checks, and revision-bound evidence to one
 representative slice. Run the target repository's required checks and report
 results, evidence limits, substitutions, and unresolved risks.
 ```

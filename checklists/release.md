@@ -37,7 +37,8 @@ flowchart LR
 ## Failure and operations
 
 - [ ] A relevant operational failure or synthetic error is exercised when the change affects that boundary.
-- [ ] Bugsink or an isolated equivalent receives the expected synthetic event.
+- [ ] The selected diagnostics destination receives the expected synthetic event, or remote activation is explicitly blocked and not claimed.
+- [ ] If telemetry is already approved and enabled, visible disclosure, field minimisation and both standard opt-outs pass. Parked telemetry is not a reason to install or activate it.
 - [ ] Sensitive fields remain absent.
 - [ ] User state, recovery, and cleanup match the requirement.
 

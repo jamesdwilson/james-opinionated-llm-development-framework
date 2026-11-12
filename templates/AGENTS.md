@@ -20,7 +20,7 @@ Replace each placeholder that applies. Unused command lines may be removed. Keep
 - integration and contract checks: `<commands>`
 - browser journeys: `<Playwright or existing equivalent>`
 - bounded UX review: `<Midscene, human review, validated equivalent, or N/A>`
-- error capture and recovery: `<Bugsink, isolated equivalent, or N/A>`
+- diagnostics and recovery: `<OpenTelemetry / SigNoz Cloud, approved equivalent, or N/A; activation status>`
 - supply-chain checks: `<commands and policy>`
 - candidate identity and review: `<project-native process>`
 
@@ -45,7 +45,7 @@ Missing authorization, unavailable tooling, or an unexecuted required role is `b
 - Use a verified characterisation baseline for behaviour-preserving work.
 - Keep deterministic checks responsible for computable behaviour.
 - Keep Midscene within its declared visual questions and validation status.
-- Use synthetic data and isolation for Bugsink exercises.
+- Use synthetic data and isolation for diagnostic exercises. Honour both opt-out variables and never activate uploads merely by adopting the framework.
 - Follow the repository's authorization, security, review, and release rules.
 - Record observed results and evidence limits.
 

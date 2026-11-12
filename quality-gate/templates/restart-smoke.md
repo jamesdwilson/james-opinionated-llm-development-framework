@@ -20,6 +20,8 @@ sequenceDiagram
     D->>A: restart, unchanged
     D->>U: restart
     D->>U: identical entity still there
+    D->>A: normal stop after verification
+    D->>U: normal stop after verification
     D->>D: all owned processes gone, all ports free
 ```
 
@@ -34,21 +36,25 @@ One script (any language the project already uses) that:
 3. Refreshes and confirms the entity is visible.
 4. Stops the services normally (SIGINT/SIGTERM, not kill -9).
 5. Restarts them unchanged and confirms the **identical** persisted entity.
-6. Confirms every owned process has exited and every owned port is free.
+6. Stops the restarted services normally, then confirms every owned process has exited and every owned port is free.
 
 ## Rules (each one comes from a real defect)
 
 - The smoke must fail if a required port was already occupied. Never take over
   a foreign service.
 - Startup must never delete the local database.
-- Cleanup availability must not decide the result. A missing cleanup helper
-  cannot fail a passing smoke, and a failed cleanup cannot hide a failed
-  assertion.
+- Report assertion and cleanup outcomes separately. An optional file-cleanup
+  helper cannot change which assertions passed. Leaked owned services, occupied
+  ports or sensitive residue still fail the safety criterion and prevent full
+  acceptance. Preserve the original failure if cleanup also fails.
 - Use a headless browser for the UI journey if the project already has
   Playwright; otherwise exercise the API directly. Do not add a browser
   dependency just for this.
 - Keep the script under the project's normal tooling so a developer can run
   it by hand. It is evidence, not a gate runner.
+- Record which entity and fields survived restart. One passing seam does not
+  establish persistence for every product entity. Preserve failure artifacts
+  using safe, bounded paths; do not remove user data to make the run look clean.
 
 ## Reference implementation
 

@@ -13,11 +13,14 @@ flowchart LR
 The six steps, as `python3 gate.py ...`, Make targets, or an equivalent the project already has:
 
 - [ ] `install` refuses a missing lockfile and installs frozen with lifecycle scripts denied
+- [ ] `test-e2e-install` provisions the browser dependencies for the declared platform when browser checks apply
 - [ ] `verify` checks module integrity, diff hygiene and pinned tool versions
 - [ ] `test` runs the complete native suite (backend, production typecheck, frontend)
 - [ ] `build` produces the real production artifacts
 - [ ] `test-e2e` builds once and runs the established browser suites
 - [ ] No step was excluded or `|| true`'d to manufacture green
+- [ ] Ordinary tests/builds do not require a historical ledger, custom source capsule or receipt generator
+- [ ] Generated commands use the correct working directory; scaffold creation alone is not acceptance
 
 ## 2. Safety properties
 
@@ -26,6 +29,7 @@ The six steps, as `python3 gate.py ...`, Make targets, or an equivalent the proj
 - [ ] Synthetic database, uploads and runtime directories only; no household config or provider credentials
 - [ ] `envDir: false` in every Vite config; Bun routes use `--no-env-file`
 - [ ] The env-isolation regression (planted sentinel, ambient `.env*` immunity, declared runtime, real-failure self-check) is adapted and green
+- [ ] Those checks run in the actual worker through the ordinary command; unadapted TODO templates and configuration-string assertions do not satisfy them
 - [ ] Browser runner owns service startup/shutdown; owned services close
 
 ## 3. Smoke
@@ -34,12 +38,15 @@ The six steps, as `python3 gate.py ...`, Make targets, or an equivalent the proj
 - [ ] One ordinary journey, refresh, entity visible
 - [ ] Normal stop, restart, identical persisted state
 - [ ] All owned processes exit and ports free afterwards
+- [ ] Assertion outcome and cleanup outcome are recorded separately; leaked services or sensitive residue block safety acceptance without hiding the original test result
 
 ## 4. Acceptance
 
 - [ ] Fresh checkout (no copied `node_modules`, build output or runtime state)
 - [ ] `install && test-e2e-install && verify && test && test-e2e` clean: no unexpected failure, no new skip, no missing tracked input, no ambient leakage
 - [ ] The smoke passes
+- [ ] Browser acceptance used the current production build and real scoped fixture inputs, not stale copied output or invented replacement data
+- [ ] Required suites were discovered and executed: record per-suite discovered/passed/failed/skipped counts and existing skip reasons; no focused-only selection or unexpected empty run
 - [ ] One bounded independent review of the exact diff and results
 - [ ] The readiness claim names the environment and configuration at an exact revision, with its scope (for example "local macOS development"); unclaimed platforms/services are listed as unclaimed, non-blocking
 
@@ -48,3 +55,5 @@ The six steps, as `python3 gate.py ...`, Make targets, or an equivalent the proj
 - [ ] The accepted change is an ordinary reviewed Git commit
 - [ ] Evidence is preserved; nothing was deleted to look clean
 - [ ] No further acceptance rounds are invented; product development proceeds
+
+Field basis and evidence limits: [CFA and Kept lessons](../research/field-lessons.md). A concrete blocking finding still requires repair and affected rechecks; the bounded-review rule does not waive it.

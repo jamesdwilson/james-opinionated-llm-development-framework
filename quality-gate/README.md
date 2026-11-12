@@ -2,38 +2,71 @@
 
 Two ideas, kept separate:
 
-- **A ready environment.** Locked deps, honest tests, isolated config, safe
-  startup. When the tests pass, believe them. Claims name the environment
-  and its configuration at an exact revision, for a stated scope: "ready on
-  this machine, at this commit, for local development." "Ready" alone is
-  not a claim. (Standards: *qualified environment*, DO-330.)
-- **An accepted change.** One reviewed change, patch, revision or
-  modification, with evidence it does what its brief says. Fit for purpose,
-  not just compiling. (Standards: *validated candidate*, IEEE V&V.) The
-  rest of this framework owns that side. Readiness comes first: evidence
-  from an unready environment is worthless.
+- **Setup checks:** can this project reliably install dependencies, build,
+  run and execute its checks in the stated environment? Record the revision,
+  environment and demonstrated scope. Configuration inspection alone cannot
+  establish readiness, and readiness does not establish adequate test coverage.
+- **Change checks:** does this exact change meet the ticket, respect the brief
+  and support the intended goal? BDD, TDD, browser journeys and review supply
+  the evidence. A green existing suite does not automatically answer that question.
 
-Proven on Kept, November 2026: 334 web tests, 121 of 125 browser journeys
-green, restart smoke, independent review.
+The native contract was accepted on Kept, November 2026: 334 web tests,
+121 of 125 browser tests passed, four existing skips, restart smoke and
+independent review. That is evidence for Kept's local macOS setup, not
+acceptance of this Python generator or every generated stack.
+
+### Adoption-kit evidence and limits (11 November 2026)
+
+At source revision `d06ff38`, fresh synthetic macOS fixtures for Go,
+Python, Rust and Bun/Vite exercised the public `doctor` and `install`
+commands. All four generated compilable `gate.py` files and `GATE.md`;
+`doctor` left fixture bytes unchanged; repeated installation preserved
+existing source and `gate.py` bytes. This is detection and generation
+coverage, not a full adoption run.
+
+Generated `verify` passed for the minimal Go, Python and Bun/Vite
+fixtures. Rust `verify` failed because Cargo was unavailable. The Python
+fixture's unsupported build and browser paths failed, and the Bun fixture
+refused installation without a lockfile. No dependency installation,
+full native test suite, production build, browser journey or Windows/Linux
+run was accepted for these generated fixtures.
+
+The local successor includes repairs for demonstrated defects: unknown generated
+subcommands now exit 2, and Python installation requires explicit configuration
+when `requirements.txt` is absent rather than guessing a package manager.
+Nine standard-library regression tests exercise dispatch, each Python marker,
+the existing requirements route, repeat-install preservation, read-only audit,
+root/nested Playwright working directories and build-failure propagation.
+The root-level Playwright command now uses `--cwd .` rather than consuming
+`playwright` as a directory argument. These are generator checks, not real browser acceptance.
+Run `python3 -m unittest discover -s quality-gate -p 'test_*.py' -v`.
+
+Remaining limits: generated tasks use shell commands and do not establish
+cross-platform equivalence. `doctor` checks recognisable configuration, not
+semantic correctness or readiness. Generated code is scaffolding, not a complete
+environment-isolation or dependency-locking implementation. Review and adapt it;
+consumer installation and Windows/Linux acceptance remain unproven.
 
 ```mermaid
 flowchart LR
     G["gate.py<br/>the six-command contract"]
-    D["doctor<br/>the readiness check"]
+    D["doctor<br/>configuration audit"]
     E["Ready environment<br/>environment + configuration<br/>at an exact revision, scoped"]
     C["Accepted change<br/>with evidence against its brief"]
-    G -->|earns| E
-    D -->|confirms| E
-    E -->|makes its evidence believable| C
+    D -->|identifies gaps in| G
+    G -->|execute native checks<br/>and review results| E
+    E -->|provides execution conditions<br/>not requirements coverage| C
 ```
 
 ## Use it
 
-Python 3.9+ is the only requirement. macOS dev tools, desktop Linux and
-every GitHub runner already have it.
+The adoption tool requires Python 3.9+. Installation also requires Git;
+the generated commands require the target project's native toolchains.
+Check availability on the actual machine. Python availability alone is
+not evidence that a generated gate works on that operating system.
 
 ```bash
-python3 quality-gate/doctor  /path/to/project          # readiness check; read-only
+python3 quality-gate/doctor  /path/to/project          # configuration audit; read-only
 python3 quality-gate/install /path/to/project          # install safe pieces, get GATE.md
 python3 quality-gate/install /path/to/project --ci     # plus optional CI workflow
 ```
@@ -73,7 +106,8 @@ flowchart LR
 
 ## The rules
 
-Each exists because its absence caused a real defect.
+Each exists because its absence caused a real defect. See the [CFA and Kept
+field lessons](../research/field-lessons.md) for the source and limits.
 
 - **Lockfile required.** Frozen flags don't reject a missing lockfile.
 - **Isolated environment.** Explicit child env, `--no-env-file`,
@@ -82,7 +116,8 @@ Each exists because its absence caused a real defect.
 - **Synthetic state only.** Never household config or provider credentials.
 - **Loopback, strict ports, no server reuse.** A taken port fails the run.
 - **Browser runner owns its services**, and they close afterwards.
-- **Cleanup never gates tests.**
+- **Separate assertion and cleanup outcomes.** An optional helper cannot rewrite
+  a test result; leaked services or sensitive residue still block safety acceptance.
 - **Safe dev startup.** Never delete the database. State survives restart.
 - **No manufactured green.** No new skips, no broad excludes.
 
@@ -108,12 +143,12 @@ flowchart LR
 
 ## What the tool does, and never does
 
-Detects the stack, writes only missing files, writes `GATE.md` with your
-remaining steps. Three rules always: **never overwrite, never delete, no
-hidden machinery.** No transactions, journals or receipts; we built those
-once and they made more work than they saved. Whatever it can't safely
-automate (safe dev commands, env wiring, the smoke, the run itself) lands
-in `GATE.md` as numbered instructions for you or your agent.
+Detects the stack, writes missing scaffold files, and regenerates `GATE.md`
+with remaining steps. Existing `gate.py`, Makefile and isolation-test files
+are preserved; **`GATE.md` is overwritten on each install**, so keep manual
+notes elsewhere. No deletion, transactions, journals or receipts. Whatever
+it cannot safely automate (safe dev commands, env wiring, the smoke, the
+acceptance run itself) lands in `GATE.md` as numbered instructions.
 
 ```mermaid
 flowchart LR
@@ -143,7 +178,8 @@ a verdict. Changes nothing.
 toolchains with version pins; with `--ci` writes one pinned Ubuntu
 workflow; with Vite+Vitest copies the env-isolation test template; writes
 `GATE.md` (what it found, what it installed, your numbered remaining
-steps). Never modifies existing files. Everything shows in `git diff`.
+steps). Existing scaffold files are preserved; `GATE.md` is regenerated.
+Review tracked changes with `git diff` and new files with `git status`.
 
 ## Extend it
 

@@ -42,4 +42,4 @@ Use rules, examples, and questions to clarify the affected requirements.
 - TDD or deterministic checks: `<IDs>`
 - Playwright journey: `<ID or N/A>`
 - Midscene question: `<ID, validation status, or N/A>`
-- Bugsink recovery exercise: `<ID or N/A>`
+- Diagnostics and recovery exercise: `<ID or N/A; include disclosure and opt-out journeys>`

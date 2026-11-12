@@ -1,10 +1,54 @@
 # James's opinionated LLM development framework
 
-> A practical stack for taking an idea through implementation, browser testing, failure recovery, and release evidence.
+A playbook for developers and coding agents: turn a project brief into small, testable changes, then review the evidence before calling them done.
 
-Here's how it works. I've made the tough choices and done the research so you don't have to. Start with this stack, keep the tools you already like, and add only what is genuinely useful.
+## Two separate decisions
 
-The whole thing runs as one chain:
+- **Is the environment ready?** Can this project reliably install dependencies, build, run and execute its checks in the stated environment? A reliable test setup does not guarantee that the tests cover the requirements.
+- **Does the change meet the request?** Does this revision satisfy the ticket's acceptance criteria and respect the project brief? Passing the existing suite helps, but it does not prove the ticket is done.
+
+The **brief** defines the purpose and constraints. The **ticket** defines the bounded change. Tests, user journeys and review provide evidence for accepting that change.
+
+### Accepting an incoming change
+
+The subject is **one exact revision**, not the environment or the project as a whole. Review it against three separate questions:
+
+| Check | Question | Required evidence |
+| --- | --- | --- |
+| **Ticket compliance** | Does it deliver every acceptance criterion, without unapproved scope? | Each criterion maps to an observable result from the candidate and a test, inspection or demonstration that checks it. |
+| **Brief alignment** | Does it respect the intended users, constraints and non-goals? | Review affected behaviour against the relevant brief clauses, including conflicts and relevant regressions. |
+| **Goal contribution** | Does the delivered behaviour support the intended user outcome? | State the expected contribution and demonstrate the relevant user task. If the real outcome needs later user or production measurement, name that measure and leave the outcome unproven. |
+
+**Example:** the goal is to avoid repeated setup; the brief says preferences persist locally without an account; the ticket asks to retain the selected language after restart. Check that the language survives restart, that the change neither requires an account nor sends preferences elsewhere, and that the user can resume without selecting the language again. This supports the intended task; it does not establish a measured reduction in real users' effort.
+
+Use [`templates/VERIFICATION.md`](templates/VERIFICATION.md) to connect **criterion → check → observed result → exact revision**. Mark each required claim **supported**, **failed** or **unproven**. Missing evidence is unproven, not a pass. A ticket that conflicts with the brief needs the responsible owner's decision, not a silent reinterpretation by the agent.
+
+Keep the conclusions separate: **environment ready**, **change accepted**, and **user outcome demonstrated** are different claims. Passing the existing suite or verifying evidence provenance cannot replace this comparison. Accept only when required claims are supported or explicitly changed or excepted by the responsible authority; disclose any outcome measurement that remains deferred.
+
+## Start here
+
+Start with the target repository's instructions and **one authorised task**.
+
+- **Prepare the environment:** use [`quality-gate/`](quality-gate/README.md). Its `doctor` reports recognised configuration; it does not certify readiness. `install` creates missing scaffolding and regenerates `GATE.md` with remaining steps. The tool requires Python 3.9+, installation requires Git, and generated tasks require the project's native toolchains. Prefer no script? [Follow the manual procedure](quality-gate/README.md#do-it-by-hand).
+- **Apply the workflow:** follow [`ADOPT.md`](ADOPT.md), using [`STACK.md`](STACK.md) to map the roles to existing tools. Keep sound equivalents. Add a tool only when the task needs its role and installation is authorised.
+
+For a coding agent:
+
+```text
+Read https://github.com/jamesdwilson/james-opinionated-llm-development-framework
+Follow ADOPT.md and the target repository's own instructions.
+Inspect its current tools and the authorised task. Map the applicable roles
+using STACK.md; keep sound equivalents. Work on one bounded change.
+Run the required checks and report results, evidence limits and unresolved gaps.
+```
+
+**Current status:** the playbook and Python adoption scaffolding exist. The [adoption-kit evidence](quality-gate/README.md) covers limited synthetic-fixture checks, not a complete consumer installation. Kept's local acceptance applies to Kept, not every generated setup. Toybox is the planned first consumer-oriented installation validation.
+
+## The workflow
+
+Our chosen sequence is **brief → examples → TDD → complementary checks → revision-bound evidence → independent review**. Research supports parts of it, not the complete package; see [the evidence and its limits](#what-the-research-does-and-does-not-prove).
+
+The diagram groups the roles, not a requirement to install every tool. Select checks for the task and record what applies, what ran and what remains unproven.
 
 ```mermaid
 flowchart LR
@@ -15,7 +59,7 @@ flowchart LR
         T["TDD"] --> U["unit, integration,<br/>contract checks"]
     end
     subgraph FEEL["exercise it"]
-        P["Playwright journeys"] --> M["Midscene UX"] --> X["Bugsink recovery"]
+        P["Playwright journeys"] --> M["Midscene UX"] --> X["diagnostics + recovery"]
     end
     subgraph BIND["bind it"]
         S["supply chain"] --> E["revision-bound evidence"] --> R["independent review"]
@@ -23,57 +67,18 @@ flowchart LR
     SHAPE --> PROVE --> FEEL --> BIND
 ```
 
-This is meant to work as one system rather than a pile of unrelated tools. The brief defines the job. BDD removes ambiguity. TDD drives the change. Deterministic tests check the facts. Playwright exercises the real interface. Midscene gives the finished interface a visual sanity check. Bugsink captures errors during a separately checked recovery exercise. Supply-chain checks inspect what you are actually installing. Evidence and review tie the results to the exact change under consideration.
+Keep verification bite-sized: one behaviour or claim per task. Run broader checks at the change's acceptance boundary. A later check cannot excuse a failed requirement.
 
-## Why use it
-
-- **Less guesswork.** Every part of the stack has a clear job.
-- **Less, on purpose.** Fewer overlapping tools, dependencies, abstractions, and instructions give people and LLMs less to configure, patch, and misunderstand.
-- **Easy to adopt.** Keep sound tools already in the project and add only the missing pieces.
-- **Opinionated on purpose.** Bun, Playwright, Midscene, and Bugsink are the defaults, so the agent does not reopen the same tooling debate on every task.
-- **Honest about evidence.** Research informs the method, official documentation establishes tool capabilities, and stack preferences stay labelled as preferences.
-- **Easy to inspect.** Important claims point back to a requirement, test, observation, or accountable decision maker.
-
-## Less is more
-
-Use the smallest set of tools, dependencies, abstractions, code paths, and instructions that can prove the job is done. Every extra layer should earn its keep.
-
-That lines up with performance and security, but it is a design direction rather than a magic guarantee. Less unnecessary work can mean less overhead. A smaller dependency set and fewer code paths also leave fewer things to review, update, and defend. Measure the real project instead of assuming that smaller is automatically faster or safer. ISO/IEC 25010 treats performance efficiency, security, and maintainability as explicit product qualities, while NIST's Secure Software Development Framework covers third-party components and secure development practices. [[3]](https://www.iso.org/standard/78176.html) [[23]](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-218.pdf)
-
-The agent research points in the same general direction without proving that less always wins. One study found that generated repository context could increase inference cost and sometimes reduce task success, while Skeleton Coding found benefits from concise structural specifications in its evaluated settings. [[9]](https://arxiv.org/abs/2602.11988) [[14]](https://arxiv.org/abs/2610.38214)
-
-## Start here
-
-Point your coding agent at the repository and give it this:
-
-```text
-Read https://github.com/jamesdwilson/james-opinionated-llm-development-framework
-
-Read this playbook's ADOPT.md and STACK.md.
-In the target repository, read its own instructions and inspect its current stack.
-Map existing tools to the playbook roles and keep sound equivalents.
-Add only the missing roles needed for the authorised work.
-Apply the full chain to one representative slice:
-Project Brief, BDD examples, TDD implementation, deterministic checks,
-Playwright journey, bounded UX review where useful, Bugsink recovery exercise
-where operational errors matter, supply-chain checks, and revision-bound evidence.
-Run the target repository's required checks and report results, limits, and risks.
-```
-
-[`ADOPT.md`](ADOPT.md) explains how to bring the stack into an existing project. [`STACK.md`](STACK.md) defines each role, default tool, substitution rule, and evidence boundary.
-
-## The quality gate: a ready environment
-
-Two ideas, kept separate. **A ready environment**: locked deps, honest tests, isolated config, safe startup; when tests pass, believe them, claimed at an exact revision. (Standards: *qualified environment*, DO-330.) **An accepted change**: a reviewed change, patch or revision with evidence it does what its brief says. (A *validated candidate*, IEEE V&V.) The chain above produces the second; it only works on top of the first, because evidence from an unready environment is worthless.
-
-[`quality-gate/`](quality-gate/README.md) owns the first. `python3 quality-gate/doctor` checks any project read-only; `python3 quality-gate/install` writes only missing, reviewable files plus your remaining steps in `GATE.md`. Python 3.9+ is the only requirement. No transactions or receipts: every change is an ordinary git diff. Prefer no script at all? [Do it by hand](quality-gate/README.md#do-it-by-hand).
-
+<a id="the-quality-gate-a-ready-environment"></a>
 ```mermaid
 flowchart LR
-    QG["quality gate<br/>a ready environment"] -->|evidence you can believe| CH["the chain above<br/>accepted changes"]
+    QG["environment checks<br/>can the setup run reliably?"] --> E["results tied to<br/>revision and environment"]
+    E --> CH["change review<br/>does it meet the ticket and brief?"]
 ```
 
 ## What gets the final say
+
+The [CFA and Kept field lessons](research/field-lessons.md) explain our practical defaults: native commands, real worker isolation, production-built journeys, safe restart and one bounded review. These are project experience, not universal research findings.
 
 Each decision should follow the source that actually owns it:
 
@@ -88,23 +93,23 @@ Treat the stack as a useful default, not a rule you have to follow. It does not 
 
 ## Suggested stack
 
-| Stack | Why |
+| Role | Purpose |
 | --- | --- |
-| [Project Brief](#stack-project-brief) | It tells the LLM what game we are playing before it starts moving pieces. |
-| [BDD and Example Mapping](#stack-bdd) | They turn "make it work" into examples people can agree on before anyone writes code. |
-| [TDD](#stack-tdd) | It gives the model a real failing target instead of letting it guess what needs fixing. |
-| [Deterministic tests](#stack-deterministic-tests) | They are boring in the best way: same code, same answer, no model mood swings. |
-| [Bun](#stack-bun) | It covers the runtime, installs, and tests in one tool, with fast package installs and dependency scripts limited to trusted packages. |
-| [Playwright](#stack-playwright) | It clicks through the real interface and catches user-visible failures that unit tests often miss. |
-| [Midscene](#stack-midscene) | It is cool because it catches the "this technically works, but feels confusing" problems hard tests usually miss. |
-| [Bugsink](#stack-bugsink) | It lets you rehearse failure safely and prove the error went where it should. |
-| [Supply-chain checks](#stack-supply-chain) | They show what you are really installing and can give brand-new packages time to settle. |
-| [Evidence tied to the build](#stack-revision-evidence) | It answers "which exact build passed?" instead of trusting a loose green screenshot. |
-| [Fresh eyes before done](#stack-independent-review) | A separate reviewer checks the work before the builder grades their own homework. |
+| [Project Brief](#stack-project-brief) | Define users, outcomes, constraints and acceptance conditions. |
+| [BDD and Example Mapping](#stack-bdd) | Clarify rules, examples and open questions before implementation. |
+| [TDD](#stack-tdd) | Demonstrate missing behaviour, implement it, then refactor. |
+| [Deterministic tests](#stack-deterministic-tests) | Check rules, boundaries and contracts reproducibly. |
+| [Bun](#stack-bun) | Default JavaScript runtime, package manager and test runner. |
+| [Playwright](#stack-playwright) | Exercise user-visible behaviour in a browser. |
+| [Midscene](#stack-midscene) | Add bounded, advisory checks of interface clarity. |
+| [Diagnostics and recovery](#stack-diagnostics) | Native recovery checks; telemetry adoption is parked. |
+| [Supply-chain checks](#stack-supply-chain) | Inspect dependencies and available advisories. |
+| [Revision-bound evidence](#stack-revision-evidence) | Identify exactly what was tested and under which conditions. |
+| [Independent review](#stack-independent-review) | Challenge coverage, results and conclusions. |
 
 ## How each piece works
 
-Plain English comes first. The research, caveats, and implementation detail stay underneath for the clankers who want to inspect the machinery.
+Each section explains the role, its evidence boundary and the supporting sources.
 
 <a id="stack-project-brief"></a>
 ### 1. Project Brief
@@ -153,7 +158,7 @@ Full RED, GREEN, REFACTOR is the chosen operating discipline here. The research 
 <a id="stack-deterministic-tests"></a>
 ### 4. Deterministic tests
 
-Deterministic tests are boring in the best way. They do not get tired, creative, or persuaded by a confident explanation. The same code and inputs should produce the same answer every time.
+Deterministic tests check observable behaviour under controlled inputs and conditions. For example, a persistence test can check whether a saved preference survives restart. A reproducible pass establishes only what its assertions actually cover.
 
 **Under the hood:** use the simplest test that can answer the question reliably:
 
@@ -189,7 +194,7 @@ Playwright closes the awkward gap between "the function passed" and "the app wor
 <a id="stack-midscene"></a>
 ### 7. Midscene
 
-Midscene is cool because it can look at the rendered interface and call out the annoyingly human stuff hard assertions miss. It notices when a flow technically works but still feels confusing. It adds AI-assisted interaction and visual assertions through Playwright. [[19]](https://midscenejs.com/integrate-with-playwright.html)
+Midscene adds AI-assisted interaction and visual assertions through Playwright. Use it to flag possible interface problems, such as an unclear next step, rather than treating its judgement as proof of usability. [[19]](https://midscenejs.com/integrate-with-playwright.html)
 
 Use it for narrow questions such as:
 
@@ -205,22 +210,30 @@ Use it for narrow questions such as:
 **Under the hood:** Midscene is advisory by default. It cannot overrule a failed deterministic check. Count its output as release evidence only after the project has validated the model, prompt, fixtures, and agreement with responsible human judgement.
 
 <a id="stack-bugsink"></a>
-### 8. Bugsink
+<a id="stack-diagnostics"></a>
+### 8. Minimal diagnostics and recovery
 
-Bugsink lets you rehearse failure before a real user finds it. Trigger a safe synthetic error, prove it reached the error tracker without leaking sensitive data, and separately check that the product recovered the way it promised.
+**Telemetry adoption is parked.** Preserve the [diagnostics draft](DIAGNOSTICS.md) and SDK evidence; hosting remains unresolved. Do not install or activate telemetry as a framework prerequisite. Native tests can still prove the required failure and recovery behaviour without a hosted dashboard.
 
-**Under the hood:** Bugsink is a self-hosted Sentry-compatible target; use synthetic data and an isolated project. [[20]](https://www.bugsink.com/docs/)
+**Collection must be obvious and easy to stop:** show the fields and destination before collection; honour `OTEL_SDK_DISABLED=true` and `DO_NOT_TRACK=1`. No raw logs, source code, prompts or stable device identifiers by default. Public activation requires the consent/legal decision and a dedicated capped ingestion key. [DIAGNOSTICS.md](DIAGNOSTICS.md) defines the exact contract and evidence limits. This playbook does not collect or upload anything merely by being installed.
 
 ```mermaid
 flowchart LR
-    F["synthetic failure<br/>chosen by the requirement"] --> C["captured in Bugsink<br/>no sensitive data"]
+    F["synthetic operation<br/>chosen by the requirement"] --> C["minimal local report<br/>approved cloud destination"]
     C --> R["recovery verified<br/>by its owning layer"]
-    R --> X["cleanup confirmed"]
+    R --> X["opt-out + limits<br/>verified separately"]
 ```
+
+<details>
+<summary>Historical Bugsink illustration, preserved rather than deleted</summary>
+
+Bugsink was the earlier error-tracking default. Existing integrations and evidence are not automatically migrated. Its documentation establishes its historical role, not acceptance of the new diagnostics path. [[20]](https://www.bugsink.com/docs/)
 
 ![Bugsink: the stacktrace at the centre of the interface](images/bugsink-stacktrace.webp)
 
-*The stacktrace is the centre of the interface, first thing you see. Image: bugsink.com.*
+*Historical illustration. Image: bugsink.com.*
+
+</details>
 
 <a id="stack-supply-chain"></a>
 ### 9. Supply-chain checks
@@ -263,23 +276,20 @@ Keep `AGENTS.md` short enough that an agent can actually use it. Connect the sta
 
 Neither study validates this template or tells us the perfect file length. [`templates/AGENTS.md`](templates/AGENTS.md) is simply the format chosen here.
 
-## Adoption rule
+<a id="adoption-rule"></a>
+## Less is more
 
-If an existing tool already does the job well, keep it. There is no need to replace something you like just because this README names a different default. Record the equivalence in the stack map, and add the suggested tool only when the role is missing, the task needs it, and installation is authorised.
-
-The goal is a joined-up method, not a rewrite for the sake of one.
+Keep sound existing tools and record their roles in the stack map. Add only what closes a demonstrated gap. This is a design choice, not a guarantee that fewer dependencies or shorter instructions always produce better results.
 
 ## What the research does and does not prove
 
-[`research/practice-map.md`](research/practice-map.md) labels each part as:
+**Clarify intent before generating code.** TiCoder describes “guided intent clarification (i.e., partial formalization) through tests”. Its study with 15 programmers found better evaluation of generated code; its separate benchmark used idealized user feedback rather than ordinary project work. [[7]](https://arxiv.org/abs/2404.10100)
 
-- standard or handbook guidance;
-- empirical evidence;
-- documented capability;
-- engineering report;
-- James's stack choice.
+**Use tests to guide implementation.** TENET describes “defining tests as executable specifications” and reports improvements on RepoCod and RepoEval with representative tests, retrieval and iterative failure analysis. That supports test-guided generation in those settings, not a universal verdict on full RED/GREEN/REFACTOR. [[12]](https://arxiv.org/abs/2509.24148)
 
-A capability page can show that a tool supports a function. It cannot prove that the tool is best for everyone. A study supports only the population, tasks, measures, and design it actually examined.
+**Keep the conclusion proportional to the evidence.** The full workflow and tool defaults are our engineering choices. The cited engineering reports describe experience, not controlled proof of this framework. A capability page establishes a supported function, not superiority; a study supports only the tasks, population and measures it examined.
+
+[`research/practice-map.md`](research/practice-map.md) separates standards and handbook guidance, empirical studies, documented capabilities, engineering reports and our stack choices.
 
 ## Repository map
 
@@ -332,7 +342,3 @@ python3 tools/verify_playbook.py
 - [[26]](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) Anthropic Effective Harnesses for Long-Running Agents
 - [[27]](https://bun.com/docs/pm/cli/install) Bun Install and Minimum Release Age
 - [[28]](https://bun.com/docs/pm/lifecycle) Bun Lifecycle Scripts
-
-## Status
-
-The suggested stack is ready to use. It is deliberately opinionated, but not dogmatic. Tool choices are explicit, substitutions are allowed, and research claims stay within what their sources actually establish.

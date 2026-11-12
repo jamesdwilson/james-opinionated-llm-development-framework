@@ -12,7 +12,7 @@ This file defines the default roles and how they connect. Keep sound equivalents
 | Fast deterministic checks | rules, boundaries, contracts | Bun test for new JS/TS work | documented capability | use the repository's native runner |
 | Browser journeys | rendered, stateful behaviour | Playwright | maintainer guidance and documented capability | keep an established browser runner with equivalent coverage |
 | Bounded UX review | visible clarity and friction | Midscene with Playwright | documented capability; advisory until locally validated | use human review or a validated equivalent |
-| Error and recovery exercise | telemetry and recovery evidence | isolated Bugsink project or disposable instance | documented capability plus project requirements | keep an isolated equivalent tracker |
+| Diagnostics and recovery | minimal failure context and recovery evidence | native failure/recovery checks; telemetry adoption parked | documented capability plus explicit project policy | preserve approved equivalents; no extra local service |
 | Supply chain | resolved graph, advisories, publication delay | Bun audit and minimumReleaseAge | documented capability plus NIST guidance | use the package manager and security policy already authorised |
 | Candidate evidence | connect results to the evaluated change | Git or project-native release identity | SLSA-informed provenance | use the identity trusted by the project |
 | Final challenge | catch weak evidence and unsupported conclusions | project reviewer, fresh agent, or human | engineering reports and local process | follow the repository's review authority |
@@ -27,7 +27,7 @@ Each stage passes a concrete object to the next:
 4. Deterministic checks own claims that can be computed or asserted.
 5. Playwright owns rendered interaction and browser state.
 6. Midscene adds bounded observations about visible clarity.
-7. Bugsink exercises operational error capture and a relevant recovery path.
+7. Minimal diagnostics expose failure context; native tests separately prove recovery. See [DIAGNOSTICS.md](DIAGNOSTICS.md).
 8. Supply-chain checks inspect the dependencies used by the revision.
 9. The verification record connects claims, procedures, results, and limits to the project-native revision identity.
 10. Review challenges the complete chain.
@@ -43,7 +43,7 @@ flowchart LR
         TD["tdd + fast tests"]
     end
     subgraph EXER["exercise"]
-        PJ["playwright"] --> MS["midscene"] --> BS["bugsink"]
+        PJ["playwright"] --> MS["midscene"] --> BS["diagnostics + recovery"]
     end
     subgraph ASSURE["assure"]
         SC["supply chain"] --> EV["verification record"] --> RV["review"]
@@ -62,7 +62,7 @@ bunx playwright test
 bun audit
 ```
 
-Midscene and Bugsink need project-specific scripts because journeys, providers, credentials, isolation, and data boundaries vary. Put those scripts in the target repository and list them in its `AGENTS.md`.
+Midscene and diagnostics need project-specific integration because journeys, providers, credentials, isolation and data boundaries vary. Put that integration in the target repository and list it in its `AGENTS.md`. The source playbook collects no telemetry.
 
 ## Midscene boundary
 
@@ -77,7 +77,7 @@ Declare:
 
 Validated status requires a linked validation record for the exact tool, model, prompt, and fixture configuration. That record states the human-labelled sample, agreement criteria, observed result, and responsible approver. Until those criteria pass, Midscene findings remain advisory and unresolved disagreement goes to the responsible human authority.
 
-## Bugsink boundary
+## Diagnostics boundary
 
 Use synthetic data. Isolate the exercise from production. Record:
 
@@ -87,9 +87,11 @@ Use synthetic data. Isolate the exercise from production. Record:
 - the product's specified user-visible behaviour;
 - recovery and cleanup results.
 
-The stack selects Bugsink as the default target. The product requirement selects the failure and expected recovery.
+Telemetry and hosting selection are parked. [DIAGNOSTICS.md](DIAGNOSTICS.md) preserves the draft without activation authority. Native recovery checks remain independent of that decision. The product requirement selects the failure and expected recovery. Bugsink remains historical evidence, not the new-install default. Do not remove existing integrations or evidence without project-specific migration authority.
 
 ## Supply-chain boundary
+
+**Witness disposition: deferred.** It belongs to supply-chain attestation verification, not checking whether a feature meets the ticket or brief. No Witness installation, signing keys or attestation pipeline is part of the current adoption gate. Introduce it only for a named provenance consumer and policy; do not make it a prerequisite for ordinary local development.
 
 The default checks inspect the resolved graph and available advisory data. `minimumReleaseAge` applies during new resolution and does not retroactively evaluate packages already present in `bun.lock`. `bun audit` may skip a scoped registry without an advisory endpoint while retaining a successful exit code. Record age-gate applicability, exemptions, and any skipped registry. These checks do not prove that every dependency is benign. The target project's security authority owns:
 
