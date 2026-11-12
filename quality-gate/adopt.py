@@ -126,9 +126,13 @@ def detect_vite(t, strict_package_text=True):
                 raise
             # Audit reports the manifest error separately; retain its Vite path.
             pkg_text = ""
-        isolated = any("envDir: false" in open(os.path.join(t, d, c)).read()
-                       for c in cfgs
-                       if os.path.isfile(os.path.join(t, d, c)))
+        isolated = False
+        for c in cfgs:
+            if os.path.isfile(os.path.join(t, d, c)):
+                with open(os.path.join(t, d, c)) as fh:
+                    isolated = "envDir: false" in fh.read()
+                if isolated:
+                    break
         return {"dir": d if d != "." else "", "vitest": '"vitest"' in pkg_text,
                 "configs": [os.path.normpath(os.path.join(d, c)) for c in sorted(cfgs)],
                 "env_isolated": isolated,

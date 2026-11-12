@@ -4,6 +4,7 @@ Run: python3 -m unittest discover -s quality-gate -p 'test_*.py' -v
 import ast
 import contextlib
 import difflib
+import gc
 import importlib.util
 import hashlib
 import io
@@ -17,6 +18,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import warnings
 from unittest import mock
 
 SPEC = importlib.util.spec_from_file_location("adopt", Path(__file__).with_name("adopt.py"))
@@ -1263,6 +1265,116 @@ class AdoptionContracts(unittest.TestCase):
         result = self.run_gate(path, "test-e2e")
         self.assertNotEqual(result.returncode, 0)
         self.assertNotIn("+ bun", result.stdout)
+
+
+class ViteReadOwnership(unittest.TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory(prefix="vite-ownership-")
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name).resolve()
+        self.web = self.root / "web"
+        self.web.mkdir()
+        (self.web / "package.json").write_text('{"devDependencies":{"vitest":"*"}}')
+
+    def test_real_config_reads_emit_no_resource_warning(self):
+        (self.web / "vite.config.js").write_text("// envDir: false\nthrow new Error('inert');")
+        gc.collect()
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always", ResourceWarning)
+            facts = adopt.detect_vite(str(self.root))
+            gc.collect()
+        self.assertTrue(facts["env_isolated"])
+        self.assertEqual([str(w.message) for w in caught if issubclass(w.category, ResourceWarning)], [])
+
+    def test_config_handles_close_preserving_order_fields_and_shortcircuit(self):
+        names = ["vite.config.z.js", "vite.config.directory", "vite.config.a.ts", "vite.config.tail.js"]
+        (self.web / names[1]).mkdir()
+        (self.web / "tsconfig.json").write_text("{}")
+        real_open = open
+        for match in (None, 0, 2):
+            with self.subTest(match=match):
+                for index in (0, 2, 3):
+                    (self.web / names[index]).write_text("// envDir: false" if index == match else "malformed inert code")
+                handles, opened = [], []
+
+                def track(path, *args, **kwargs):
+                    handle = real_open(path, *args, **kwargs)
+                    handles.append(handle)
+                    opened.append(Path(path).name)
+                    return handle
+
+                try:
+                    with mock.patch.object(adopt.os, "listdir", return_value=names), \
+                         mock.patch("builtins.open", side_effect=track):
+                        facts = adopt.detect_vite(str(self.root))
+                    self.assertEqual(facts, {"dir": "web", "vitest": True,
+                        "configs": ["web/" + name for name in sorted(names)],
+                        "env_isolated": match is not None, "typescript": True})
+                    expected = [names[i] for i in (0, 2, 3) if match is None or i <= match]
+                    self.assertEqual(opened, ["package.json", *expected])
+                    self.assertTrue(all(handle.closed for handle in handles), opened)
+                finally:
+                    for handle in handles:
+                        handle.close()
+
+    def test_config_decode_error_propagates_and_closes_real_handle(self):
+        config = self.web / "vite.config.js"
+        config.write_bytes(b"\xff")
+        real_open = open
+        for strict in (True, False):
+            with self.subTest(strict=strict):
+                handles = []
+
+                def track(path, *args, **kwargs):
+                    handle = real_open(path, *args, **kwargs)
+                    handles.append(handle)
+                    return handle
+
+                try:
+                    with mock.patch("builtins.open", side_effect=track), self.assertRaises(UnicodeDecodeError):
+                        adopt.detect_vite(str(self.root), strict_package_text=strict)
+                    self.assertEqual(len(handles), 2)
+                    self.assertTrue(all(handle.closed for handle in handles))
+                finally:
+                    for handle in handles:
+                        handle.close()
+
+    def test_config_open_error_is_not_swallowed(self):
+        config = self.web / "vite.config.js"
+        config.write_text("// envDir: false")
+        real_open = open
+        failure = PermissionError("synthetic unreadable config")
+
+        def unreadable(path, *args, **kwargs):
+            if Path(path) == config:
+                raise failure
+            return real_open(path, *args, **kwargs)
+
+        with mock.patch("builtins.open", side_effect=unreadable), self.assertRaises(PermissionError) as raised:
+            adopt.detect_vite(str(self.root))
+        self.assertIs(raised.exception, failure)
+
+    def test_absent_config_and_package_error_behavior(self):
+        self.assertIsNone(adopt.detect_vite(str(self.root)))
+        (self.web / "vite.config.js").write_text("// envDir: false")
+        package = self.web / "package.json"
+        package.write_text('{ malformed "vitest"')
+        self.assertTrue(adopt.detect_vite(str(self.root))["vitest"])
+        package.write_bytes(b"\xff")
+        with self.assertRaises(UnicodeDecodeError):
+            adopt.detect_vite(str(self.root))
+        facts = adopt.detect_vite(str(self.root), strict_package_text=False)
+        self.assertEqual((facts["dir"], facts["vitest"], facts["env_isolated"]), ("web", False, True))
+        real_open = open
+
+        def unreadable_package(path, *args, **kwargs):
+            if Path(path) == package:
+                raise PermissionError("synthetic unreadable package")
+            return real_open(path, *args, **kwargs)
+
+        with mock.patch("builtins.open", side_effect=unreadable_package):
+            facts = adopt.detect_vite(str(self.root))
+        self.assertEqual((facts["vitest"], facts["env_isolated"]), (False, True))
 
 
 if __name__ == "__main__":
