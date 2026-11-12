@@ -1,6 +1,6 @@
 # Worked adoption: weekly digest preference
 
-This fictional example shows the cohesive stack applied to an existing Bun web application. Commands and results are illustrative. Its Bugsink integration is a retained historical equivalent, not the current new-install default; see [DIAGNOSTICS.md](../DIAGNOSTICS.md) for the selected OpenTelemetry/SigNoz direction. It is not evidence that either integration has been installed in a consumer.
+This fictional example shows the cohesive stack applied to an existing Bun web application. Commands and results are illustrative. Its Bugsink integration is a retained historical equivalent, not the current new-install default; see [DIAGNOSTICS.md](../DIAGNOSTICS.md) for the current local-default GlitchTip/MCP direction. It is not evidence that either integration has been installed in a consumer.
 
 ## Stack map
 

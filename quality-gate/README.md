@@ -74,6 +74,32 @@ python3 quality-gate/install /path/to/project --ci     # plus optional CI workfl
 install needs a git repo: every change is meant to be read as a `git diff`.
 doctor needs nothing.
 
+## Review the generated defaults before running them
+
+Generate the scaffold from the same activated toolchain environment used for
+acceptance. For Python, create/activate the isolated virtualenv first, then run
+`doctor` and `install` with that environment's `python3` on PATH. Generation pins
+the discovered versions; changing interpreters afterward can correctly fail
+`verify`. Existing `gate.py` is preserved on rerun, not silently repinned.
+
+The generator is a starting point, not native-runner discovery:
+
+- Python assumes `pytest`; declare it in the project's locked development
+  dependencies, or replace that command with the existing native runner (for
+  example `python3 -m unittest discover -v`). Do not install a new test framework
+  merely to satisfy a generated default. Review the requirements installation
+  command for lock/hash and build-hook policy before any nonempty installation.
+- Go build assumes `./cmd/server`; adapt to the existing application entrypoint.
+- Vite uses the project's `test` script and `vite build`; `tsconfig.json` adds
+  TypeScript checks. Nonstandard TypeScript configurations need an explicit
+  native typecheck command. Root Vite is reported as `.`.
+- Bun installation requires a real `bun.lock` produced by the project's normal
+  dependency-resolution workflow. Do not fabricate one. Rust requires Cargo and
+  its lockfile; missing toolchains are untested scope, not a passed path.
+- Browser and persistence checks apply when the supported product scope has a
+  browser or persistent service. A justified N/A for a pure command-line fixture
+  does not waive those requirements for a web application.
+
 ## The contract
 
 Six commands, generated for your stack as `gate.py`:

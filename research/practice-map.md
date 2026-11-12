@@ -72,7 +72,7 @@ This file separates authorities, empirical findings, tool capabilities, engineer
 
 **Documented capability:** Bugsink provides a self-hosted Sentry-compatible error tracking target. [[20]](https://www.bugsink.com/docs/)
 
-**Boundary:** Bugsink is a historical example, not the new-install default. Telemetry and hosting selection are parked; [DIAGNOSTICS.md](../DIAGNOSTICS.md) preserves the research without activation authority. Native failure/recovery checks remain independent. No empirical claim of superior agent productivity is established. The affected product requirement chooses the failure, expected user behaviour, recovery and data boundary.
+**Boundary:** Bugsink is a historical example, not the new-install default. The selected direction is GlitchTip with MCP: local by default, optional cloud by user choice. [DIAGNOSTICS.md](../DIAGNOSTICS.md) preserves earlier research separately from this decision; rollout remains unimplemented. Native failure/recovery checks remain independent. No empirical claim of superior agent productivity is established.
 
 ## Supply chain
 

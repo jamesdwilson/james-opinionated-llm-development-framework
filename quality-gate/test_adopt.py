@@ -104,6 +104,36 @@ class AdoptionContracts(unittest.TestCase):
             tokens = shlex.split(commands[task][0])
             self.assertEqual(tokens[tokens.index("--cwd") + 1], "e2e")
 
+    def test_root_vite_is_reported_as_current_directory(self):
+        (self.root / "package.json").write_text('{}')
+        (self.root / "vite.config.js").write_text('export default {envDir: false};')
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            self.assertEqual(adopt.main(["adopt.py", "audit", str(self.root)]), 0)
+        self.assertIn("vite frontend:             .", output.getvalue())
+
+    def test_javascript_vite_does_not_require_typescript(self):
+        (self.root / "package.json").write_text('{}')
+        (self.root / "vite.config.js").write_text('export default {};')
+        vite = adopt.detect_vite(str(self.root))
+        path = self.root / "gate.py"
+        path.write_text(adopt.emit_gate_py({}, None, vite))
+        commands = runpy.run_path(str(path))["COMMANDS"]
+        self.assertNotIn("tsc", " ".join(commands["test"] + commands["build"]))
+        self.assertIn("vite build", " ".join(commands["build"]))
+
+    def test_typescript_vite_preserves_typechecks(self):
+        web = self.root / "web"
+        web.mkdir()
+        (web / "package.json").write_text('{}')
+        (web / "vite.config.ts").write_text('export default {};')
+        (web / "tsconfig.json").write_text('{}')
+        path = self.root / "gate.py"
+        path.write_text(adopt.emit_gate_py({}, None, adopt.detect_vite(str(self.root))))
+        commands = runpy.run_path(str(path))["COMMANDS"]
+        self.assertIn("--cwd web tsc --noEmit", " ".join(commands["test"]))
+        self.assertIn("--cwd web tsc -b", " ".join(commands["build"]))
+
     def test_failed_build_prevents_browser_execution(self):
         path = self.root / "gate.py"
         adapter = {"name": "fixture", "build": ["exit 9"]}

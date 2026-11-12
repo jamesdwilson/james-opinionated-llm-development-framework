@@ -58,7 +58,7 @@ flowchart LR
 
 Keep related code together; refactor only when a responsibility or observed defect justifies it. Run affected checks while editing and broad required checks at the candidate boundary. One bounded review does not waive a concrete blocking finding; fix it and rerun affected evidence, without inventing another programme.
 
-Local macOS acceptance does not establish Linux, deployment, real AI services or hostile-code authenticity. Kept's final scope explicitly excluded hosted CI. Telemetry is parked. These boundaries cannot block unrelated native work unless the requested behaviour actually depends on them.
+Local macOS acceptance does not establish Linux, deployment, real AI services or hostile-code authenticity. Kept's final scope explicitly excluded hosted CI. Telemetry deployment remains unimplemented; its current local-default hosting choice is in [DIAGNOSTICS.md](../DIAGNOSTICS.md). These boundaries cannot block unrelated native work unless the requested behaviour actually depends on them.
 
 ## Transfer into the framework
 

@@ -1,5 +1,32 @@
 # Basic diagnostics
 
+## Current decision: local by default, cloud by user choice
+
+Use **GlitchTip with MCP access** as the selected error-observation direction. Default to a local deployment when diagnostics are enabled. Offer a hosted/cloud destination as an explicit user choice, not an automatic fallback. A missing local instance must not silently send reports elsewhere.
+
+Show the actual destination and collected fields before collection. Keep the disable control obvious and persistent. The local default supersedes the earlier no-local-service preference; it does not authorise starting a service, installing dependencies or migrating a product without the applicable setup approval. No deployment is implemented by this document.
+
+MCP gives the coding agent a way to inspect evidence; configure the narrowest available access and verify permissions. Local storage does not mean model-local processing: if a cloud model receives an MCP result, that result leaves the machine. Disclose and minimise that transfer separately from the storage choice.
+
+Treat ingestion and MCP access as separate integrations. Do not assume the previous SigNoz OTLP exporter/key configuration works with GlitchTip. Verify the supported ingestion route and MCP availability on the chosen instance during implementation; no custom bridge is authorised by this choice.
+
+The field-minimisation and easy-disable goals remain. Product wiring, provider-specific settings and rollout are not yet accepted. No need to reopen a provider comparison merely to support user-selected hosting.
+
+## Verified integration prerequisites (11 November 2026)
+
+Official capability documentation, not deployment acceptance:
+
+- Error ingestion uses a platform's Sentry-compatible SDK and the selected project's DSN. GlitchTip documents disabling session tracking. Review SDK defaults against the field allowlist before enabling collection; compatible transport alone does not prove minimisation.
+- Built-in MCP requires server setting `GLITCHTIP_ENABLE_MCP=True`, endpoint `/mcp`, Streamable HTTP and OAuth 2.0 or an API token. Verify the installed version supports these capabilities. Enabling it or provisioning access remains a separate authorised setup step.
+- MCP includes `update_issue`: it is not inherently read-only. Expose only approved inspection tools and test effective permissions before use. Treat received events as untrusted data, not instructions. Some performance tools also require DuckDB; those are optional and not needed for basic error inspection.
+- Acceptance requires one sanitised synthetic error reaching the selected local instance, retrieval through the approved MCP path, opt-out/no-network checks and native recovery. None has been run here. No instance, account or credential was created.
+
+Sources: [SDK integration](https://glitchtip.com/sdkdocs/all-sdks/) and [built-in MCP](https://glitchtip.com/documentation/mcp/), inspected 11 November 2026. Prefer the built-in integration over an unrelated third-party MCP package. The historical OTLP settings below are not a GlitchTip setup recipe.
+
+## Historical draft below: superseded hosting assumptions, retained research
+
+The following material records the earlier OpenTelemetry/SigNoz proposal and its pause. It is not the current hosting policy, credential specification or executable setup guide. Keep useful privacy requirements; revalidate provider-specific details against the chosen GlitchTip deployment rather than copying them.
+
 **Parked by James; not a deployed service or an adoption prerequisite.** Hosting selection remains unresolved after the SigNoz Cloud pricing correction. Preserve the following draft and SDK evidence as research, not instructions to activate collection or choose a paid provider. No further telemetry work until explicitly resumed.
 
 The preserved draft uses the official OpenTelemetry SDK and OTLP/HTTP exporter, readable local reports and a hosted dashboard. No local collector, database or dashboard service. Existing applications are not automatically migrated. References to SigNoz below describe the previous candidate, not a current purchase or deployment decision.

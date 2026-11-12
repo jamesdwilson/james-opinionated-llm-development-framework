@@ -108,7 +108,9 @@ def detect_vite(t):
         isolated = any("envDir: false" in open(os.path.join(t, d, c)).read()
                        for c in cfgs
                        if os.path.isfile(os.path.join(t, d, c)))
-        return {"dir": d if d != "." else "", "vitest": '"vitest"' in pkg_text, "env_isolated": isolated}
+        return {"dir": d if d != "." else "", "vitest": '"vitest"' in pkg_text,
+                "env_isolated": isolated,
+                "typescript": os.path.isfile(os.path.join(t, d, "tsconfig.json"))}
     return None
 
 
@@ -311,10 +313,11 @@ def emit_gate_py(found, pw, vite):
                 commands[key] += a.get(key, [])
     if vite:
         d = vite["dir"] or "."
-        commands["test"] += ["bun --no-env-file run --bun --cwd %s tsc --noEmit" % d,
-                             "bun --no-env-file run --bun --cwd %s test" % d]
-        commands["build"] += ["bun --no-env-file run --bun --cwd %s tsc -b" % d,
-                              "bun --no-env-file run --bun --cwd %s vite build" % d]
+        if vite.get("typescript", False):
+            commands["test"] += ["bun --no-env-file run --bun --cwd %s tsc --noEmit" % d]
+            commands["build"] += ["bun --no-env-file run --bun --cwd %s tsc -b" % d]
+        commands["test"] += ["bun --no-env-file run --bun --cwd %s test" % d]
+        commands["build"] += ["bun --no-env-file run --bun --cwd %s vite build" % d]
     if pw:
         e2edir = os.path.dirname(pw["configs"][0]) or "."
         commands["test-e2e-install"] = [
@@ -358,7 +361,7 @@ def main(argv):
     mf = find_makefile_gaps(target)
     has_gate_py = os.path.isfile(os.path.join(target, "gate.py"))
     dev = dev_safety(target)
-    lines = report(target, found, mf, has_gate_py, vite["dir"] if vite else None, pw, dev, osname)
+    lines = report(target, found, mf, has_gate_py, (vite["dir"] or ".") if vite else None, pw, dev, osname)
 
     if mode == "audit":
         print("\n".join(lines))

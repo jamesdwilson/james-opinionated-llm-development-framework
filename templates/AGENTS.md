@@ -20,7 +20,7 @@ Replace each placeholder that applies. Unused command lines may be removed. Keep
 - integration and contract checks: `<commands>`
 - browser journeys: `<Playwright or existing equivalent>`
 - bounded UX review: `<Midscene, human review, validated equivalent, or N/A>`
-- diagnostics and recovery: `<OpenTelemetry / SigNoz Cloud, approved equivalent, or N/A; activation status>`
+- diagnostics and recovery: `<GlitchTip + MCP: local default or explicit cloud choice; approved equivalent or N/A; activation status>`
 - supply-chain checks: `<commands and policy>`
 - candidate identity and review: `<project-native process>`
 

@@ -12,7 +12,7 @@ This file defines the default roles and how they connect. Keep sound equivalents
 | Fast deterministic checks | rules, boundaries, contracts | Bun test for new JS/TS work | documented capability | use the repository's native runner |
 | Browser journeys | rendered, stateful behaviour | Playwright | maintainer guidance and documented capability | keep an established browser runner with equivalent coverage |
 | Bounded UX review | visible clarity and friction | Midscene with Playwright | documented capability; advisory until locally validated | use human review or a validated equivalent |
-| Diagnostics and recovery | minimal failure context and recovery evidence | native failure/recovery checks; telemetry adoption parked | documented capability plus explicit project policy | preserve approved equivalents; no extra local service |
+| Diagnostics and recovery | minimal failure context and recovery evidence | native checks; GlitchTip + MCP, local default with optional cloud | selected design; deployment and integration unverified | user chooses hosting; preserve approved equivalents |
 | Supply chain | resolved graph, advisories, publication delay | Bun audit and minimumReleaseAge | documented capability plus NIST guidance | use the package manager and security policy already authorised |
 | Candidate evidence | connect results to the evaluated change | Git or project-native release identity | SLSA-informed provenance | use the identity trusted by the project |
 | Final challenge | catch weak evidence and unsupported conclusions | project reviewer, fresh agent, or human | engineering reports and local process | follow the repository's review authority |
@@ -87,7 +87,7 @@ Use synthetic data. Isolate the exercise from production. Record:
 - the product's specified user-visible behaviour;
 - recovery and cleanup results.
 
-Telemetry and hosting selection are parked. [DIAGNOSTICS.md](DIAGNOSTICS.md) preserves the draft without activation authority. Native recovery checks remain independent of that decision. The product requirement selects the failure and expected recovery. Bugsink remains historical evidence, not the new-install default. Do not remove existing integrations or evidence without project-specific migration authority.
+GlitchTip with MCP is the selected direction: local by default, cloud only by explicit user choice. [DIAGNOSTICS.md](DIAGNOSTICS.md) separates that decision from unimplemented deployment, ingestion and MCP configuration. Native recovery checks remain independent. Bugsink remains historical evidence, not the new-install default. Do not remove existing integrations or evidence without project-specific migration authority.
 
 ## Supply-chain boundary
 

@@ -102,7 +102,7 @@ Treat the stack as a useful default, not a rule you have to follow. It does not 
 | [Bun](#stack-bun) | Default JavaScript runtime, package manager and test runner. |
 | [Playwright](#stack-playwright) | Exercise user-visible behaviour in a browser. |
 | [Midscene](#stack-midscene) | Add bounded, advisory checks of interface clarity. |
-| [Diagnostics and recovery](#stack-diagnostics) | Native recovery checks; telemetry adoption is parked. |
+| [Diagnostics and recovery](#stack-diagnostics) | GlitchTip + MCP: local by default, cloud by user choice; rollout not activated. |
 | [Supply-chain checks](#stack-supply-chain) | Inspect dependencies and available advisories. |
 | [Revision-bound evidence](#stack-revision-evidence) | Identify exactly what was tested and under which conditions. |
 | [Independent review](#stack-independent-review) | Challenge coverage, results and conclusions. |
@@ -213,9 +213,9 @@ Use it for narrow questions such as:
 <a id="stack-diagnostics"></a>
 ### 8. Minimal diagnostics and recovery
 
-**Telemetry adoption is parked.** Preserve the [diagnostics draft](DIAGNOSTICS.md) and SDK evidence; hosting remains unresolved. Do not install or activate telemetry as a framework prerequisite. Native tests can still prove the required failure and recovery behaviour without a hosted dashboard.
+**Selected direction: GlitchTip with MCP, local by default.** Users may explicitly choose cloud hosting. Never fall back to cloud silently. [DIAGNOSTICS.md](DIAGNOSTICS.md) records the policy and integration boundaries; no service or upload is activated by adopting this document. Native tests still prove failure and recovery independently.
 
-**Collection must be obvious and easy to stop:** show the fields and destination before collection; honour `OTEL_SDK_DISABLED=true` and `DO_NOT_TRACK=1`. No raw logs, source code, prompts or stable device identifiers by default. Public activation requires the consent/legal decision and a dedicated capped ingestion key. [DIAGNOSTICS.md](DIAGNOSTICS.md) defines the exact contract and evidence limits. This playbook does not collect or upload anything merely by being installed.
+**Collection must be obvious and easy to stop:** show the fields and destination before collection; the product must honour both `OTEL_SDK_DISABLED=true` and `DO_NOT_TRACK=1`, including non-OTel collection paths. No raw logs, source code, prompts or stable device identifiers by default. Activation requires appropriate consent and verified credentials, access and limits for the chosen deployment. [DIAGNOSTICS.md](DIAGNOSTICS.md) separates current policy from historical provider assumptions. This playbook does not collect or upload anything merely by being installed.
 
 ```mermaid
 flowchart LR

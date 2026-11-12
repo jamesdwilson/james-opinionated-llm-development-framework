@@ -6,7 +6,7 @@ These instructions govern the target repository. The playbook source repository'
 
 > **Setup checks first:** if the target cannot reliably build, run and check changes, start with [`quality-gate/`](quality-gate/README.md). `doctor` audits configuration; `install` adds missing scaffolding. Neither command certifies readiness. Run the target's real checks, then assess each change against its ticket and brief. See the [checklist](checklists/quality-gate.md).
 
-> **Telemetry is parked:** [DIAGNOSTICS.md](DIAGNOSTICS.md) is a preserved draft, not an adoption prerequisite. Do not install or activate a provider. Keep the Python 3.9+ adoption core dependency-free and continue native failure/recovery checks independently.
+> **Diagnostics hosting is a user choice:** default to local GlitchTip with MCP; cloud requires an explicit choice. [DIAGNOSTICS.md](DIAGNOSTICS.md) defines the boundary. Deployment is not yet implemented or activated. Keep the Python 3.9+ adoption core dependency-free and native failure/recovery checks independent.
 
 ## The adoption path
 
