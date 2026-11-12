@@ -385,16 +385,31 @@ binds canonical target, original bytes, permission mode, ordered selections and
 resulting bytes. Apply requires the preview's expected value and refuses stale
 content or changed selections. Running gate tasks requires separate authority.
 
-A changing apply exclusively creates `gate.py.reviewed-backup` containing the
-original bytes and mode, and `gate.py.reviewed-tmp` containing the complete new
-file. It flushes both files, rechecks original identity/content/mode immediately
-before atomic replacement, and preserves permission mode. Existing backup/temp
-paths cause refusal. These fixed paths bound retained recovery files. Interrupted
-or failed preparation can leave these files for manual inspection and recovery.
-Keep or relocate the backup before another changing apply. No recovery file is
-automatically deleted. A fresh preview after application yields an empty diff,
-and confirmed no-change apply writes nothing, even with the retained backup.
-Reusing the old fingerprint after a changing apply refuses.
+A changing apply retains original bytes and permission mode at
+`gate.py.reviewed-backup-sha256-HEX-mode-MMMM` inside the target, where HEX is the
+64 lowercase hexadecimal SHA-256 of the original bytes and MMMM is their
+four-digit octal permission mode (including special permission bits). Distinct
+original bytes or modes have distinct backup names. Existing historical backups,
+including the legacy fixed `gate.py.reviewed-backup`, are never overwritten,
+rotated, pruned or deleted. Success reports the retained path with escaped text.
+A computed backup may be reused only after regular nonsymlink verification and
+exact original content/mode comparison; any mismatch or nonregular path refuses.
+New backups use exclusive creation, so a collision during creation also refuses.
+
+Preparation uses one fixed exclusive `gate.py.reviewed-tmp`. An existing temporary
+path refuses before backup creation, even if a matching backup exists. Interrupted
+or failed preparation can retain incomplete recovery files: inspect the reported
+paths and target, preserve evidence, then manually restore the chosen original
+bytes/mode or relocate the incomplete temporary file before a fresh preview and
+retry. Never assume an incomplete backup is usable; it must match exactly to be
+reused. No recovery file is automatically removed. Successful application flushes
+prepared files, rechecks original identity/content/mode immediately before atomic
+replacement, and preserves permission mode. Later changing applications need no
+backup relocation; backups grow only for distinct original revisions/modes in
+changing applications (including failed preparation attempts). A fresh preview
+after application yields an empty diff, and confirmed no-change apply writes
+nothing, even with retained recovery paths. Reusing the old fingerprint after a
+changing apply refuses. This is not a universal power-loss recovery guarantee.
 
 The supported workflow has one implementation writer. Final rechecking handles
 ordinary stale edits. Arbitrary hostile concurrent writers and every filesystem
@@ -405,11 +420,18 @@ readiness certification require separate work and evidence.
 The `test_reviewed_*` regressions exercise this opt-in capability with synthetic local
 fixtures. They cover byte/mode preservation, native unittest execution and failure
 propagation, confirmation and stale-edit refusal, AST shapes and decoys, bounded
-recovery, injected pre-replacement failure, exact diffs and idempotence. The complete
+recovery, injected pre-replacement failure, exact diffs and idempotence. The previously accepted
 owning suite passed 49 tests. Bounded independent source review and binding-refusal
 closure passed. A fresh blind consumer used public documentation to preserve its
 required check, add two native tests, expose a deliberate failure, restore them and
 make a second reviewed update. Its public product copy stayed unchanged. Command
 selection, JSON-diff inspection and backup relocation remained manual friction.
-These are local synthetic observations, not general consumer or platform readiness.
+The content-derived backup successor passed 53 owning tests and bounded independent
+review, including four successive changing applications without backup relocation.
+A fresh blind consumer completed three changing applications, preserved its legacy
+backup and all three new backups, demonstrated native failure/restoration and
+executed its final test/verify tasks. Parent checks confirmed the unchanged public
+snapshot, original project bytes/modes, recovery backups and final native results.
+The owning tests add successive changes, exact reuse, mode distinction, backup
+collisions and preparation-failure coverage. These are local synthetic observations, not general consumer or platform readiness.
 The existing read-only plan tests remain in place.

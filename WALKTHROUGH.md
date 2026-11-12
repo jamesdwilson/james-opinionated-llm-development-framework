@@ -76,10 +76,15 @@ requires a separate explicit manual decision and a fresh preview.
 
 Only an existing supported simple literal `COMMANDS` dictionary is edited. This
 creates no new gate, runs no task and supplies no readiness certificate. The
-changing apply preserves mode and original bytes in `gate.py.reviewed-backup`,
-uses exclusive `gate.py.reviewed-tmp` preparation and rechecks original identity
-and bytes immediately before atomic replacement. Existing recovery paths refuse.
-Keep or relocate retained recovery files manually before a later changing apply.
+changing apply preserves original bytes/mode in
+`gate.py.reviewed-backup-sha256-HEX-mode-MMMM` (original-byte SHA-256 and four-digit
+octal mode). Historical backups, including the legacy fixed backup, stay intact.
+Later changes need no backup relocation. Exact matching regular nonsymlink backups
+may be reused; mismatches refuse. Exclusive `gate.py.reviewed-tmp` preparation
+and the final original identity/content/mode check precede atomic replacement.
+An existing temporary path refuses: inspect the target and reported recovery
+paths, preserve evidence and manually restore verified bytes/mode or relocate the
+incomplete temporary file before a fresh preview/retry. No automatic pruning occurs.
 After successful application, fresh preview has an empty diff and confirmed
 no-change apply writes nothing. See the [full bounded contract and recovery
 limits](quality-gate/README.md#reviewed-gate-application-contract).
@@ -88,7 +93,9 @@ Synthetic checks and bounded independent review demonstrated preserved local com
 appended native unittest success, deliberate assertion failure and original fail-first
 stopping. A blind consumer also completed adoption, failure/restoration and a second
 reviewed update using only public guidance, while preserving its existing check.
-It selected commands and relocated the first backup manually. Review role applicability
+That accepted baseline required manual backup relocation. The content-derived backup
+successor addresses that observed friction and awaits fresh independent review and
+blind consumer acceptance. Review role applicability
 and update the adoption map before separately authorised task execution.
 
 ## 4. Run the native test and gate

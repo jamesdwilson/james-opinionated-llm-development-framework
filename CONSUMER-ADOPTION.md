@@ -12,7 +12,7 @@ Historical evidence is bounded to its recorded fixtures or consumers. Source pre
 | Retain native tools and commands per component | Unexecuted package script declarations at root and one recognised Vite frontend; broader mapping remains manual | Evidence-based component mapping; no shipped native-runner discovery |
 | Resolve detected, configured and LLM proposals | Person/LLM explicit `--command` selections share a read-only preview; supplied provenance remains unverified | One reviewable mapping path, including a no-LLM route |
 | Review changes before applying them | Bounded independently reviewed literal gate diff preview and fingerprint-confirmed application with stale-byte/selection refusal; blind local use passed | Broader file-owner support remains proposed |
-| Reapply without losing existing work | Reviewed literal gate application appends missing commands with exact deduplication; repeat use passed with manual backup relocation. Selected scaffolding preserved. `GATE.md` overwritten | Broader reapplication remains proposed |
+| Reapply without losing existing work | Reviewed literal gate application appends missing commands with exact deduplication; accepted baseline repeat use required manual backup relocation; content-derived retained backups are the successor candidate. Selected scaffolding preserved. `GATE.md` overwritten | Broader reapplication remains proposed |
 | Run gates and expose failures | Synthetic Python native unittest and manually selected generated gate both passed; deliberate assertion produced gate exit 1; restored fixture passed | Native dependency installation, production builds and applicable journeys remain consumer-specific and unproven here |
 | Prove isolation, restart and closure; bind evidence | Manual procedures; templates require adaptation | Separate assertions, cleanup, counts, skips, revision and scope |
 
@@ -213,9 +213,12 @@ owns removal of unsuitable defaults and applicability of required checks.
 
 The fingerprint binds canonical target, original bytes/mode, ordered selections
 and resulting bytes. Changed bytes or selectors refuse. A changing apply retains
-one exclusive backup, prepares an exclusive temporary file, flushes both and
-rechecks original content/identity immediately before atomic replacement. Recovery
-collisions refuse. Fresh confirmed no-change application writes nothing. The
+an original-byte SHA-256/mode-named backup per distinct original revision/mode,
+reusing only an exact matching regular nonsymlink file. Historical and legacy
+backups remain intact without pruning. It exclusively prepares one fixed temporary
+file, flushes prepared files and rechecks original content/identity/mode immediately
+before atomic replacement. Backup mismatch or temporary collision refuses with
+manual recovery guidance. Fresh confirmed no-change application writes nothing. The
 [operator contract](quality-gate/README.md#reviewed-gate-application-contract)
 details file names, source-shape restrictions and recovery. One-writer operation
 and ordinary stale-edit refusal are the demonstrated scope. Hostile concurrent
@@ -224,7 +227,7 @@ writers and every filesystem race remain outside the guarantee.
 Reviewed-application regressions cover this capability in synthetic local fixtures, including real
 generated gate execution of one native unittest, assertion failure and retained
 fail-first behaviour. Preview/application guard target execution, subprocesses
-and sockets. The final owning suite passed 49 tests; bounded independent source
+and sockets. The previously accepted owning suite passed 49 tests; bounded independent source
 review and binding-refusal closure passed. No target task runs during
 preview/application. Broader consumer readiness, platforms, runner inference and
 research boundaries retain their prior limits.
@@ -234,15 +237,23 @@ synthetic Python project. It preserved the original required check, added two
 native tests, demonstrated failure/restoration and made a second reviewed update.
 The product copy remained unchanged. The supervising parent checked those results
 and independently proved the old required check could still fail the gate before
-the native tests. Manual command selection, escaped-diff inspection, backup
-relocation and an unnecessary generic installation suggestion remain usability
-findings, not evidence that broader adoption is solved.
+the native tests. That attempt exposed backup relocation, escaped-diff inspection
+and an unnecessary generic installation suggestion as usability findings.
+
+The content-derived backup successor passed 53 owning tests and bounded independent
+review. A fresh blind consumer then completed three changing applications without
+moving recovery history, preserved its legacy backup and three new backups, and
+demonstrated native failure/restoration and successful final test/verify tasks.
+Parent checks matched the unchanged public snapshot, original project bytes/modes,
+recovery backups, raw failure exits and actual final task execution. Backup
+housekeeping is resolved within this local scope; escaped-diff inspection, blanket
+installer advice and walkthrough route ambiguity remain observed friction.
 
 ## Remaining backlog (ranked)
 
 These are remaining product gaps, not implemented capabilities.
 
-1. **Repeat-use ergonomics:** improve observed backup housekeeping, escaped-diff readability and diagnostic next-action guidance without weakening confirmation or preservation. Literal `gate.py` application has bounded acceptance; other file owners and general application remain proposed. Scaffold generation writes directly and overwrites `GATE.md`.
+1. **Repeat-use ergonomics:** content-derived backups now have bounded independent and blind acceptance without manual history relocation. Correct blanket installer advice and clarify the existing-gate walkthrough; escaped-diff readability remains backlog. Literal `gate.py` application has bounded acceptance; other file owners and general application remain proposed. Scaffold generation writes directly and overwrites `GATE.md`.
 2. **Evidence-based component and native-runner mapping:** general monorepo detection, automatic declaration matching and detected/configured/LLM convergence remain proposed. Today commands are explicitly supplied and reviewed; limited marker/script reporting does not infer a runner.
 3. **Broader consumer verification:** actual dependency installation, production builds, applicable browser/restart/isolation checks and required stack-role evidence need separately authorised consumer runs. This stdlib fixture proves only the documented local path and failure propagation.
 4. **Portability:** other platforms and shells remain unsupported/unproven by this run. Review generated commands for the admitted environment before execution; no automatic portability guarantee exists.

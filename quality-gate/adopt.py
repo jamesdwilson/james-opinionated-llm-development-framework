@@ -548,20 +548,41 @@ def reviewed_gate_bytes(original, commands):
 
 def apply_reviewed_gate(path, original, identity, result):
     """Prepare bounded recovery files and atomically replace after a final check."""
-    backup, temporary = path + ".reviewed-backup", path + ".reviewed-tmp"
-    for recovery in (backup, temporary):
-        if os.path.lexists(recovery):
-            raise ValueError("recovery path already exists: " + ascii(recovery))
     mode = stat.S_IMODE(identity[2])
-    for destination, content in ((backup, original), (temporary, result)):
-        with os.fdopen(os.open(destination, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "wb") as stream:
-            stream.write(content)
-            stream.flush()
-            os.fchmod(stream.fileno(), mode)
-            os.fsync(stream.fileno())
-    if read_reviewed_gate(path) != (original, identity):
-        raise ValueError("gate.py changed during preparation; recovery files retained")
-    os.replace(temporary, path)
+    backup = (path + ".reviewed-backup-sha256-" + hashlib.sha256(original).hexdigest()
+              + "-mode-" + format(mode, "04o"))
+    temporary = path + ".reviewed-tmp"
+    try:
+        if os.path.lexists(temporary):
+            raise ValueError("temporary recovery path already exists: " + ascii(temporary))
+        prepared = []
+        if os.path.lexists(backup):
+            try:
+                retained, metadata = read_reviewed_gate(backup)
+            except (OSError, ValueError) as error:
+                raise ValueError("retained backup regular/nonsymlink verification failed: "
+                                 + ascii(backup)) from error
+            if retained != original or stat.S_IMODE(metadata[2]) != mode:
+                raise ValueError("retained backup content/mode mismatch: " + ascii(backup))
+        else:
+            prepared.append((backup, original))
+        prepared.append((temporary, result))
+        for destination, content in prepared:
+            with os.fdopen(os.open(destination, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "wb") as stream:
+                stream.write(content)
+                stream.flush()
+                os.fchmod(stream.fileno(), mode)
+                os.fsync(stream.fileno())
+        if read_reviewed_gate(path) != (original, identity):
+            raise ValueError("gate.py changed during preparation; recovery files retained")
+        os.replace(temporary, path)
+    except (OSError, ValueError) as error:
+        raise ValueError(str(error) + "; inspect target and recovery paths " + ascii(backup)
+                         + " and " + ascii(temporary)
+                         + "; preserve evidence, manually restore verified bytes/mode or relocate"
+                         + " incomplete recovery files before a fresh preview/retry") from error
+    return backup
+
 
 
 def reviewed_gate(target, selections, commands, expected):
@@ -575,7 +596,8 @@ def reviewed_gate(target, selections, commands, expected):
         if expected != fingerprint:
             raise ValueError("confirmation mismatch; preview the unchanged target and selections first")
         if result != original:
-            apply_reviewed_gate(path, original, identity, result)
+            backup = apply_reviewed_gate(path, original, identity, result)
+            print("Retained original backup: " + ascii(backup))
         print("Applied reviewed gate.py." if result != original else "No changes to gate.py.")
         print("Selected commands remain unexecuted; task execution requires separate authority.")
         return 0

@@ -221,6 +221,73 @@ class AdoptionContracts(unittest.TestCase):
         path.write_bytes(b"# surrounding \xc3\xa9\r\nCOMMANDS = {'test': ['local-check',], 'build': [], 'verify': ['required']} # keep\r\n# tail\r\n")
         return path
 
+    def backup_path(self, original, mode):
+        # Public name contract, independent of the production implementation.
+        return self.root / ('gate.py.reviewed-backup-sha256-' +
+                            hashlib.sha256(original).hexdigest() + '-mode-' + format(mode, '04o'))
+
+    def retained_metadata(self, path):
+        metadata = path.stat()
+        return (metadata.st_ino, metadata.st_mode, metadata.st_mtime_ns,
+                metadata.st_ctime_ns, metadata.st_size)
+
+    def test_reviewed_successive_changes_reuse_modes_and_legacy(self):
+        path = self.literal_gate()
+        legacy = self.root / 'gate.py.reviewed-backup'
+        legacy.write_bytes(b'legacy history')
+        legacy.chmod(0o640)
+        history = []
+        for index, mode in enumerate((0o751, 0o640, 0o700)):
+            path.chmod(mode)
+            original = path.read_bytes()
+            args = ('--command', 'test', '.', 'revision-' + str(index))
+            preview = self.reviewed('--preview-gate', *args)
+            result = self.reviewed('--apply-gate', self.confirmation(preview[1]), *args)
+            self.assertEqual(result[0], 0, result)
+            backup = self.backup_path(original, mode)
+            self.assertIn(ascii(str(backup)), result[1])
+            history.append((backup, original, mode, self.retained_metadata(backup)))
+            self.assertEqual(path.stat().st_mode & 0o7777, mode)
+            self.assertFalse((self.root / 'gate.py.reviewed-tmp').exists())
+            for retained, content, permissions, metadata in history:
+                self.assertEqual(retained.read_bytes(), content)
+                self.assertEqual(self.retained_metadata(retained), metadata)
+                self.assertEqual(retained.stat().st_mode & 0o7777, permissions)
+        self.assertEqual(len(list(self.root.glob('gate.py.reviewed-backup-sha256-*'))), 3)
+        self.assertEqual(legacy.read_bytes(), b'legacy history')
+        self.assertEqual(legacy.stat().st_mode & 0o7777, 0o640)
+        # Controlled restoration reuses the exact backup without touching its inode/metadata.
+        backup, original, mode, metadata = history[0]
+        path.write_bytes(original)
+        path.chmod(mode)
+        args = ('--command', 'test', '.', 'restored-change')
+        preview = self.reviewed('--preview-gate', *args)
+        self.assertEqual(self.reviewed('--apply-gate', self.confirmation(preview[1]), *args)[0], 0)
+        self.assertEqual(self.retained_metadata(backup), metadata)
+        self.assertEqual(backup.read_bytes(), original)
+        # Same original bytes, only mode differs: a separate recoverable backup.
+        path.write_bytes(original)
+        path.chmod(0o754)
+        preview = self.reviewed('--preview-gate', *args)
+        self.assertEqual(self.reviewed('--apply-gate', self.confirmation(preview[1]), *args)[0], 0)
+        self.assertEqual(self.backup_path(original, 0o754).read_bytes(), original)
+        self.assertEqual(self.backup_path(original, 0o754).stat().st_mode & 0o7777, 0o754)
+        self.assertEqual(self.retained_metadata(backup), metadata)
+        self.assertEqual(len(list(self.root.glob('gate.py.reviewed-backup-sha256-*'))), 4)
+
+    def test_reviewed_repeat_changes_without_legacy_relocation(self):
+        path = self.literal_gate()
+        path.chmod(0o644)
+        originals = []
+        for command in ('second-required-check', 'third-required-check', 'fourth-required-check'):
+            originals.append(path.read_bytes())
+            args = ('--command', 'test', '.', command)
+            preview = self.reviewed('--preview-gate', *args)
+            result = self.reviewed('--apply-gate', self.confirmation(preview[1]), *args)
+            self.assertEqual(result[0], 0, result)
+        for original in originals:
+            self.assertEqual(self.backup_path(original, 0o644).read_bytes(), original)
+
     def test_reviewed_multi_task_preservation_and_idempotence(self):
         path = self.literal_gate()
         path.chmod(0o751)
@@ -242,13 +309,14 @@ class AdoptionContracts(unittest.TestCase):
         values = ast.literal_eval(ast.parse(after).body[0].value)
         self.assertEqual(values['test'], ['local-check', '(cd ./. && (\nnew-check\n))'])
         self.assertEqual(values['build'], ['(cd ./. && (\nbuild-check\n))'])
-        backup = self.root / 'gate.py.reviewed-backup'
+        backup = self.backup_path(before, 0o751)
         self.assertEqual(backup.read_bytes(), before)
         self.assertEqual(path.stat().st_mode & 0o7777, 0o751)
         self.assertEqual(backup.stat().st_mode & 0o7777, 0o751)
         self.assertEqual(self.reviewed('--apply-gate', fingerprint, *args)[0], 2)
         repeated = self.reviewed('--preview-gate', *args)
         self.assertNotIn('--- ', repeated[1])
+        (self.root / 'gate.py.reviewed-tmp').write_bytes(b'incomplete but no-change needs no preparation')
         snapshot = self.snapshot(self.root)
         self.assertEqual(self.reviewed('--apply-gate', self.confirmation(repeated[1]), *args)[0], 0)
         self.assertEqual(snapshot, self.snapshot(self.root))
@@ -426,7 +494,7 @@ class AdoptionContracts(unittest.TestCase):
         rendered = '(cd ./. && (\n' + command + '\n))'
         self.assertEqual(path.read_bytes(), original.replace(b"['exit 7']",
                          ("['exit 7', " + ascii(rendered) + ']').encode(), 1))
-        self.assertEqual((self.root / 'gate.py.reviewed-backup').read_bytes(), original)
+        self.assertEqual(self.backup_path(original, path.stat().st_mode & 0o7777).read_bytes(), original)
         self.assertFalse((self.root / 'selected-marker').exists())
 
     def test_reviewed_target_and_directory_constraints(self):
@@ -456,17 +524,85 @@ class AdoptionContracts(unittest.TestCase):
 
     def test_reviewed_backup_and_temp_collision(self):
         path = self.literal_gate()
+        path.chmod(0o751)
+        original = path.read_bytes()
+        backup = self.backup_path(original, 0o751)
         args = ('--command', 'test', '.', 'true')
         preview = self.reviewed('--preview-gate', *args)
         self.assertEqual(preview[0], 0, preview)
-        for name in ['gate.py.reviewed-backup', 'gate.py.reviewed-tmp']:
-            collision = self.root / name
-            collision.write_text('owned')
-            before = path.read_bytes()
-            self.assertEqual(self.reviewed('--apply-gate', self.confirmation(preview[1]), *args)[0], 2)
-            self.assertEqual(path.read_bytes(), before)
-            self.assertEqual(collision.read_text(), 'owned')
-            collision.rename(self.root / (name + '.retained'))
+        # Replaces fixed-backup collision policy: computed collisions still fail closed.
+        for kind in ('wrong-content', 'wrong-mode', 'directory', 'symlink', 'fifo', 'temp'):
+            with self.subTest(kind=kind):
+                collision = self.root / 'gate.py.reviewed-tmp' if kind == 'temp' else backup
+                if kind == 'directory':
+                    collision.mkdir()
+                elif kind == 'symlink':
+                    collision.symlink_to(path)
+                elif kind == 'fifo':
+                    os.mkfifo(collision)
+                else:
+                    collision.write_bytes(original if kind == 'wrong-mode' else b'owned')
+                    collision.chmod(0o751 if kind == 'wrong-content' else 0o600)
+                collision_metadata = collision.lstat()
+                before = self.snapshot(self.root) if kind != 'fifo' else None
+                result = self.reviewed('--apply-gate', self.confirmation(preview[1]), *args)
+                self.assertEqual(result[0], 2, result)
+                self.assertEqual(path.read_bytes(), original)
+                self.assertEqual(collision.lstat().st_mode, collision_metadata.st_mode)
+                self.assertEqual(collision.lstat().st_ino, collision_metadata.st_ino)
+                self.assertEqual(path.stat().st_mode & 0o7777, 0o751)
+                if before is not None:
+                    self.assertEqual(self.snapshot(self.root), before)
+                if kind == 'temp':
+                    self.assertIn('inspect', result[2].lower())
+                    self.assertFalse(backup.exists())
+                collision.rename(self.root / ('retained-' + kind))
+
+    def test_reviewed_preparation_flush_failure_preserves_original(self):
+        path = self.literal_gate()
+        original = path.read_bytes()
+        mode = path.stat().st_mode & 0o7777
+        args = ('--command', 'test', '.', 'true')
+        preview = self.reviewed('--preview-gate', *args)
+        real_fsync = os.fsync
+        calls = 0
+        def fail_temporary_flush(fd):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise OSError('injected temporary flush failure')
+            real_fsync(fd)
+        with mock.patch.object(os, 'fsync', side_effect=fail_temporary_flush), \
+             mock.patch.object(os, 'replace', side_effect=AssertionError('no replacement after failed flush')):
+            result = self.reviewed('--apply-gate', self.confirmation(preview[1]), *args)
+        self.assertEqual(result[0], 2, result)
+        self.assertEqual(calls, 2)
+        self.assertEqual(path.read_bytes(), original)
+        self.assertEqual(path.stat().st_mode & 0o7777, mode)
+        self.assertEqual(self.backup_path(original, mode).read_bytes(), original)
+        self.assertEqual(self.backup_path(original, mode).stat().st_mode & 0o7777, mode)
+        self.assertTrue((self.root / 'gate.py.reviewed-tmp').is_file())
+        before = self.snapshot(self.root)
+        self.assertEqual(self.reviewed('--apply-gate', self.confirmation(preview[1]), *args)[0], 2)
+        self.assertEqual(self.snapshot(self.root), before)
+
+    def test_reviewed_exclusive_backup_create_race(self):
+        path = self.literal_gate()
+        original = path.read_bytes()
+        backup = self.backup_path(original, path.stat().st_mode & 0o7777)
+        args = ('--command', 'test', '.', 'true')
+        preview = self.reviewed('--preview-gate', *args)
+        real_open = os.open
+        def collide(destination, flags, *rest):
+            if destination == str(backup):
+                backup.write_bytes(b'racing owner')
+            return real_open(destination, flags, *rest)
+        with mock.patch.object(os, 'open', side_effect=collide):
+            result = self.reviewed('--apply-gate', self.confirmation(preview[1]), *args)
+        self.assertEqual(result[0], 2, result)
+        self.assertEqual(path.read_bytes(), original)
+        self.assertEqual(backup.read_bytes(), b'racing owner')
+        self.assertFalse((self.root / 'gate.py.reviewed-tmp').exists())
 
     def test_reviewed_failure_before_replace_and_final_conflict(self):
         path = self.literal_gate()
@@ -477,10 +613,15 @@ class AdoptionContracts(unittest.TestCase):
         with mock.patch.object(os, 'replace', side_effect=OSError('injected before replace')):
             self.assertEqual(self.reviewed('--apply-gate', self.confirmation(preview[1]), *args)[0], 2)
         self.assertEqual(path.read_bytes(), before)
-        self.assertEqual((self.root / 'gate.py.reviewed-backup').read_bytes(), before)
-        # Retain recovery evidence and make room for a new explicitly reviewed attempt.
-        for name in ['gate.py.reviewed-backup', 'gate.py.reviewed-tmp']:
-            (self.root / name).rename(self.root / (name + '.retained'))
+        self.assertEqual(self.backup_path(before, path.stat().st_mode & 0o7777).read_bytes(), before)
+        # The fixed incomplete temporary file still blocks retry; backup remains reusable.
+        snapshot = self.snapshot(self.root)
+        refused = self.reviewed('--apply-gate', self.confirmation(preview[1]), *args)
+        self.assertEqual(refused[0], 2)
+        self.assertIn('inspect', refused[2].lower())
+        self.assertEqual(snapshot, self.snapshot(self.root))
+        temporary = self.root / 'gate.py.reviewed-tmp'
+        temporary.rename(self.root / 'gate.py.reviewed-tmp.retained')
         real_fsync = os.fsync
         def edit_during_preparation(fd):
             real_fsync(fd)

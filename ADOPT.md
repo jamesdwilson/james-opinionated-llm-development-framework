@@ -82,7 +82,11 @@ the diff. For an existing supported literal gate, the
 previews an exact diff with `plan TARGET --preview-gate --command ...`. Apply with
 `plan TARGET --apply-gate FINGERPRINT --command ...` using the preview value and
 identical selections. This candidate appends missing commands, preserves existing
-checks and refuses stale bytes. Unsuitable defaults require an explicit manual
+checks and refuses stale bytes. Changing applications retain original bytes/mode
+in content-derived backups without manual relocation; exact matching regular
+nonsymlink backups may be reused, while mismatches and a retained fixed temporary
+path refuse. Historical backups are never automatically removed. See the linked
+contract for naming and manual recovery. Unsuitable defaults require an explicit manual
 decision. Gate execution requires separate authority. Broader role mapping
 remains manual. This preview executes no selected command and supplies no readiness
 certificate.
