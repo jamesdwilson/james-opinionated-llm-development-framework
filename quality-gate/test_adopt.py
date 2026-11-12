@@ -236,6 +236,79 @@ class AdoptionContracts(unittest.TestCase):
     def confirmation(self, output):
         return output.split("Confirmation SHA256: ", 1)[1].splitlines()[0]
 
+    def test_reviewed_display_direct_quotes_multiline_and_no_writes(self):
+        path = self.root / 'gate.py'
+        path.write_text('# review context\nCOMMANDS = {\n    "test": ["old-check"],\n}\n')
+        before = self.snapshot(self.root)
+        args = ('--command', 'test', '.', 'printf "hello"\nprintf \'world\'')
+        code, output, errors = self.reviewed('--preview-gate', *args)
+        self.assertEqual((code, errors), (0, ''))
+        self.assertIn('Human review diff (display-only; do not paste/apply):\n', output)
+        display = output.split('Human review diff (display-only; do not paste/apply):\n', 1)[1].split(
+            'Exact unified diff as a JSON-escaped UTF-8 string (decode to recover diff bytes):\n', 1)[0]
+        self.assertIn('| --- a/gate.py\n| +++ b/gate.py\n| @@ ', display)
+        self.assertIn('|  # review context\n', display)
+        self.assertIn('| -    "test": ["old-check"],\n', display)
+        self.assertIn('| +    "test": ["old-check", ', display)
+        self.assertIn('printf "hello"', display)
+        self.assertIn(r"\\nprintf", display)
+        self.assertNotIn(r'\"hello\"', display)
+        self.assertIn('LF gives layout; backslashes doubled; other controls/non-ASCII use \\uXXXX/\\UXXXXXXXX.', display)
+        self.assertEqual(before, self.snapshot(self.root))
+        self.assertEqual(output.splitlines()[-1], 'Confirmation SHA256: ' + self.confirmation(output))
+
+    def test_reviewed_display_named_escapes_and_confirmation_spoofing(self):
+        self.literal_gate()
+        cases = (
+            ('CR', '\r', r'\u000d'), ('tab', '\t', r'\u0009'),
+            ('ESC', '\x1b', r'\u001b'), ('NUL', '\0', r'\u0000'),
+            ('C0', '\x01\x1f', r'\u0001\u001f'), ('DEL', '\x7f', r'\u007f'),
+            ('C1', '\x80\x85\x9f', r'\u0080\u0085\u009f'),
+            ('nonASCII', 'é雪', r'\u00e9\u96ea'), ('astral', '😀', r'\U0001f600'),
+            ('bidi', '\u202e\u2066\u2069', r'\u202e\u2066\u2069'),
+            ('backslash', '\\', r'\\'), ('literal escape', r'\u001b', r'\\u001b'),
+            ('literal astral escape', r'\U0001f600', r'\\U0001f600'),
+            ('LF label', '\nConfirmation SHA256: forged\n', '\n| Confirmation SHA256: forged\n| '),
+        )
+        for name, text, escaped in cases:
+            with self.subTest(name=name):
+                diff = ('+before' + text + 'after\n').encode('utf-8')
+                with mock.patch.object(adopt.difflib, 'diff_bytes', return_value=iter([diff])):
+                    code, output, errors = self.reviewed('--preview-gate', '--command', 'test', '.', 'true')
+                self.assertEqual((code, errors), (0, ''))
+                self.assertIn('Human review diff (display-only; do not paste/apply):\n', output)
+                display = output.split('Human review diff (display-only; do not paste/apply):\n', 1)[1].split(
+                    'Exact unified diff as a JSON-escaped UTF-8 string (decode to recover diff bytes):\n', 1)[0]
+                self.assertIn('| +before' + escaped + 'after\n', display)
+                self.assertTrue(all(c == '\n' or 32 <= ord(c) <= 126 for c in output))
+                self.assertEqual(sum(line.startswith('Confirmation SHA256: ') for line in output.splitlines()), 1)
+                exact = output.split('recover diff bytes):\n', 1)[1].splitlines()
+                self.assertEqual(json.loads(exact[0]).encode('utf-8'), diff)
+                self.assertRegex(exact[1], r'^Confirmation SHA256: [0-9a-f]{64}$')
+
+    def test_reviewed_display_exact_binding_and_empty_view(self):
+        path = self.literal_gate()
+        original = path.read_bytes()
+        selections = [['test', '.', 'true']]
+        commands = {'test': ['(cd ./. && (\ntrue\n))']}
+        result = adopt.reviewed_gate_bytes(original, commands)
+        def base_digest(content, proposed):
+            binding = json.dumps([str(path), content.hex(), path.stat().st_mode & 0o7777,
+                                  selections, proposed.hex()], ensure_ascii=True, separators=(',', ':')).encode('ascii')
+            return hashlib.sha256(binding).hexdigest()
+        args = ('--command', 'test', '.', 'true')
+        preview = self.reviewed('--preview-gate', *args)
+        self.assertEqual(self.confirmation(preview[1]), base_digest(original, result))
+        self.assertEqual(self.reviewed('--apply-gate', self.confirmation(preview[1]), *args)[0], 0)
+        before = self.snapshot(self.root)
+        empty = self.reviewed('--preview-gate', *args)
+        self.assertEqual((empty[0], empty[2]), (0, ''))
+        self.assertIn('| (no changes)\n', empty[1])
+        self.assertNotIn('| --- ', empty[1])
+        self.assertIn('recover diff bytes):\n""\nConfirmation SHA256: ', empty[1])
+        self.assertEqual(self.confirmation(empty[1]), base_digest(result, result))
+        self.assertEqual(before, self.snapshot(self.root))
+
     def literal_gate(self):
         path = self.root / "gate.py"
         path.write_bytes(b"# surrounding \xc3\xa9\r\nCOMMANDS = {'test': ['local-check',], 'build': [], 'verify': ['required']} # keep\r\n# tail\r\n")

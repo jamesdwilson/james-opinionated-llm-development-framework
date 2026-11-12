@@ -382,9 +382,19 @@ references. Unrelated names, strings and comments remain inert. This is a bounde
 source-shape check, with arbitrary target behaviour still requiring source review.
 Preview creates no file and executes no target code.
 
-The unified diff is printed as a JSON-escaped UTF-8 string so control characters
-stay inert. JSON decoding recovers its exact bytes, including line endings and
-missing-final-newline markers. An empty string means no proposed change.
+Preview first shows a line-oriented, display-only unified diff for direct review,
+with every diff line prefixed by `| `. Printable ASCII, including quotes and hunk
+prefixes, stays readable. LF provides layout; backslashes are doubled and every
+other control or non-ASCII codepoint is shown as `\uXXXX` or `\UXXXXXXXX`.
+This includes CR, tabs, ESC, C0/C1 controls and bidi characters. Thus literal
+backslash escape text is distinguishable from an escaped codepoint. No colours
+or terminal controls are emitted by this display. These are display escapes, not
+literal source to paste or apply. An empty diff is explicitly labelled no changes.
+
+The contiguous exact JSON header/string block remains authoritative for byte
+copying: JSON decoding recovers the exact UTF-8 diff bytes, including line endings
+and missing-final-newline markers. Its empty string still means no proposed
+change. The final `Confirmation SHA256` line and fingerprint binding are unchanged.
 
 Application appends missing exact rendered commands after existing checks in each
 selected list. Existing commands, unselected tasks and surrounding bytes are kept.

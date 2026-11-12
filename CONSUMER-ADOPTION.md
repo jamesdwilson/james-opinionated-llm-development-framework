@@ -200,8 +200,12 @@ of its retained 29/29 baseline. Broader consumer readiness remains unproven.
 
 A person and an LLM use the same existing selectors, with an explicit mode before
 selections. `plan TARGET --preview-gate --command TASK DIRECTORY COMMAND` reads
-existing `gate.py` as inert UTF-8 text and emits a JSON-escaped exact unified diff
-plus a deterministic SHA-256 confirmation. `plan TARGET --apply-gate FINGERPRINT
+existing `gate.py` as inert UTF-8 text and emits a display-only line-oriented
+unified diff for direct review, the retained authoritative JSON-escaped exact diff
+for byte copying after decoding, and a deterministic SHA-256 confirmation.
+Display lines have a `| ` prefix, readable ASCII quotes/hunk layout, doubled
+backslashes and visible escapes for controls and non-ASCII; they are not literal
+source to paste/apply. Empty display explicitly reports no changes. `plan TARGET --apply-gate FINGERPRINT
 --command TASK DIRECTORY COMMAND` requires that prior value with identical target
 and selections. The original plain plan remains read-only and paste-ready.
 
@@ -246,7 +250,7 @@ moving recovery history, preserved its legacy backup and three new backups, and
 demonstrated native failure/restoration and successful final test/verify tasks.
 Parent checks matched the unchanged public snapshot, original project bytes/modes,
 recovery backups, raw failure exits and actual final task execution. Backup
-housekeeping is resolved within this local scope. Blanket installer advice and walkthrough route ambiguity motivated the bounded guidance repair below; escaped-diff inspection remains backlog.
+housekeeping is resolved within this local scope. Blanket installer advice, walkthrough route ambiguity and escaped-diff inspection motivated the bounded repairs below.
 
 ## Existing-gate guidance repair
 
@@ -256,11 +260,24 @@ The `test_guidance_*` public-entrypoint regressions own this contract, including
 
 The final owning suite passed 59 tests. Bounded independent review reproduced eight diagnostic cases and the reviewed native pass/failure/restoration route. A fresh blind consumer followed inspection, explicit review and confirmed application without an installer or product repair, correctly distinguished inspection completion from readiness, and completed failure/restoration plus a later update. Parent checks matched the frozen public files, original project bytes/modes, retained recovery history and actual final test/verify results. These remain local synthetic observations.
 
+## Direct preview review
+
+The display-only line-oriented diff passed 63 owning tests and bounded independent
+review: 17 public runs and seven deterministic rendering cases preserved exact JSON,
+fingerprints, confirmation framing and inert control text. A fresh blind consumer
+reviewed two changes directly without a JSON decoder pipeline, preserved the old
+required check and recovery history, demonstrated assertion failure/restoration,
+and executed a later multiline syntax check. Parent checks matched the frozen public
+files, original project bytes/modes, backups, raw failure exits and final native tasks.
+Multiline string escapes and nested quotes still required the public legend and
+Python quoting knowledge; this is not proof of novice comprehension or arbitrary
+terminal security. Exact JSON remains authoritative for byte copying.
+
 ## Remaining backlog (ranked)
 
 These are remaining product gaps, not implemented capabilities.
 
-1. **Repeat-use ergonomics:** content-derived backups now have bounded independent and blind acceptance without manual history relocation. The guidance repair above addresses blanket installer advice and the existing-gate walkthrough; escaped-diff readability remains backlog. Literal `gate.py` application has bounded acceptance; other file owners and general application remain proposed. Scaffold generation writes directly and overwrites `GATE.md`.
+1. **Repeat-use ergonomics:** backups, existing-gate guidance and direct diff review now have bounded acceptance. Multiline/quoted Python string interpretation remains manual; do not treat decoder-free review as general novice usability. Literal `gate.py` application has bounded acceptance; other file owners and general application remain proposed. Scaffold generation writes directly and overwrites `GATE.md`.
 2. **Evidence-based component and native-runner mapping:** general monorepo detection, automatic declaration matching and detected/configured/LLM convergence remain proposed. Today commands are explicitly supplied and reviewed; limited marker/script reporting does not infer a runner.
 3. **Broader consumer verification:** actual dependency installation, production builds, applicable browser/restart/isolation checks and required stack-role evidence need separately authorised consumer runs. This stdlib fixture proves only the documented local path and failure propagation.
 4. **Portability:** other platforms and shells remain unsupported/unproven by this run. Review generated commands for the admitted environment before execution; no automatic portability guarantee exists.

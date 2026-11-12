@@ -50,7 +50,10 @@ selection interface. The mode option follows TARGET and precedes selections.
 ```
 
 Replace `FINGERPRINT` with the exact `Confirmation SHA256` value after reviewing
-the JSON-escaped unified diff. JSON decoding yields the exact diff bytes. The
+the display-only, line-oriented unified diff directly. Each diff line has a `| `
+prefix; doubled backslashes and visible Unicode escapes keep controls inert. Do
+not paste/apply this display as source. For exact byte copying, decode the
+contiguous authoritative JSON diff block instead. An empty display says no changes. The
 second command requires identical selectors and unchanged gate bytes/mode.
 Existing selected commands stay first. A default pytest command would therefore
 still run before the appended unittest command. Removing an unsuitable default

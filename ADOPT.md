@@ -77,7 +77,11 @@ Partial selection is supported. Invalid selection or no selection exits 2 withou
 snippet. See the [validation and manual-application contract](quality-gate/README.md#explicit-command-plan).
 For an existing supported literal gate, use the
 [reviewed application option](quality-gate/README.md#reviewed-gate-application-contract)
-to preview an exact diff with `plan TARGET --preview-gate --command ...`. Apply with
+to review a display-only line-oriented diff with
+`plan TARGET --preview-gate --command ...`. Quotes and hunk lines are directly
+readable; backslashes, controls and non-ASCII use visible escapes. Do not paste
+the display as source; the retained exact JSON block is authoritative for byte
+copying after decoding. Apply with
 `plan TARGET --apply-gate FINGERPRINT --command ...` using the preview value and
 identical selections. This candidate appends missing commands, preserves existing
 checks and refuses stale bytes. Changing applications retain original bytes/mode

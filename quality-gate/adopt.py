@@ -608,6 +608,14 @@ def reviewed_gate(target, selections, commands, expected):
                  fromfile=b"a/gate.py", tofile=b"b/gate.py", lineterm=b"\n")
     diff = b"".join(line if line.endswith(b"\n") else line + b"\n\\ No newline at end of file\n"
                     for line in diff_lines)
+    print("Human review diff (display-only; do not paste/apply):")
+    print("LF gives layout; backslashes doubled; other controls/non-ASCII use \\uXXXX/\\UXXXXXXXX.")
+    print("Exact JSON below is authoritative for byte copying after decoding.")
+    display = "".join("\\\\" if char == "\\" else char if char == "\n" or " " <= char <= "~"
+                      else ("\\u%04x" if ord(char) <= 0xffff else "\\U%08x") % ord(char)
+                      for char in diff.decode("utf-8"))
+    for line in display.removesuffix("\n").split("\n") if display else ["(no changes)"]:
+        print("| " + line)
     print("Exact unified diff as a JSON-escaped UTF-8 string (decode to recover diff bytes):")
     print(json.dumps(diff.decode("utf-8"), ensure_ascii=True))
     print("Confirmation SHA256: " + fingerprint)
