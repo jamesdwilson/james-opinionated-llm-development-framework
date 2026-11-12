@@ -31,7 +31,7 @@ Start with the target repository's instructions and **one authorised task**.
 
 Use the [consumer walkthrough](WALKTHROUGH.md) for the concise operator path: inspect, supply an explicit plan, apply reviewed commands, run the native test and report the scoped result.
 
-- **Prepare the environment:** use [`quality-gate/`](quality-gate/README.md). Its `doctor` reports recognised configuration; it does not certify readiness. `install` creates missing scaffolding and regenerates `GATE.md` with remaining steps. The tool requires Python 3.9+, installation requires Git, and generated tasks require the project's native toolchains. Prefer no script? [Follow the manual procedure](quality-gate/README.md#do-it-by-hand).
+- **Prepare the environment:** use [`quality-gate/`](quality-gate/README.md). Its `doctor` reports recognised configuration; it does not certify readiness. For an existing supported literal `gate.py`, use explicit plan → reviewed diff → confirmation → separately authorised native check; no installer is needed. With no existing gate and a matched adapter, optional `install` creates missing scaffolding and regenerates `GATE.md` with remaining steps. The tool requires Python 3.9+, installation requires Git, and generated tasks require the project's native toolchains. Prefer no script? [Follow the manual procedure](quality-gate/README.md#do-it-by-hand).
 - **Apply the workflow:** follow [`ADOPT.md`](ADOPT.md), using [`STACK.md`](STACK.md) to map the roles to existing tools. Keep sound equivalents. Add a tool only when the task needs its role and installation is authorised.
 
 For a coding agent:
@@ -44,7 +44,7 @@ using STACK.md; keep sound equivalents. Work on one bounded change.
 Run the required checks and report results, evidence limits and unresolved gaps.
 ```
 
-**Current status:** the playbook and Python adoption scaffolding exist. The [walkthrough](WALKTHROUGH.md) documents the verified local synthetic Python path: scaffolding, manual command application and native test success/failure. A reviewed-application capability adds opt-in diff preview and fingerprint-confirmed
+**Current status:** the playbook and Python adoption scaffolding exist. The [walkthrough](WALKTHROUGH.md) starts with the existing-gate route and separately retains historical scaffolding/manual transfer and native test success/failure. Reviewed application provides opt-in diff preview and fingerprint-confirmed
 updates to an existing supported literal `gate.py`. Bounded independent source review
 and a blind local consumer attempt passed, including preservation and repeat use.
 A content-derived backup successor now addresses the observed manual relocation

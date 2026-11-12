@@ -1,6 +1,6 @@
 # Consumer adoption specification
 
-Status: supported/manual adoption slice verified for the documented local synthetic path. Non-executing inspection and package-script reporting retain bounded independent acceptance. Explicit command planning has bounded independent review with the empty-target finding closed; the accepted source retains its 36/36 implementation result. The [operator walkthrough](WALKTHROUGH.md) demonstrates public scaffolding and manual native-test adoption in a synthetic stdlib-Python Git project, including success, deliberate failure and restoration. The walkthrough and raw results have been checked; broader consumer readiness remains unproven.
+Status: supported/manual adoption slice verified for the documented local synthetic path. Non-executing inspection and package-script reporting retain bounded independent acceptance. Explicit command planning has bounded independent review with the empty-target finding closed; the accepted source retains its 36/36 implementation result. The [operator walkthrough](WALKTHROUGH.md) starts with the current existing-literal-gate route: inspect, explicit plan/reviewed diff, confirm, then separately authorised native checks. It separately preserves historical public scaffolding and manual native-test adoption in a synthetic stdlib-Python Git project, including success, deliberate failure and restoration. The walkthrough and raw results have been checked; broader consumer readiness remains unproven.
 
 ## Consumer capability state map
 
@@ -12,7 +12,7 @@ Historical evidence is bounded to its recorded fixtures or consumers. Source pre
 | Retain native tools and commands per component | Unexecuted package script declarations at root and one recognised Vite frontend; broader mapping remains manual | Evidence-based component mapping; no shipped native-runner discovery |
 | Resolve detected, configured and LLM proposals | Person/LLM explicit `--command` selections share a read-only preview; supplied provenance remains unverified | One reviewable mapping path, including a no-LLM route |
 | Review changes before applying them | Bounded independently reviewed literal gate diff preview and fingerprint-confirmed application with stale-byte/selection refusal; blind local use passed | Broader file-owner support remains proposed |
-| Reapply without losing existing work | Reviewed literal gate application appends missing commands with exact deduplication; accepted baseline repeat use required manual backup relocation; content-derived retained backups are the successor candidate. Selected scaffolding preserved. `GATE.md` overwritten | Broader reapplication remains proposed |
+| Reapply without losing existing work | Reviewed literal gate application appends missing commands with exact deduplication; accepted baseline repeat use required manual backup relocation; content-derived retained backups have bounded independent and fresh blind acceptance. Selected scaffolding preserved. `GATE.md` overwritten | Broader reapplication remains proposed |
 | Run gates and expose failures | Synthetic Python native unittest and manually selected generated gate both passed; deliberate assertion produced gate exit 1; restored fixture passed | Native dependency installation, production builds and applicable journeys remain consumer-specific and unproven here |
 | Prove isolation, restart and closure; bind evidence | Manual procedures; templates require adaptation | Separate assertions, cleanup, counts, skips, revision and scope |
 
@@ -246,14 +246,21 @@ moving recovery history, preserved its legacy backup and three new backups, and
 demonstrated native failure/restoration and successful final test/verify tasks.
 Parent checks matched the unchanged public snapshot, original project bytes/modes,
 recovery backups, raw failure exits and actual final task execution. Backup
-housekeeping is resolved within this local scope; escaped-diff inspection, blanket
-installer advice and walkthrough route ambiguity remain observed friction.
+housekeeping is resolved within this local scope. Blanket installer advice and walkthrough route ambiguity motivated the bounded guidance repair below; escaped-diff inspection remains backlog.
+
+## Existing-gate guidance repair
+
+The public guidance contract retains inspection exits, gap counts, unresolved declarations and unproven readiness. Existing `gate.py` routes to explicit selections, supported-source diff review and confirmation without reinstalling; doctor does not parse it. Existing Makefiles retain native recipes, with missing targets added manually where applicable. Completeness still uses all six existing target-name markers, not mere Makefile presence. Only a missing gate with a matched adapter gets optional scaffolding advice, with Git/write-authority and overwrite limits; no adapter routes to manual adoption. Commands use shell quoting inside JSON display strings. No native command is selected or executed automatically and service applicability remains a manual assessment.
+
+The `test_guidance_*` public-entrypoint regressions own this contract, including malformed declarations with retained valid siblings, complete/incomplete Makefiles, no-adapter existing gates and space/quote/control-character paths. The walkthrough puts the supported existing-gate path first and labels historical manual transfer and optional scaffolding separately. This bounded guidance does not expand supported source shapes or make a new readiness or broader mapping claim.
+
+The final owning suite passed 59 tests. Bounded independent review reproduced eight diagnostic cases and the reviewed native pass/failure/restoration route. A fresh blind consumer followed inspection, explicit review and confirmed application without an installer or product repair, correctly distinguished inspection completion from readiness, and completed failure/restoration plus a later update. Parent checks matched the frozen public files, original project bytes/modes, retained recovery history and actual final test/verify results. These remain local synthetic observations.
 
 ## Remaining backlog (ranked)
 
 These are remaining product gaps, not implemented capabilities.
 
-1. **Repeat-use ergonomics:** content-derived backups now have bounded independent and blind acceptance without manual history relocation. Correct blanket installer advice and clarify the existing-gate walkthrough; escaped-diff readability remains backlog. Literal `gate.py` application has bounded acceptance; other file owners and general application remain proposed. Scaffold generation writes directly and overwrites `GATE.md`.
+1. **Repeat-use ergonomics:** content-derived backups now have bounded independent and blind acceptance without manual history relocation. The guidance repair above addresses blanket installer advice and the existing-gate walkthrough; escaped-diff readability remains backlog. Literal `gate.py` application has bounded acceptance; other file owners and general application remain proposed. Scaffold generation writes directly and overwrites `GATE.md`.
 2. **Evidence-based component and native-runner mapping:** general monorepo detection, automatic declaration matching and detected/configured/LLM convergence remain proposed. Today commands are explicitly supplied and reviewed; limited marker/script reporting does not infer a runner.
 3. **Broader consumer verification:** actual dependency installation, production builds, applicable browser/restart/isolation checks and required stack-role evidence need separately authorised consumer runs. This stdlib fixture proves only the documented local path and failure propagation.
 4. **Portability:** other platforms and shells remain unsupported/unproven by this run. Review generated commands for the admitted environment before execution; no automatic portability guarantee exists.

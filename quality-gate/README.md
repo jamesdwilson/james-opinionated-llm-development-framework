@@ -106,6 +106,14 @@ not ready. This does not scan general monorepos or choose a package manager:
 `package.json` alone does not establish Bun, even when the legacy Bun adapter matches.
 Generated defaults remain unverified; installation and gate generation are unchanged.
 
+## Choose the existing-gate route first
+
+Follow [WALKTHROUGH.md](../WALKTHROUGH.md): inspect → explicit plan → reviewed diff → confirm → separately authorised native check. An existing supported literal `gate.py` needs no installer or adapter match. Doctor observes file presence only; source shape stays unverified until the opt-in preview validates it. Unsupported source and existing Makefiles use reviewed manual transfer, preserving every required check.
+
+Doctor keeps all gap groups and unresolved declarations visible. Review remaining applicability, prerequisites and safety in the authoritative adoption map; neither command addition nor scaffolding decides service requirements or qualifies the environment. A complete Makefile report means six literal target-name markers were found, not that their recipes work or are safe. Incomplete Makefiles need manual additions where applicable; install preserves them.
+
+Only when no gate exists and an adapter matches does doctor suggest optional scaffolding, subject to Git and explicit write authority. With no adapter, installation refuses; use the manual native-owner route. Suggested commands are shell quoted and printed as JSON strings: decode the string before use, then replace the plan's `TASK DIRECTORY COMMAND` placeholders with inspected selections. Execution requires separate authority. This encoding keeps control characters inert in the advice.
+
 ## Review the generated defaults before running them
 
 Generate the scaffold from the same activated toolchain environment used for
@@ -251,7 +259,7 @@ markers for env isolation and database deletion in dev startup; prints a verdict
 It preserves target files and executes no version tools. These heuristics do not
 verify runtime isolation, safe startup or readiness.
 
-**install** refuses non-git targets; generates `gate.py` from the matched
+**install** refuses non-git targets and targets without a matched adapter; generates `gate.py` from the matched
 toolchains with version pins; with `--ci` writes one pinned Ubuntu
 workflow; with Vite+Vitest copies the env-isolation test template; writes
 `GATE.md` (what it found, what it installed, your numbered remaining

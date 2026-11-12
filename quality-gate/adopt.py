@@ -757,7 +757,30 @@ def main(argv):
             print("verdict: gate shape present. Run the acceptance gate (fresh checkout chain, "
                   "start/restart smoke, one bounded review) before claiming qualification.")
         else:
-            print("verdict: %d gap group(s). Run: quality-gate/install %s" % (gaps, target))
+            print("verdict: %d gap group(s)." % gaps)
+            print("Review remaining applicability, declarations and safety in the adoption map; "
+                  "scaffolding does not resolve all reported gaps. Do not infer service requirements.")
+            if has_gate_py:
+                print("Preserve existing gate.py; source shape is unverified by doctor. "
+                      "Review explicit selections with plan, then --preview-gate for a supported literal gate; "
+                      "confirm its diff with --apply-gate FINGERPRINT and identical selections. "
+                      "Unsupported source needs manual adaptation; preserve every required check.")
+            elif mf[0] is not None:
+                print("Preserve existing Makefile; review explicit selections and transfer into native recipes. "
+                      "Add missing targets manually where applicable; target-name matches do not verify recipes.")
+            elif found:
+                print("Optional scaffolding for the missing gate requires Git and explicit write authority. "
+                      "Review generated defaults and GATE.md overwrite before use.")
+                print("Scaffolding command (JSON string; decode before use): " +
+                      json.dumps(shlex.join(["python3", "quality-gate/install", target]), ensure_ascii=True))
+            else:
+                print("No adapter matched; use a manual native gate owner and review explicit selections. "
+                      "Scaffold installation would refuse this target.")
+            print("Plan command (JSON string; decode before use): " +
+                  json.dumps(shlex.join(["python3", "quality-gate/adopt.py", "plan", target,
+                                         "--command", "TASK", "DIRECTORY", "COMMAND"]), ensure_ascii=True))
+            print("Replace TASK DIRECTORY COMMAND with inspected native selections; see WALKTHROUGH.md. "
+                  "Native check execution requires separate authority; no command was executed.")
         return 0
 
     # install mode

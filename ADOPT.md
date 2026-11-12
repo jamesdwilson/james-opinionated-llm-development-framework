@@ -2,11 +2,11 @@
 
 Apply the cohesive stack to an existing repository without discarding sound equivalents.
 
-For the exercised local consumer path and its supported/manual boundaries, follow [WALKTHROUGH.md](WALKTHROUGH.md). Its synthetic Python example covers inspection, explicit planning, authorised scaffolding, manual application and native test success/failure; it does not certify a complete consumer setup.
+For the exercised local consumer path and its supported/manual boundaries, follow [WALKTHROUGH.md](WALKTHROUGH.md). It starts with inspection, explicit planning, reviewed diff and confirmation for an existing supported literal gate, followed by separately authorised native checks. Historical manual transfer and optional scaffolding are separate alternatives; none certifies a complete consumer setup.
 
 These instructions govern the target repository. The playbook source repository's root `AGENTS.md` and verifier are maintenance tools for the playbook itself.
 
-> **Setup checks first:** if the target cannot reliably build, run and check changes, start with [`quality-gate/`](quality-gate/README.md). `doctor` audits configuration; `install` adds missing scaffolding. Neither command certifies readiness. Run the target's real checks, then assess each change against its ticket and brief. See the [checklist](checklists/quality-gate.md).
+> **Setup checks first:** if the target cannot reliably build, run and check changes, start with [`quality-gate/`](quality-gate/README.md). `doctor` audits configuration. Preserve existing gates and use explicit planning/reviewed application or manual native recipes. Optional `install` adds missing scaffolding only for matched adapters; it is not a remedy for every reported gap. Neither command certifies readiness. Run the target's real checks, then assess each change against its ticket and brief. See the [checklist](checklists/quality-gate.md).
 
 > **Diagnostics hosting is a user choice:** default to local GlitchTip with MCP; cloud requires an explicit choice. [DIAGNOSTICS.md](DIAGNOSTICS.md) defines the boundary. Deployment is not yet implemented or activated. Keep the Python 3.9+ adoption core dependency-free and native failure/recovery checks independent.
 
@@ -75,11 +75,9 @@ relative directories beyond detection coverage, displays proposed adoption-map r
 remaining manual roles/tasks and paste-ready entries for the generated `COMMANDS` dict.
 Partial selection is supported. Invalid selection or no selection exits 2 without a
 snippet. See the [validation and manual-application contract](quality-gate/README.md#explicit-command-plan).
-After human/agent review preserving all existing required checks, manually replace
-only selected `COMMANDS` lists, update the authoritative adoption map and review
-the diff. For an existing supported literal gate, the
+For an existing supported literal gate, use the
 [reviewed application option](quality-gate/README.md#reviewed-gate-application-contract)
-previews an exact diff with `plan TARGET --preview-gate --command ...`. Apply with
+to preview an exact diff with `plan TARGET --preview-gate --command ...`. Apply with
 `plan TARGET --apply-gate FINGERPRINT --command ...` using the preview value and
 identical selections. This candidate appends missing commands, preserves existing
 checks and refuses stale bytes. Changing applications retain original bytes/mode
@@ -87,7 +85,7 @@ in content-derived backups without manual relocation; exact matching regular
 nonsymlink backups may be reused, while mismatches and a retained fixed temporary
 path refuse. Historical backups are never automatically removed. See the linked
 contract for naming and manual recovery. Unsuitable defaults require an explicit manual
-decision. Gate execution requires separate authority. Broader role mapping
+decision. For manual transfer instead, merge every required check before replacing only selected lists; keep Makefile recipes under their existing owner. Update the authoritative adoption map and review the resulting diff. Gate execution requires separate authority. Broader role mapping
 remains manual. This preview executes no selected command and supplies no readiness
 certificate.
 

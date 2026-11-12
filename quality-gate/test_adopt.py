@@ -740,6 +740,100 @@ class AdoptionContracts(unittest.TestCase):
         self.assertIn("package manager: unresolved", text)
         return text
 
+    def public_guidance(self, root=None):
+        root = self.root if root is None else root
+        before = self.snapshot(root)
+        result = subprocess.run([sys.executable, "-B", str(Path(__file__).with_name("doctor")), str(root)],
+                                capture_output=True, text=True, timeout=15)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(result.stderr, "")
+        self.assertEqual(before, self.snapshot(root))
+        self.assertIn("readiness: unproven", result.stdout)
+        self.assertIn("commands: unverified defaults; no commands executed", result.stdout)
+        return result.stdout
+
+    def test_guidance_existing_gate_no_adapter_public(self):
+        (self.root / "gate.py").write_text("COMMANDS = {'test': ['false']}\nraise AssertionError('never execute')\n")
+        text = self.public_guidance()
+        self.assertIn("verdict: 1 gap group(s).", text)
+        self.assertNotIn("quality-gate/install", text)
+        self.assertIn("Preserve existing gate.py", text)
+        self.assertIn("explicit selections", text)
+        self.assertIn("--preview-gate", text)
+        self.assertIn("--apply-gate FINGERPRINT", text)
+        self.assertIn("source shape is unverified", text)
+        self.assertIn("Review remaining applicability, declarations and safety", text)
+        self.assertIn("separate authority", text)
+
+    def test_guidance_existing_gate_adapter_unresolved_public(self):
+        (self.root / "gate.py").write_text("COMMANDS = {'test': ['false']}\n")
+        (self.root / "package.json").write_text('{"scripts":{"bad":42,"good":"false"}}')
+        web = self.root / "web"
+        web.mkdir()
+        (web / "package.json").write_text("{")
+        (web / "vite.config.js").write_text("throw new Error('never execute');")
+        (self.root / "Makefile").write_text("dev:\n\trm state.db\n")
+        text = self.public_guidance()
+        self.assertIn("verdict: 4 gap group(s).", text)
+        self.assertIn("safe dev targets:          unsafe", text)
+        self.assertIn('script name="good"; literal command="false"', text)
+        self.assertIn("script value must be a string", text)
+        self.assertIn("invalid JSON", text)
+        self.assertNotIn("quality-gate/install", text)
+        self.assertIn("Preserve existing gate.py", text)
+
+    def test_guidance_makefile_complete_and_incomplete_public(self):
+        (self.root / "pyproject.toml").write_text("# marker only\n")
+        for complete in (True, False):
+            with self.subTest(complete=complete):
+                tasks = adopt.ORDER if complete else ["test"]
+                (self.root / "Makefile").write_text("".join(task + ":\n\tfalse\n" for task in tasks))
+                text = self.public_guidance()
+                self.assertIn("verdict: %d gap group(s)." % (1 if complete else 6), text)
+                self.assertIn("Makefile (complete)" if complete else "Makefile (missing targets:", text)
+                self.assertNotIn("quality-gate/install", text)
+                self.assertIn("Preserve existing Makefile", text)
+                self.assertIn("native recipes", text)
+                self.assertNotIn("--preview-gate", text)
+
+    def test_guidance_missing_gate_adapter_public(self):
+        (self.root / "pyproject.toml").write_text("# marker only\n")
+        text = self.public_guidance()
+        self.assertIn("verdict: 7 gap group(s).", text)
+        self.assertIn("Optional scaffolding", text)
+        line = next(line for line in text.splitlines() if line.startswith("Scaffolding command (JSON string; decode before use): "))
+        command = json.loads(line.split(": ", 1)[1])
+        self.assertEqual(shlex.split(command), ["python3", "quality-gate/install", str(self.root)])
+        self.assertIn("requires Git and explicit write authority", text)
+        self.assertIn("does not resolve all reported gaps", text)
+
+    def test_guidance_missing_gate_no_adapter_public(self):
+        text = self.public_guidance()
+        self.assertIn("verdict: 7 gap group(s).", text)
+        self.assertNotIn("quality-gate/install", text)
+        self.assertIn("No adapter matched", text)
+        self.assertIn("manual", text)
+        self.assertIn("explicit selections", text)
+
+    def test_guidance_commands_quote_and_escape_target_public(self):
+        for name in ("space target", "quote'target", "line\n\x1btarget"):
+            with self.subTest(name=name):
+                root = self.root / name
+                root.mkdir()
+                (root / "pyproject.toml").write_text("# marker only\n")
+                text = self.public_guidance(root)
+                # Restrict inert-output assertion to new advice; legacy report rendering is unchanged.
+                advice = text.split("verdict:", 1)[1]
+                self.assertNotIn("\x1b", advice)
+                lines = [line for line in advice.splitlines() if "command (JSON string; decode before use): " in line]
+                self.assertEqual(len(lines), 2)
+                for line in lines:
+                    command = json.loads(line.split(": ", 1)[1])
+                    args = shlex.split(command)
+                    self.assertIn(str(root), args)
+                    self.assertEqual(args[0], "python3")
+                    self.assertNotIn("\n", line)
+
     def test_script_mixed_go_root_and_nested_react_vite(self):
         (self.root / "go.mod").write_text("module example.invalid/synthetic\n")
         (self.root / "package.json").write_text(json.dumps({"scripts": {"api:check": "go test ./..."}}))
