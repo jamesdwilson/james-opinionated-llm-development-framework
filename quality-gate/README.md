@@ -107,7 +107,7 @@ Six commands, generated for your stack as `gate.py`:
 ```
 python3 gate.py install            locked, frozen deps; no lifecycle scripts
 python3 gate.py test-e2e-install   browser test deps
-python3 gate.py verify             module integrity, clean diff, pinned versions
+python3 gate.py verify             adapter checks, diff whitespace, detected version pins
 python3 gate.py test               the full native suite
 python3 gate.py build              real production artifacts
 python3 gate.py test-e2e           build once, run the browser suites
@@ -115,6 +115,17 @@ python3 gate.py test-e2e           build once, run the browser suites
 
 A Makefile, Taskfile or npm scripts with the same steps counts. The shape
 is the contract, not the runner.
+
+`verify` is not a clean-worktree or universal dependency-integrity certificate.
+Its common Git check is `git diff --check`, which checks whitespace, not whether
+files changed. Adapter checks differ: Go adds `go mod verify`; Bun has no
+additional module-integrity command here. Only detected tool versions are pinned.
+At acceptance, separately inspect `git status --short` and bind the reviewed
+source to the tested commit or tree. Review the native lock/install guarantees
+for the actual stack rather than inferring them from the command name.
+Likewise, generated commands do not sanitize the caller environment by themselves;
+use an explicit clean child environment and prove the project's isolation with
+a synthetic sentinel before claiming readiness.
 
 ```mermaid
 flowchart LR
