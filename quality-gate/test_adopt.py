@@ -29,7 +29,27 @@ class AdoptionContracts(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory(prefix="gate-regression-")
         self.addCleanup(self.directory.cleanup)
-        self.root = Path(self.directory.name)
+        self.root = Path(self.directory.name).resolve()
+
+    def test_fixture_root_resolves_owned_directory_alias(self):
+        with tempfile.TemporaryDirectory(dir=self.root) as owned:
+            canonical = Path(owned).resolve()
+            alias = self.root / "fixture-alias"
+            alias.symlink_to(canonical, target_is_directory=True)
+            directory = mock.Mock()
+            directory.name = str(alias)
+            # The real context owns cleanup; the facade never removes the alias.
+            fixture = AdoptionContracts()
+            try:
+                with mock.patch.object(tempfile, "TemporaryDirectory", return_value=directory):
+                    fixture.setUp()
+                self.assertTrue(alias.is_symlink())
+                self.assertNotEqual(Path(directory.name), canonical)
+                self.assertEqual(fixture.root, canonical)
+            finally:
+                fixture.doCleanups()
+            directory.cleanup.assert_called_once_with()
+            self.assertTrue(canonical.is_dir())
 
     def plan(self, *args, target=None):
         output, errors = io.StringIO(), io.StringIO()
