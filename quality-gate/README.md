@@ -10,10 +10,13 @@ Two ideas, kept separate:
   and support the intended goal? BDD, TDD, browser journeys and review supply
   the evidence. A green existing suite does not automatically answer that question.
 
-The native contract was accepted on Kept, November 2026: 334 web tests,
+Kept's retained record attributes local acceptance to candidate `150b7c9`,
+November 2026: 334 web tests,
 121 of 125 browser tests passed, four existing skips, restart smoke and
-independent review. That is evidence for Kept's local macOS setup, not
-acceptance of this Python generator or every generated stack.
+independent review. The referenced final review and raw acceptance evidence
+are missing from the current corpus, so these details remain record-attributed.
+They concern Kept's local macOS setup, not acceptance of this Python generator
+or every generated stack.
 
 ### Adoption-kit evidence and limits (11 November 2026)
 
@@ -34,9 +37,15 @@ run was accepted for these generated fixtures.
 The local successor includes repairs for demonstrated defects: unknown generated
 subcommands now exit 2, and Python installation requires explicit configuration
 when `requirements.txt` is absent rather than guessing a package manager.
-Nine standard-library regression tests exercise dispatch, each Python marker,
-the existing requirements route, repeat-install preservation, read-only audit,
-root/nested Playwright working directories and build-failure propagation.
+The earlier regression record covered nine tests. The independently accepted non-executing inspection candidate passed fifteen
+test methods covering dispatch, Python markers and requirements, preservation,
+audit file preservation, Playwright directories, Vite variants and build-failure
+propagation, subprocess-forbidden audit across nine synthetic fixtures, public
+doctor PATH wrappers and installation version pins. That acceptance covers file-derived inspection and preserved installation pins.
+The successor added eight script-reporting tests. Its F1 repair adds four root-absence
+compatibility cases and two missing-expected/unreadable boundary tests; focused
+independent F1 closure passed 11/11 bounded synthetic checks. Explicit command
+planning has local implementation evidence and awaits independent acceptance.
 The root-level Playwright command now uses `--cwd .` rather than consuming
 `playwright` as a directory argument. These are generator checks, not real browser acceptance.
 Run `python3 -m unittest discover -s quality-gate -p 'test_*.py' -v`.
@@ -45,7 +54,10 @@ Remaining limits: generated tasks use shell commands and do not establish
 cross-platform equivalence. `doctor` checks recognisable configuration, not
 semantic correctness or readiness. Generated code is scaffolding, not a complete
 environment-isolation or dependency-locking implementation. Review and adapt it;
-consumer installation and Windows/Linux acceptance remain unproven.
+general consumer adoption and Windows/Linux acceptance remain unproven.
+Toybox's separate bounded acceptance covers owned dependencies, a cold-copy
+installation and a no-recording journey, not this generator. See the
+[field evidence](../research/field-lessons.md).
 
 ```mermaid
 flowchart LR
@@ -66,19 +78,39 @@ Check availability on the actual machine. Python availability alone is
 not evidence that a generated gate works on that operating system.
 
 ```bash
-python3 quality-gate/doctor  /path/to/project          # configuration audit; read-only
+python3 quality-gate/doctor  /path/to/project          # file-derived inspection; no version executables
 python3 quality-gate/install /path/to/project          # install safe pieces, get GATE.md
 python3 quality-gate/install /path/to/project --ci     # plus optional CI workflow
 ```
 
 install needs a git repo: every change is meant to be read as a `git diff`.
-doctor needs nothing.
+doctor does not require Git or execute version tools. It reports marker evidence,
+unprobed versions, unverified command defaults and unproven readiness. It reads
+recognised configuration as text and does not import it. It reports package scripts
+as unexecuted declarations/candidates, not verified native commands. Installation still probes available PATH tools for
+version pins.
+
+Script reporting covers root `package.json` plus the single existing frontend
+selected by the fixed-directory Vite detector (root is deduplicated). Each entry
+labels source manifest/path, script name, literal command and working directory
+relative to the audited target. JSON escaping keeps control characters inert.
+Custom script names are retained without interpreting shell text. An absent root
+manifest is informational: root package-script discovery is not applicable unless
+the Vite detector already identified that manifest as expected. Missing expected
+manifests (including a present path disappearing before reading), present unreadable
+manifests, invalid JSON/encoding, nonobject manifests or `scripts`, and
+nonstring script values are unresolved discovery; valid siblings remain visible.
+An absent or empty `scripts` object means no scripts declared, not malformed input.
+Unresolved items contribute to reported gaps; audit exit 0 means inspection completed,
+not ready. This does not scan general monorepos or choose a package manager:
+`package.json` alone does not establish Bun, even when the legacy Bun adapter matches.
+Generated defaults remain unverified; installation and gate generation are unchanged.
 
 ## Review the generated defaults before running them
 
 Generate the scaffold from the same activated toolchain environment used for
 acceptance. For Python, create/activate the isolated virtualenv first, then run
-`doctor` and `install` with that environment's `python3` on PATH. Generation pins
+`install` with that environment's `python3` on PATH. Generation pins
 the discovered versions; changing interpreters afterward can correctly fail
 `verify`. Existing `gate.py` is preserved on rerun, not silently repinned.
 
@@ -105,7 +137,7 @@ The generator is a starting point, not native-runner discovery:
 Six commands, generated for your stack as `gate.py`:
 
 ```
-python3 gate.py install            locked, frozen deps; no lifecycle scripts
+python3 gate.py install            adapter-specific dependency installation
 python3 gate.py test-e2e-install   browser test deps
 python3 gate.py verify             adapter checks, diff whitespace, detected version pins
 python3 gate.py test               the full native suite
@@ -115,6 +147,12 @@ python3 gate.py test-e2e           build once, run the browser suites
 
 A Makefile, Taskfile or npm scripts with the same steps counts. The shape
 is the contract, not the runner.
+
+Installation guarantees differ by adapter. Bun uses `--frozen-lockfile` and
+`--ignore-scripts`; Rust uses `cargo fetch --locked`; Go uses `go mod download`.
+Python uses `python3 -m pip install -r requirements.txt`, which alone guarantees
+neither frozen resolution nor suppression of build scripts. Review each native
+command and dependency policy before installation.
 
 `verify` is not a clean-worktree or universal dependency-integrity certificate.
 Its common Git check is `git diff --check`, which checks whitespace, not whether
@@ -164,7 +202,8 @@ From a fresh checkout with nothing copied over:
 
 1. The full chain: clean, no new skip, no missing input, no leakage.
 2. The restart smoke (`templates/restart-smoke.md`).
-3. One bounded independent review. One. No extra rounds.
+3. One bounded independent review. Repair concrete blockers and rerun affected
+   evidence without starting an open-ended review programme.
 
 Then claim exactly what you proved, by revision: "ready at `abc123` for
 local macOS development." Linux, containers, deployment, AI services:
@@ -190,7 +229,7 @@ acceptance run itself) lands in `GATE.md` as numbered instructions.
 ```mermaid
 flowchart LR
     T["target project"] --> A{"detect stack<br/>via adapters"}
-    A -->|doctor| R["report and verdict<br/>changes nothing"]
+    A -->|doctor| R["report and verdict<br/>file evidence, versions unprobed"]
     A -->|install| G{"contract file exists?"}
     G -->|yes| N["never modified<br/>gaps become instructions"]
     G -->|no| W["write gate.py<br/>version pins included"]
@@ -207,9 +246,10 @@ The tool is a convenience. Everything it does:
 `bun.lock`/`package.json`, `pyproject.toml`/`requirements.txt`/`setup.py`/
 `Pipfile`, `Cargo.toml`, `vite.config.*` beside a `package.json` in
 `web/frontend/ui/app/apps/web/client` or root, `playwright*.config.*`
-within three levels); reads versions; checks for `gate.py` or an equivalent
-Makefile, env isolation, and whether dev startup deletes a database; prints
-a verdict. Changes nothing.
+within three levels); checks for `gate.py` or an equivalent Makefile and text
+markers for env isolation and database deletion in dev startup; prints a verdict.
+It preserves target files and executes no version tools. These heuristics do not
+verify runtime isolation, safe startup or readiness.
 
 **install** refuses non-git targets; generates `gate.py` from the matched
 toolchains with version pins; with `--ci` writes one pinned Ubuntu
@@ -249,7 +289,58 @@ hostile-host models: each waits until a feature needs it.
 
 ## Sources
 
-Kept, November 2026: candidate `150b7c9`, 334 web tests, 121/125 green, 4
-known skips, 0 failures, restart smoke, review PASS. Full reasoning:
-`Golden-Implementation-Playbook-2026-11-11.md` and the Golden Development
-Contract (2026-11-10; both predate this vocabulary, same ideas).
+Kept, November 2026: retained-record attribution for candidate `150b7c9`,
+334 web tests, 121/125 browser passes, four known skips, zero failures,
+restart smoke and review PASS. The referenced final review and raw evidence
+are unavailable in the current corpus. See [evidence anchors and limits](../research/field-lessons.md#evidence-anchors).
+
+## Explicit command plan
+
+After inspecting `doctor` output and the target's documented commands, a person
+or LLM supplies the same explicit arguments from the playbook checkout.
+
+```sh
+python3 quality-gate/adopt.py plan /path/to/project \
+  --command test backend 'go test ./...' \
+  --command test frontend 'npm run ui:check' \
+  --command build frontend 'npm run bundle:ui'
+```
+
+Repeat `--command TASK DIRECTORY COMMAND` for the six existing tasks, `install`,
+`test-e2e-install`, `verify`, `test`, `build`, and `test-e2e`. Repeated task commands
+retain argument order. Custom script invocations remain literal supplied commands.
+Provenance is explicitly supplied/unverified. Command selection requires review
+of the declaration, runner and prerequisites by the person or agent.
+
+Directories must exist relative to the target and resolve inside it. Absolute
+paths, `..` traversal and outside symlinks are rejected. Ordinary inside paths,
+spaces and apostrophes are supported, including directories beyond detector
+coverage. A partial selection exits 0. Missing selections, invalid task/arity,
+blank commands and invalid targets/directories exit 2 with a specific diagnostic.
+Every selection is validated before any paste-ready snippet is printed.
+
+The deterministic preview prints ordered adoption-map rows, remaining manual
+tasks and stack roles, and Python entries for the existing generated `COMMANDS`
+dict. Display values are escaped and Python literals preserve command text.
+Each command runs in a directory-scoped subshell, with the whole supplied command
+gated by successful directory change. Run the generated gate from the target root.
+Planning leaves target bytes unchanged, reads no target gate/config as code,
+and performs no command execution, version probes or Git subprocesses.
+
+For manual application, review each selected list against the existing required
+checks. The entries replace only selected `COMMANDS` lists, so merge every
+required existing check into the reviewed lists before pasting. Update the
+repository's authoritative adoption map and inspect the ordinary diff. For a
+Makefile or other existing owner, transfer the selections into its native recipes.
+Execution and auto-apply remain separately authorised/manual. Execute the ordinary
+`python3 gate.py test` or other selected task only with the target's authority.
+Command planning supplies proposed, unexecuted selections. Native-runner inference,
+automatic script matching, automatic application and readiness certification remain
+outside this capability.
+
+Six `test_plan_*` tests cover selection, deterministic preview, invalid inputs,
+escaping, forbidden subprocesses, inert poison files and unchanged target bytes.
+Owned synthetic manual application exercises the ordinary generated `gate.py test`
+entrypoint, directory/order preservation, fail-first stopping and whole-command
+gating after a directory disappears. These are local synthetic implementation
+checks pending independent acceptance, with platform portability unproven.

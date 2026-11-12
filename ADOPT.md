@@ -2,6 +2,8 @@
 
 Apply the cohesive stack to an existing repository without discarding sound equivalents.
 
+For the exercised local consumer path and its supported/manual boundaries, follow [WALKTHROUGH.md](WALKTHROUGH.md). Its synthetic Python example covers inspection, explicit planning, authorised scaffolding, manual application and native test success/failure; it does not certify a complete consumer setup.
+
 These instructions govern the target repository. The playbook source repository's root `AGENTS.md` and verifier are maintenance tools for the playbook itself.
 
 > **Setup checks first:** if the target cannot reliably build, run and check changes, start with [`quality-gate/`](quality-gate/README.md). `doctor` audits configuration; `install` adds missing scaffolding. Neither command certifies readiness. Run the target's real checks, then assess each change against its ticket and brief. See the [checklist](checklists/quality-gate.md).
@@ -56,6 +58,29 @@ Create a short adoption map:
 
 Use the defaults in `STACK.md` for missing roles. Keep sound equivalents. Mark a role N/A only when the product or authorised change genuinely does not exercise it. Missing authorization, unavailable tooling, or an unexecuted required role is blocked or not run. Preserve every role and its disposition in the authoritative adoption map.
 
+Stack-role disposition remains manual. The [consumer capability map and mixed-stack example](CONSUMER-ADOPTION.md#consumer-capability-state-map) distinguish existing heuristics from proposed component mapping and native-command discovery. Current `doctor` uses file-derived inspection without version executables, preserves target files and labels versions unprobed and commands as unverified defaults. It now reports unexecuted package script declarations from root `package.json` and the single frontend selected by the existing Vite detector, with source path, script name, literal command and owning working directory. An absent root manifest is informational and root package-script discovery is not applicable unless Vite detection already identified it as expected. Missing expected manifests, present unreadable or malformed manifests and invalid script values remain unresolved; absent scripts are allowed. This bounded reporting does not select a package manager or verify commands. Installation still probes available tool versions for pins; its generation behaviour is unchanged, and inspection does not establish readiness.
+
+After inspection, preview explicit commands with the read-only planner.
+
+```sh
+python3 quality-gate/adopt.py plan /path/to/project \
+  --command test backend 'go test ./...' \
+  --command test frontend 'npm run ui:check' \
+  --command build frontend 'npm run bundle:ui'
+```
+
+A person and an LLM use identical arguments. Provenance is explicitly supplied/unverified,
+and repeated task commands retain their order. The plan accepts existing inside-target
+relative directories beyond detection coverage, displays proposed adoption-map rows,
+remaining manual roles/tasks and paste-ready entries for the generated `COMMANDS` dict.
+Partial selection is supported. Invalid selection or no selection exits 2 without a
+snippet. See the [validation and manual-application contract](quality-gate/README.md#explicit-command-plan).
+After human/agent review preserving all existing required checks, manually replace
+only selected `COMMANDS` lists, update the authoritative adoption map and review
+the diff. Execution and auto-apply remain separately authorised/manual. Broader
+role mapping remains manual. This preview executes no selected command and supplies
+no readiness certificate.
+
 ## 3. Establish the context
 
 Reuse existing documents where they contain the required information. Add only missing information:
@@ -86,6 +111,8 @@ Follow this chain:
 13. complete the target repository's independent review and release process.
 
 A failed deterministic check remains a failure. Midscene findings are advisory until the project validates that evaluation setup.
+
+Keep independent review bounded. Repair concrete blockers and rerun affected evidence without starting an open-ended review programme.
 
 ## 5. Report the result
 

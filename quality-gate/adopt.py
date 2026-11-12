@@ -17,16 +17,21 @@ Design rules (learned the expensive way):
   Anything unsafe to automate becomes a numbered instruction instead.
 
 Usage:
+  adopt.py plan TARGET_DIR --command TASK DIRECTORY COMMAND [--command ...]
   adopt.py audit  TARGET_DIR          read-only status report
   adopt.py install TARGET_DIR [--ci]  install missing safe pieces + GATE.md
 """
 
+import json
 import os
 import platform
+import shlex
 import shutil
 import subprocess
 import sys
 from datetime import datetime, timezone
+
+ORDER = ["install", "test-e2e-install", "verify", "test", "build", "test-e2e"]
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -35,7 +40,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 # Adapter registry. To support another toolchain, add one entry here. Each
 # adapter provides:
 #   name        short identifier
-#   detect(t)   -> dict of facts, or None if the toolchain is absent
+#   detect(t, probe_versions=True) -> file facts and optional local version
 #   install/verify/test/build/e2e  lists of Makefile recipe lines (optional)
 #   pin(facts)  -> list of Makefile recipe lines pinning the tool version
 #   guidance    dict of GATE.md remainder text keyed by topic (optional)
@@ -53,42 +58,43 @@ def _tool_version(cmd):
     return _run(cmd).splitlines()[0] if _run(cmd) else ""
 
 
-def detect_go(t):
+def detect_go(t, probe_versions=True):
     if not os.path.isfile(os.path.join(t, "go.mod")):
         return None
-    ver = _tool_version(["go", "version"]).split(" ")[2] if shutil.which("go") else ""
-    return {"version": ver}
+    ver = _tool_version(["go", "version"]).split(" ")[2] if probe_versions and shutil.which("go") else ""
+    return {"marker": "go.mod", "version": ver}
 
 
-def detect_bun(t):
+def detect_bun(t, probe_versions=True):
     if not (os.path.isfile(os.path.join(t, "bun.lock")) or os.path.isfile(os.path.join(t, "package.json"))):
         return None
-    facts = {"lockfile": os.path.isfile(os.path.join(t, "bun.lock"))}
-    facts["version"] = _tool_version(["bun", "--version"]) if shutil.which("bun") else ""
+    facts = {"marker": "bun.lock" if os.path.isfile(os.path.join(t, "bun.lock")) else "package.json",
+             "lockfile": os.path.isfile(os.path.join(t, "bun.lock"))}
+    facts["version"] = _tool_version(["bun", "--version"]) if probe_versions and shutil.which("bun") else ""
     return facts
 
 
-def detect_python(t):
+def detect_python(t, probe_versions=True):
     for marker in ("pyproject.toml", "requirements.txt", "setup.py", "Pipfile"):
         if os.path.isfile(os.path.join(t, marker)):
             ver = ""
-            if shutil.which("python3"):
+            if probe_versions and shutil.which("python3"):
                 ver = _tool_version(["python3", "--version"]).replace("Python ", "")
             return {"marker": marker, "version": ver,
                     "requirements": os.path.isfile(os.path.join(t, "requirements.txt"))}
     return None
 
 
-def detect_rust(t):
+def detect_rust(t, probe_versions=True):
     if not os.path.isfile(os.path.join(t, "Cargo.toml")):
         return None
-    facts = {"lockfile": os.path.isfile(os.path.join(t, "Cargo.lock"))}
-    if shutil.which("cargo"):
+    facts = {"marker": "Cargo.toml", "lockfile": os.path.isfile(os.path.join(t, "Cargo.lock"))}
+    if probe_versions and shutil.which("cargo"):
         facts["version"] = _tool_version(["cargo", "--version"]).split(" ")[1]
     return facts
 
 
-def detect_vite(t):
+def detect_vite(t, strict_package_text=True):
     """Frontend framework adapter: Vite + Vitest in a subdirectory or root."""
     for d in ("web", "frontend", "ui", "app", os.path.join("apps", "web"), "client", "."):
         pkg = os.path.join(t, d, "package.json")
@@ -105,10 +111,16 @@ def detect_vite(t):
                 pkg_text = fh.read()
         except OSError:
             pkg_text = ""
+        except UnicodeError:
+            if strict_package_text:
+                raise
+            # Audit reports the manifest error separately; retain its Vite path.
+            pkg_text = ""
         isolated = any("envDir: false" in open(os.path.join(t, d, c)).read()
                        for c in cfgs
                        if os.path.isfile(os.path.join(t, d, c)))
         return {"dir": d if d != "." else "", "vitest": '"vitest"' in pkg_text,
+                "configs": [os.path.normpath(os.path.join(d, c)) for c in sorted(cfgs)],
                 "env_isolated": isolated,
                 "typescript": os.path.isfile(os.path.join(t, d, "tsconfig.json"))}
     return None
@@ -177,10 +189,10 @@ ADAPTERS = [
 # the toolchain adapters above rather than replacing them.
 
 
-def detect_all(target):
+def detect_all(target, probe_versions=True):
     found = {}
     for a in ADAPTERS:
-        facts = a["detect"](target)
+        facts = a["detect"](target, probe_versions=probe_versions)
         if facts:
             found[a["name"]] = (a, facts)
     return found
@@ -211,14 +223,72 @@ def dev_safety(target):
     return "present"
 
 
-def report(target, found, missing, has_gate_py, vite, pw, dev, osname):
+def report_package_scripts(target, vite):
+    """Read declarations only, in root and the existing detector's single Vite match."""
+    lines = ["  package scripts: unexecuted declarations/candidates; not verified native commands",
+             "    scope: root plus recognised Vite frontend only; no general monorepo discovery",
+             "    package manager: unresolved; package.json alone does not establish Bun"]
+    directories = ["."]
+    if vite and vite["dir"]:
+        directories.append(vite["dir"])
+    unresolved = 0
+    for directory in directories:
+        manifest = os.path.normpath(os.path.join(directory, "package.json"))
+        source = "source manifest=%s; working directory=%s" % (json.dumps(manifest), json.dumps(directory))
+        # Only an unobserved root manifest is optional. A detected Vite manifest
+        # or a present path that disappears before reading remains unresolved.
+        expected = directory != "." or bool(vite and not vite["dir"]) or os.path.lexists(os.path.join(target, manifest))
+
+        def problem(reason):
+            lines.append("    %s; unresolved discovery: %s" % (source, reason))
+
+        try:
+            with open(os.path.join(target, manifest), encoding="utf-8") as fh:
+                package = json.load(fh)
+        except FileNotFoundError:
+            if expected:
+                problem("manifest missing")
+                unresolved += 1
+            else:
+                lines.append("    %s; manifest absent; root package scripts not applicable" % source)
+            continue
+        except (OSError, UnicodeError, ValueError) as exc:
+            # Do not interpolate parser/file error text containing untrusted input.
+            problem("invalid JSON" if isinstance(exc, (UnicodeError, ValueError)) else "manifest unreadable")
+            unresolved += 1
+            continue
+        if not isinstance(package, dict):
+            problem("manifest must be an object")
+            unresolved += 1
+            continue
+        scripts = package.get("scripts", {})
+        if not isinstance(scripts, dict):
+            problem("scripts must be an object")
+            unresolved += 1
+            continue
+        if not scripts:
+            lines.append("    %s; no scripts declared" % source)
+        for name, command in scripts.items():
+            if not isinstance(command, str):
+                problem("script name=%s; script value must be a string" % json.dumps(name))
+                unresolved += 1
+                continue
+            lines.append("    source manifest=%s; script name=%s; literal command=%s; working directory=%s" %
+                         tuple(json.dumps(value) for value in (manifest, name, command, directory)))
+    return lines, unresolved
+
+
+def report(target, found, missing, has_gate_py, vite, pw, dev, osname, probe_versions=True):
     lines = [
         "quality gate report: %s" % target,
         "  operating system:          %s" % osname,
         "  adapters matched:          %s" % (", ".join(sorted(found)) or "none"),
+        "  marker evidence:",
     ]
     for name in sorted(found):
         facts = found[name][1]
+        if not probe_versions:
+            facts = dict(facts, version="unprobed")
         detail = ", ".join("%s=%s" % (k, v) for k, v in facts.items() if v not in (True, ""))
         lines.append("    %-12s %s" % (name, detail or "present"))
     lines += [
@@ -251,7 +321,7 @@ PINS = {pins}
 BUILD_DIRS = {build_dirs}
 COMMANDS = {commands}
 
-ORDER = ["install", "test-e2e-install", "verify", "test", "build", "test-e2e"]
+ORDER = {order}
 
 
 def sh(cmd):
@@ -339,11 +409,92 @@ def emit_gate_py(found, pw, vite):
         return _json.dumps(obj, indent=4).replace("\n", "\n" + "    " * level)
 
     return GATE_PY_TEMPLATE.format(
-        env=fmt(env, 1), lockfiles=fmt(lockfiles, 0), pins=fmt(pins, 0),
+        order=json.dumps(ORDER), env=fmt(env, 1), lockfiles=fmt(lockfiles, 0), pins=fmt(pins, 0),
         build_dirs=fmt(build_dirs, 0), commands=fmt(commands, 1))
 
 
+def plan(argv):
+    """Validate explicit selections completely before rendering an inert preview."""
+    def invalid(message):
+        sys.stderr.write("plan: " + message + "\n")
+        return 2
+
+    if len(argv) < 3 or argv[2] == "":
+        return invalid("target required; use plan TARGET --command TASK DIRECTORY COMMAND")
+    try:
+        target = os.path.realpath(argv[2])
+    except (OSError, ValueError):
+        return invalid("target not found: " + ascii(argv[2]))
+    if not os.path.isdir(target):
+        return invalid("target not found: " + ascii(argv[2]))
+    arguments = argv[3:]
+    if not arguments:
+        return invalid("at least one --command is required")
+    selections = []
+    commands = {}
+    while arguments:
+        if arguments[0] != "--command":
+            return invalid("unknown option: " + ascii(arguments[0]))
+        if len(arguments) < 4:
+            return invalid("--command requires TASK DIRECTORY COMMAND")
+        task, directory, command = arguments[1:4]
+        arguments = arguments[4:]
+        if task not in ORDER:
+            return invalid("unknown task: " + ascii(task) + "; choose " + ", ".join(ORDER))
+        if not command.strip():
+            return invalid("command must be nonblank for " + ascii(task))
+        if os.path.isabs(directory):
+            return invalid("directory must be target-relative: " + ascii(directory))
+        if ".." in directory.split(os.sep):
+            return invalid("directory traversal is not allowed: " + ascii(directory))
+        # Embedded NUL cannot name a filesystem directory.
+        if not directory or "\x00" in directory:
+            return invalid("directory not found: " + ascii(directory))
+        try:
+            resolved = os.path.realpath(os.path.join(target, directory))
+        except (OSError, ValueError):
+            return invalid("directory not found: " + ascii(directory))
+        if os.path.commonpath([target, resolved]) != target:
+            return invalid("directory resolves outside target: " + ascii(directory))
+        if not os.path.isdir(resolved):
+            return invalid("directory not found: " + ascii(directory))
+        selections.append((task, directory, command))
+        commands.setdefault(task, []).append("(cd " + shlex.quote(os.path.join(".", directory)) + " && (\n" + command + "\n))")
+
+    # JSON escaping plus a table-delimiter escape keeps each value on one row.
+    def cell(value):
+        return json.dumps(value, ensure_ascii=True).replace("|", "\\u007c")
+
+    lines = ["quality gate plan: " + json.dumps(target),
+             "Scope: explicitly supplied/unverified commands; proposed, unexecuted.",
+             "Provenance is supplied by the person or LLM after inspecting doctor output.",
+             "Command declarations and runners require manual review.",
+             "| Role/task | Existing tool or practice | Keep, add, N/A, blocked, or not run | Reason |",
+             "|---|---|---|---|"]
+    for task, directory, command in selections:
+        lines.append("| %s | directory=%s; command=%s | proposed, unexecuted | explicitly supplied/unverified |" %
+                     (task, cell(directory), cell(command)))
+    lines += ["Remaining manual tasks: " + (", ".join(task for task in ORDER if task not in commands) or "none unselected"),
+              "Remaining manual roles: Project Brief, BDD discovery, TDD and fast tests, Browser journeys, "
+              "Bounded UX review, Error capture and recovery, Supply-chain checks, Candidate evidence and review.",
+              "Review applicability, prerequisites, required checks and evidence for every role/task.",
+              "Paste-ready entries for the existing generated COMMANDS dict (run gate.py from the target root):",
+              "Replace selected COMMANDS entries only after human/agent review preserving all existing required checks.",
+              "Selected lists replace each selected task's whole list. Review and merge required checks before applying.",
+              "Execution and auto-apply remain separately authorised/manual.",
+              "```python"]
+    for task, selected in commands.items():
+        lines.append("    " + ascii(task) + ": [")
+        lines.extend("        " + ascii(command) + "," for command in selected)
+        lines.append("    ],")
+    lines.append("```")
+    print("\n".join(lines))
+    return 0
+
+
 def main(argv):
+    if len(argv) > 1 and argv[1] == "plan":
+        return plan(argv)
     if len(argv) < 3 or argv[1] not in ("audit", "install"):
         sys.stderr.write(__doc__)
         return 2
@@ -355,17 +506,26 @@ def main(argv):
         return 2
 
     osname = platform.system()
-    found = detect_all(target)
-    vite = detect_vite(target)
+    found = detect_all(target, probe_versions=mode == "install")
+    vite = detect_vite(target, strict_package_text=mode == "install")
     pw = detect_playwright(target)
     mf = find_makefile_gaps(target)
     has_gate_py = os.path.isfile(os.path.join(target, "gate.py"))
     dev = dev_safety(target)
-    lines = report(target, found, mf, has_gate_py, (vite["dir"] or ".") if vite else None, pw, dev, osname)
+    lines = report(target, found, mf, has_gate_py, (vite["dir"] or ".") if vite else None, pw, dev, osname,
+                   probe_versions=mode == "install")
 
     if mode == "audit":
+        script_lines, unresolved_scripts = report_package_scripts(target, vite)
+        lines += script_lines
+        if vite:
+            lines.append("  Vite marker evidence: %s" % ", ".join(vite["configs"]))
+        if pw:
+            lines.append("  Playwright marker evidence: %s" % ", ".join(pw["configs"]))
+        lines += ["  commands: unverified defaults; no commands executed",
+                  "  readiness: unproven; marker matches do not verify native commands or safety"]
         print("\n".join(lines))
-        gaps = 0 if has_gate_py else len(mf[1])
+        gaps = (0 if has_gate_py else len(mf[1])) + unresolved_scripts
         gaps += 0 if (vite and vite["env_isolated"]) else (1 if vite else 0)
         gaps += 0 if dev == "present" else 1
         if gaps == 0:
