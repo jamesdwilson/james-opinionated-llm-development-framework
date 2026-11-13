@@ -292,6 +292,78 @@ def report_package_scripts(target, vite):
     return lines, unresolved
 
 
+def report_child_go_markers(target):
+    """Bounded metadata evidence only; never add child facts to root adapters."""
+    skip = {"node_modules", "vendor", "dist", "build", "target", "__pycache__", "venv"}
+    lines = ["  child Go markers: unverified file presence; not parsed modules or verified commands",
+             "    scope: immediate nonsymlink children only; root adapters remain root-only",
+             "    deeper layouts uninspected; linked/nonregular markers uninspected",
+             "    hidden and dependency/build directories uninspected (project policy): " + ", ".join(sorted(skip)),
+             "    no runner, entrypoint, version or readiness selected; existing gaps unchanged"]
+    try:
+        flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_NONBLOCK
+    except AttributeError:
+        lines.append("    unknown/uninspected: required no-follow directory inspection unavailable")
+        return lines
+    candidates, unknown = 0, False
+
+    def identity(metadata):
+        return metadata.st_dev, metadata.st_ino, metadata.st_mode
+
+    try:
+        # Anchor metadata operations to open directories. Never follow a child or
+        # marker link, including a directory replaced after enumeration.
+        with contextlib.ExitStack() as stack:
+            root_fd = os.open(target, flags)
+            stack.callback(os.close, root_fd)
+            with os.scandir(root_fd) as entries:
+                children = sorted(entries, key=lambda entry: entry.name)
+            for entry in children:
+                if entry.name.startswith(".") or entry.name in skip:
+                    continue
+                source = "working directory=%s" % json.dumps(entry.name)
+                try:
+                    metadata = entry.stat(follow_symlinks=False)
+                    if stat.S_ISLNK(metadata.st_mode):
+                        lines.append("    %s; uninspected: linked directory entry" % source)
+                        continue
+                    if not stat.S_ISDIR(metadata.st_mode):
+                        continue
+                    with contextlib.ExitStack() as child_stack:
+                        child_fd = os.open(entry.name, flags, dir_fd=root_fd)
+                        child_stack.callback(os.close, child_fd)
+                        if identity(metadata) != identity(os.fstat(child_fd)):
+                            raise OSError("child changed")
+                        source += "; marker path=%s" % json.dumps(entry.name + "/go.mod")
+                        try:
+                            marker = os.stat("go.mod", dir_fd=child_fd, follow_symlinks=False)
+                        except FileNotFoundError:
+                            marker = None
+                        # Check that the owning directory still has the observed
+                        # identity. Absence is only a scoped metadata observation.
+                        if identity(metadata) != identity(os.stat(entry.name, dir_fd=root_fd, follow_symlinks=False)):
+                            raise OSError("child changed")
+                        if marker is None:
+                            lines.append("    %s; marker absent at inspected location" % source)
+                        elif not stat.S_ISREG(marker.st_mode):
+                            lines.append("    %s; uninspected: linked or nonregular marker" % source)
+                        else:
+                            current = os.stat("go.mod", dir_fd=child_fd, follow_symlinks=False)
+                            if identity(marker) != identity(current):
+                                raise OSError("marker changed")
+                            lines.append("    %s; unverified file presence" % source)
+                            candidates += 1
+                except (OSError, NotImplementedError):
+                    unknown = True
+                    lines.append("    %s; unknown/uninspected: metadata unavailable or changed" % source)
+    except (OSError, NotImplementedError):
+        unknown = True
+        lines.append("    unknown/uninspected: cannot enumerate target")
+    if not candidates and not unknown:
+        lines.append("    no immediate-child candidates observed within this scope; not a claim of no Go anywhere")
+    return lines
+
+
 def report(target, found, missing, has_gate_py, vite, pw, dev, osname, probe_versions=True):
     lines = [
         "quality gate report: %s" % target,
@@ -755,6 +827,7 @@ def main(argv):
     if mode == "audit":
         script_lines, unresolved_scripts = report_package_scripts(target, vite)
         lines += script_lines
+        lines += report_child_go_markers(target)
         if vite:
             lines.append("  Vite marker evidence: %s" % ", ".join(vite["configs"]))
         if pw:

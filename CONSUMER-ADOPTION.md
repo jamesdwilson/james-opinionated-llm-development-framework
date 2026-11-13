@@ -20,7 +20,37 @@ Historical evidence is bounded to its recorded fixtures or consumers. Source pre
 
 Proposed mapping for a synthetic repository: `backend/go.mod` owns a Go API and `frontend/package.json` owns a React/Vite UI using npm. After inspecting its documented commands, retain `go test ./...` and `go build ./cmd/api` in `backend/`; retain `npm ci`, `npm test` and `npm run build` in `frontend/`. Map its documented browser command and service prerequisites separately. These are desired mappings, not commands discovered or verified by this generator.
 
-Current heuristics look for Go markers at the repository root, so this backend is missed. Vite detection can find `frontend/`, but generates Bun-based commands; it does not infer the established npm workflow or the API entrypoint. The report now displays literal scripts declared in root `package.json` and the single recognised Vite frontend, with each owning directory. It does not select npm/Bun or verify those declarations; generated commands remain unchanged. The explicit plan can preview these supplied backend/frontend selections for manual adaptation. General component mapping and native-runner discovery remain proposed.
+Root adapter heuristics still look for Go markers at the repository root. The
+audit/doctor child-marker report now shows `working directory="backend"` and
+`marker path="backend/go.mod"` as unverified file presence, independently of that
+root-only adapter summary. It does not parse a module, select a Go runner or prove
+that any Go command works. Vite detection can find `frontend/`, but generates
+Bun-based commands; it does not infer the established npm workflow or API entrypoint.
+Literal scripts declared in root `package.json` and the single recognised Vite
+frontend retain their owning directories. Inspect `backend/README.md` or the
+target's equivalent command authority, then explicitly supply the reviewed
+backend/frontend selections to the existing plan/preview/application path.
+Generated commands remain unchanged. General component mapping and native-runner
+discovery remain proposed.
+
+The [bounded child-marker contract](quality-gate/README.md#immediate-child-go-marker-evidence)
+covers only immediate nonsymlink children with regular nonsymlink markers, stable
+ordering and escaped relative paths. Hidden, dependency/build, linked and deeper
+layouts remain uninspected; metadata failures are unknown/uninspected evidence,
+without changing required gap arithmetic or inspection exit semantics. Marker
+contents, commands, versions and readiness remain unverified.
+
+This bounded report passed 87 owning tests with zero emitted warnings and independent
+review of metadata, capability failures, path safety and preservation. A fresh blind
+consumer used public inspection and component documentation to map the backend and
+frontend checks into their correct directories, preserving the original required
+check first. Eleven public framework commands completed; repeat application made
+no changes, and two changing applications retained their prior gate bytes/modes.
+Parent checks matched the frozen public files and original target baseline, exact
+surrounding gate source, command order and backups, then independently repeated the
+combined no-change preview/application. No selected native command or target gate
+was executed: this proves bounded discovery, mapping and preservation, not Go test
+success, module validity, package-manager selection or environment readiness.
 
 ## Product outcome
 

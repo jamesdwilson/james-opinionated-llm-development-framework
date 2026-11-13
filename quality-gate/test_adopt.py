@@ -1377,5 +1377,418 @@ class ViteReadOwnership(unittest.TestCase):
         self.assertEqual((facts["vitest"], facts["env_isolated"]), (False, True))
 
 
+class ChildGoMarkers(unittest.TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory(prefix="child-go-")
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name).resolve()
+
+    def marker(self, directory, content=b"not parsed\xff"):
+        child = self.root / directory
+        child.mkdir(parents=True, exist_ok=True)
+        (child / "go.mod").write_bytes(content)
+        return child
+
+    def evidence(self):
+        # The helper may inspect directory metadata, never contents or executables.
+        real_open = adopt.os.open
+
+        def directory_only(path, flags, *args, **kwargs):
+            self.assertTrue(flags & os.O_DIRECTORY)
+            self.assertTrue(flags & os.O_NOFOLLOW)
+            self.assertFalse(flags & (os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_TRUNC))
+            self.assertTrue(str(path) == str(self.root) or kwargs.get('dir_fd') is not None)
+            return real_open(path, flags, *args, **kwargs)
+
+        with mock.patch("builtins.open", side_effect=AssertionError("contents forbidden")), \
+             mock.patch.object(adopt.os, "open", side_effect=directory_only), \
+             mock.patch.object(adopt.subprocess, "run", side_effect=AssertionError("process forbidden")), \
+             mock.patch.object(adopt, "_tool_version", side_effect=AssertionError("probe forbidden")), \
+             mock.patch.object(adopt.os, "system", side_effect=AssertionError("shell forbidden")), \
+             mock.patch.object(socket, "socket", side_effect=AssertionError("network forbidden")):
+            return "\n".join(adopt.report_child_go_markers(str(self.root)))
+
+    def candidate(self, directory):
+        return 'working directory=%s; marker path=%s; unverified file presence' % (
+            json.dumps(directory), json.dumps(directory + '/go.mod'))
+
+    def test_child_go_mixed_audit_retains_frontend_and_gap_arithmetic(self):
+        self.marker("backend")
+        web = self.root / "frontend"
+        web.mkdir()
+        (web / "package.json").write_text('{"scripts":{"ui:check":"npm test"}}')
+        (web / "vite.config.js").write_text('// envDir: false')
+        (self.root / "package.json").write_text('{"scripts":{"root:check":"echo root"}}')
+        (self.root / "gate.py").write_text("COMMANDS = {'test': ['old-check']}\n")
+        (self.root / "Makefile").write_text('dev:\n\techo safe\n')
+        (self.root / '.env').write_text('POISON=must-not-read')
+        before = {str(p.relative_to(self.root)): (p.read_bytes(), p.stat().st_mode)
+                  for p in self.root.rglob('*') if p.is_file()}
+        real_open = open
+
+        def declared_reads(path, mode='r', *args, **kwargs):
+            self.assertNotIn(mode, ('w', 'a', 'x', 'r+'))
+            self.assertIn(Path(path).relative_to(self.root).as_posix(), (
+                'Makefile', 'package.json', 'frontend/package.json', 'frontend/vite.config.js'))
+            return real_open(path, mode, *args, **kwargs)
+
+        output = io.StringIO()
+        with mock.patch.object(adopt.subprocess, "run", side_effect=AssertionError("process forbidden")), \
+             mock.patch.object(adopt, "_tool_version", side_effect=AssertionError("probe forbidden")), \
+             mock.patch('builtins.open', side_effect=declared_reads), \
+             mock.patch.object(adopt.os, 'system', side_effect=AssertionError('shell forbidden')), \
+             mock.patch.object(socket, 'socket', side_effect=AssertionError('network forbidden')), \
+             contextlib.redirect_stdout(output):
+            self.assertEqual(adopt.main(['adopt.py', 'audit', str(self.root)]), 0)
+        self.assertEqual(before, {str(p.relative_to(self.root)): (p.read_bytes(), p.stat().st_mode)
+                                 for p in self.root.rglob('*') if p.is_file()})
+        text = output.getvalue()
+        self.assertIn(self.candidate('backend'), text)
+        self.assertIn('adapters matched:          bun', text)
+        self.assertIn('script name="ui:check"; literal command="npm test"; working directory="frontend"', text)
+        self.assertIn('script name="root:check"', text)
+        self.assertIn('verdict: gate shape present.', text)
+        self.assertIn('readiness: unproven', text)
+
+    def test_child_go_root_only_absent_and_two_children_order(self):
+        (self.root / 'go.mod').write_text('module root')
+        (self.root / 'empty').mkdir()
+        text = self.evidence()
+        self.assertIn('no immediate-child candidates observed', text)
+        self.assertNotIn('working directory="."', text)
+        self.marker('z-backend')
+        self.marker('a-backend', b'module synthetic/example\n')
+        text = self.evidence()
+        self.assertEqual(text, self.evidence())
+        self.assertLess(text.index(self.candidate('a-backend')), text.index(self.candidate('z-backend')))
+        self.assertEqual(text.count('; unverified file presence'), 2)
+
+    def test_child_go_nonregular_and_linked_markers_are_uninspected(self):
+        for name in ('directory', 'fifo', 'linked', 'outside-link'):
+            (self.root / name).mkdir()
+        (self.root / 'directory/go.mod').mkdir()
+        os.mkfifo(self.root / 'fifo/go.mod')
+        regular = self.marker('regular')
+        (self.root / 'linked/go.mod').symlink_to(regular / 'go.mod')
+        with tempfile.TemporaryDirectory(dir=self.root.parent) as outside:
+            marker = Path(outside) / 'go.mod'
+            marker.write_text('outside')
+            (self.root / 'outside-link/go.mod').symlink_to(marker)
+            (self.root / 'linked-child').symlink_to(outside, target_is_directory=True)
+            text = self.evidence()
+        self.assertEqual(text.count('; unverified file presence'), 1)
+        for name in ('directory', 'fifo', 'linked', 'outside-link'):
+            self.assertIn('marker path=%s; uninspected: linked or nonregular marker' % json.dumps(name + '/go.mod'), text)
+        self.assertIn('working directory="linked-child"; uninspected: linked directory entry', text)
+
+    def test_child_go_exclusions_and_deeper_scope(self):
+        for name in ('.hidden', 'node_modules', 'vendor', 'dist', 'build', 'target', '__pycache__', 'venv'):
+            self.marker(name)
+        self.marker('services/api')
+        real_open = adopt.os.open
+
+        def scope_only(path, *args, **kwargs):
+            self.assertIn(str(path), (str(self.root), 'services'))
+            return real_open(path, *args, **kwargs)
+
+        with mock.patch.object(adopt.os, 'open', side_effect=scope_only):
+            text = self.evidence()
+        self.assertNotIn('; unverified file presence', text)
+        self.assertIn('deeper layouts uninspected', text)
+        self.assertIn('hidden and dependency/build directories uninspected', text)
+        self.assertNotIn('services/api/go.mod', text)
+
+    def test_child_go_names_escaped_and_contents_inert(self):
+        name = 'api space"\n\t\x1b café'
+        self.marker(name, b'\xff\x00malformed\nmodule ???')
+        text = self.evidence()
+        self.assertIn(self.candidate(name), text)
+        self.assertNotIn('\x1b', text)
+        self.assertNotIn('café', text)
+        self.assertNotIn('malformed', text)
+
+    def test_child_go_enumeration_permission_error_is_unknown(self):
+        with mock.patch.object(adopt.os, 'scandir', side_effect=PermissionError('private details')):
+            text = self.evidence()
+        self.assertIn('unknown/uninspected: cannot enumerate target', text)
+        self.assertNotIn('no immediate-child candidates observed', text)
+        self.assertNotIn('private details', text)
+
+    def test_child_go_marker_permission_error_keeps_valid_sibling(self):
+        self.marker('a-denied')
+        self.marker('z-valid')
+        real_stat = adopt.os.stat
+
+        def denied(path, *args, **kwargs):
+            if path == 'go.mod' and kwargs.get('dir_fd') is not None:
+                directory = os.fstat(kwargs['dir_fd'])
+                if directory.st_ino == (self.root / 'a-denied').stat().st_ino:
+                    raise PermissionError('private details')
+            return real_stat(path, *args, **kwargs)
+
+        with mock.patch.object(adopt.os, 'stat', side_effect=denied):
+            text = self.evidence()
+        self.assertIn('working directory="a-denied"; marker path="a-denied/go.mod"; unknown/uninspected:', text)
+        self.assertIn(self.candidate('z-valid'), text)
+        self.assertNotIn('private details', text)
+
+    def test_child_go_child_disappears_is_unknown(self):
+        child = self.marker('backend')
+        real_open = adopt.os.open
+
+        def raced(path, *args, **kwargs):
+            if path == 'backend':
+                raise FileNotFoundError('synthetic race')
+            return real_open(path, *args, **kwargs)
+
+        with mock.patch.object(adopt.os, 'open', side_effect=raced):
+            text = self.evidence()
+        self.assertTrue(child.is_dir())
+        self.assertIn('working directory="backend"; unknown/uninspected:', text)
+        self.assertNotIn('no immediate-child candidates observed', text)
+
+    def test_child_go_marker_disappears_is_unknown(self):
+        self.marker('backend')
+        real_stat = adopt.os.stat
+        calls = 0
+
+        def raced(path, *args, **kwargs):
+            nonlocal calls
+            if path == 'go.mod' and kwargs.get('dir_fd') is not None:
+                calls += 1
+                if calls == 2:
+                    raise FileNotFoundError('synthetic race')
+            return real_stat(path, *args, **kwargs)
+
+        with mock.patch.object(adopt.os, 'stat', side_effect=raced):
+            text = self.evidence()
+        self.assertIn('marker path="backend/go.mod"; unknown/uninspected:', text)
+        self.assertNotIn('; unverified file presence', text)
+
+    def test_child_go_directory_replaced_by_outside_link_is_unknown(self):
+        child = self.marker('backend')
+        real_open = adopt.os.open
+        with tempfile.TemporaryDirectory(dir=self.root.parent) as outside:
+            (Path(outside) / 'go.mod').write_text('outside must never be inspected')
+
+            def raced(path, *args, **kwargs):
+                if path == 'backend':
+                    child.rename(self.root / 'retained-backend')
+                    child.symlink_to(outside, target_is_directory=True)
+                return real_open(path, *args, **kwargs)
+
+            with mock.patch.object(adopt.os, 'open', side_effect=raced):
+                text = self.evidence()
+        self.assertIn('working directory="backend"; unknown/uninspected:', text)
+        self.assertNotIn('; unverified file presence', text)
+
+    def test_child_go_marker_replaced_by_link_is_unknown_without_following(self):
+        child = self.marker('backend')
+        real_stat = adopt.os.stat
+        calls = 0
+
+        def raced(path, *args, **kwargs):
+            nonlocal calls
+            if path == 'go.mod' and kwargs.get('dir_fd') is not None:
+                self.assertIs(kwargs.get('follow_symlinks'), False)
+                calls += 1
+                if calls == 2:
+                    (child / 'go.mod').rename(child / 'retained-marker')
+                    (child / 'go.mod').symlink_to(self.root / 'outside-nonexistent')
+            return real_stat(path, *args, **kwargs)
+
+        with mock.patch.object(adopt.os, 'stat', side_effect=raced):
+            text = self.evidence()
+        self.assertIn('marker path="backend/go.mod"; unknown/uninspected:', text)
+        self.assertNotIn('; unverified file presence', text)
+
+    def test_child_go_entry_metadata_error_is_unknown(self):
+        entry = mock.Mock(name='entry')
+        entry.name = 'backend'
+        entry.stat.side_effect = PermissionError('private metadata')
+        entries = mock.MagicMock()
+        entries.__enter__.return_value = iter([entry])
+        with mock.patch.object(adopt.os, 'scandir', return_value=entries):
+            text = self.evidence()
+        entry.stat.assert_called_once_with(follow_symlinks=False)
+        self.assertIn('working directory="backend"; unknown/uninspected:', text)
+        self.assertNotIn('no immediate-child candidates observed', text)
+        self.assertNotIn('private metadata', text)
+
+    def test_child_go_root_audit_preserves_old_output_and_never_uses_child_as_adapter(self):
+        (self.root / 'go.mod').write_text('malformed inert root marker')
+        output = io.StringIO()
+        with mock.patch.object(adopt.subprocess, 'run', side_effect=AssertionError('process forbidden')), \
+             contextlib.redirect_stdout(output):
+            self.assertEqual(adopt.main(['adopt.py', 'audit', str(self.root)]), 0)
+        text = output.getvalue()
+        self.assertIn('adapters matched:          go', text)
+        self.assertIn('go           marker=go.mod, version=unprobed', text)
+        self.assertNotIn('working directory="."; marker path="go.mod"', text)
+        self.assertIn('verdict: 7 gap group(s).', text)
+        (self.root / 'go.mod').unlink()
+        self.marker('backend')
+        output = io.StringIO()
+        with mock.patch.object(adopt.subprocess, 'run', side_effect=AssertionError('process forbidden')), \
+             contextlib.redirect_stdout(output):
+            self.assertEqual(adopt.main(['adopt.py', 'audit', str(self.root)]), 0)
+        text = output.getvalue()
+        self.assertIn('adapters matched:          none', text)
+        self.assertIn('No adapter matched; use a manual native gate owner', text)
+        self.assertIn(self.candidate('backend'), text)
+        self.assertIn('verdict: 7 gap group(s).', text)
+
+
+class ChildGoCapabilityContracts(unittest.TestCase):
+    setUp = ChildGoMarkers.setUp
+    marker = ChildGoMarkers.marker
+    candidate = ChildGoMarkers.candidate
+
+    def test_child_go_missing_flags_stop_before_filesystem_or_probes(self):
+        self.marker('backend')
+        for flag in ('O_RDONLY', 'O_DIRECTORY', 'O_NOFOLLOW', 'O_NONBLOCK'):
+            with self.subTest(flag=flag), contextlib.ExitStack() as stack:
+                stack.enter_context(mock.patch.dict(os.__dict__))
+                del os.__dict__[flag]
+                for name in ('open', 'scandir', 'stat', 'fstat', 'listdir', 'walk', 'system'):
+                    stack.enter_context(mock.patch.object(os, name, side_effect=AssertionError('filesystem or shell forbidden')))
+                stack.enter_context(mock.patch('builtins.open', side_effect=AssertionError('contents forbidden')))
+                stack.enter_context(mock.patch.object(adopt.subprocess, 'run', side_effect=AssertionError('process forbidden')))
+                stack.enter_context(mock.patch.object(adopt, '_tool_version', side_effect=AssertionError('probe forbidden')))
+                stack.enter_context(mock.patch.object(socket, 'socket', side_effect=AssertionError('network forbidden')))
+                text = '\n'.join(adopt.report_child_go_markers(str(self.root)))
+                self.assertIn('unknown/uninspected: required no-follow directory inspection unavailable', text)
+                self.assertNotIn('no immediate-child candidates observed', text)
+                self.assertNotIn('; unverified file presence', text)
+                self.assertNotIn('marker absent', text)
+
+    def test_child_go_missing_flags_public_audit_preserves_root_gaps_and_exit(self):
+        self.marker('backend')
+        (self.root / 'go.mod').write_text('inert root marker')
+        frontend = self.root / 'frontend'
+        frontend.mkdir()
+        (frontend / 'package.json').write_text('{"scripts":{"ui:check":"npm test"}}')
+        (frontend / 'vite.config.js').write_text('// envDir: false')
+        (self.root / '.env').write_text('POISON=must-not-read')
+        real_open = open
+
+        def declared_reads(path, mode='r', *args, **kwargs):
+            self.assertEqual(mode, 'r')
+            self.assertIn(Path(path).relative_to(self.root).as_posix(), (
+                'Makefile', 'package.json', 'frontend/package.json', 'frontend/vite.config.js'))
+            return real_open(path, mode, *args, **kwargs)
+
+        for layout in ('root-gaps', 'mixed-gate', 'unresolved-script'):
+            if layout == 'mixed-gate':
+                (self.root / 'gate.py').write_text("COMMANDS = {'test': ['old-check']}\n")
+                (self.root / 'Makefile').write_text('dev:\n\techo safe\n')
+                (self.root / 'package.json').write_text('{"scripts":{"root:check":"echo root"}}')
+            elif layout == 'unresolved-script':
+                (self.root / 'package.json').write_text('{"scripts":{"bad":123}}')
+            before = {str(p.relative_to(self.root)): (p.read_bytes(), p.stat().st_mode)
+                      for p in self.root.rglob('*') if p.is_file()}
+            baseline = io.StringIO()
+            with mock.patch.object(adopt, 'report_child_go_markers', return_value=[]), \
+                 contextlib.redirect_stdout(baseline):
+                expected_code = adopt.main(['adopt.py', 'audit', str(self.root)])
+            for flag in ('O_RDONLY', 'O_DIRECTORY', 'O_NOFOLLOW', 'O_NONBLOCK'):
+                output, errors = io.StringIO(), io.StringIO()
+                with self.subTest(layout=layout, flag=flag), contextlib.ExitStack() as stack:
+                    stack.enter_context(mock.patch.dict(os.__dict__))
+                    del os.__dict__[flag]
+                    stack.enter_context(mock.patch.object(os, 'open', side_effect=AssertionError('directory open forbidden')))
+                    stack.enter_context(mock.patch('builtins.open', side_effect=declared_reads))
+                    stack.enter_context(mock.patch.object(adopt.subprocess, 'run', side_effect=AssertionError('process forbidden')))
+                    stack.enter_context(mock.patch.object(adopt, '_tool_version', side_effect=AssertionError('probe forbidden')))
+                    stack.enter_context(mock.patch.object(os, 'system', side_effect=AssertionError('shell forbidden')))
+                    stack.enter_context(mock.patch.object(socket, 'socket', side_effect=AssertionError('network forbidden')))
+                    stack.enter_context(contextlib.redirect_stdout(output))
+                    stack.enter_context(contextlib.redirect_stderr(errors))
+                    code = adopt.main(['adopt.py', 'audit', str(self.root)])
+                    section = '\n'.join(adopt.report_child_go_markers(str(self.root))) + '\n'
+                    self.assertIn('unknown/uninspected: required no-follow directory inspection unavailable', section)
+                    self.assertEqual(output.getvalue().replace(section, '', 1), baseline.getvalue())
+                    self.assertEqual((code, errors.getvalue()), (expected_code, ''))
+                    self.assertEqual(code, 0)
+                self.assertEqual(before, {str(p.relative_to(self.root)): (p.read_bytes(), p.stat().st_mode)
+                                         for p in self.root.rglob('*') if p.is_file()})
+
+    def test_child_go_unsupported_root_operations_are_unknown(self):
+        self.marker('backend')
+        for operation in ('open', 'scandir'):
+            with self.subTest(operation=operation):
+                with mock.patch.object(os, operation, side_effect=NotImplementedError('private capability details')):
+                    text = '\n'.join(adopt.report_child_go_markers(str(self.root)))
+                self.assertIn('unknown/uninspected: cannot enumerate target', text)
+                self.assertNotIn('no immediate-child candidates observed', text)
+                self.assertNotIn('private capability details', text)
+                self.assertNotIn('; unverified file presence', text)
+
+    def test_child_go_unsupported_child_and_marker_operations_keep_valid_sibling(self):
+        child = self.marker('a-unsupported')
+        self.marker('z-valid')
+        child_inode = child.stat().st_ino
+        real_open, real_stat, real_fstat = os.open, os.stat, os.fstat
+        for operation in ('child-open', 'child-fstat', 'owner-stat', 'marker-stat', 'marker-recheck'):
+            marker_calls = 0
+
+            def open_directory(path, *args, **kwargs):
+                if operation == 'child-open' and path == 'a-unsupported':
+                    raise NotImplementedError('private capability details')
+                return real_open(path, *args, **kwargs)
+
+            def descriptor_stat(fd):
+                metadata = real_fstat(fd)
+                if operation == 'child-fstat' and metadata.st_ino == child_inode:
+                    raise NotImplementedError('private capability details')
+                return metadata
+
+            def nofollow_stat(path, *args, **kwargs):
+                nonlocal marker_calls
+                if kwargs.get('dir_fd') is not None:
+                    self.assertIs(kwargs.get('follow_symlinks'), False)
+                    if path == 'a-unsupported' and operation == 'owner-stat':
+                        raise NotImplementedError('private capability details')
+                    if path == 'go.mod' and real_fstat(kwargs['dir_fd']).st_ino == child_inode:
+                        marker_calls += 1
+                        if operation == 'marker-stat' or (operation == 'marker-recheck' and marker_calls == 2):
+                            raise NotImplementedError('private capability details')
+                return real_stat(path, *args, **kwargs)
+
+            with self.subTest(operation=operation):
+                with mock.patch.object(os, 'open', side_effect=open_directory), \
+                     mock.patch.object(os, 'fstat', side_effect=descriptor_stat), \
+                     mock.patch.object(os, 'stat', side_effect=nofollow_stat):
+                    text = '\n'.join(adopt.report_child_go_markers(str(self.root)))
+                self.assertIn('working directory="a-unsupported";', text)
+                self.assertIn('unknown/uninspected: metadata unavailable or changed', text)
+                self.assertNotIn(self.candidate('a-unsupported'), text)
+                self.assertIn(self.candidate('z-valid'), text)
+                self.assertNotIn('marker absent', text)
+                self.assertNotIn('private capability details', text)
+
+    def test_child_go_unsupported_entry_nofollow_metadata_is_unknown(self):
+        entry = mock.Mock()
+        entry.name = 'backend'
+        entry.stat.side_effect = NotImplementedError('private capability details')
+        entries = mock.MagicMock()
+        entries.__enter__.return_value = iter([entry])
+        with mock.patch.object(os, 'scandir', return_value=entries):
+            text = '\n'.join(adopt.report_child_go_markers(str(self.root)))
+        entry.stat.assert_called_once_with(follow_symlinks=False)
+        self.assertIn('working directory="backend"; unknown/uninspected:', text)
+        self.assertNotIn('no immediate-child candidates observed', text)
+        self.assertNotIn('private capability details', text)
+
+    def test_child_go_programming_errors_are_not_hidden(self):
+        self.marker('backend')
+        for error in (AttributeError, TypeError):
+            for operation in ('open', 'stat'):
+                with self.subTest(error=error, operation=operation), \
+                     mock.patch.object(os, operation, side_effect=error('synthetic programming bug')), \
+                     self.assertRaisesRegex(error, 'synthetic programming bug'):
+                    adopt.report_child_go_markers(str(self.root))
+
+
 if __name__ == "__main__":
     unittest.main()

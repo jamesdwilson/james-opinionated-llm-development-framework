@@ -90,6 +90,35 @@ recognised configuration as text and does not import it. It reports package scri
 as unexecuted declarations/candidates, not verified native commands. Installation still probes available PATH tools for
 version pins.
 
+### Immediate-child Go marker evidence
+
+Audit/doctor additionally reports regular nonsymlink `go.mod` file presence in
+immediate nonsymlink child directories, with exact target-relative owning directory
+and marker path. This is **unverified file presence**, not a parsed or valid module,
+verified command, selected runner, entrypoint, version or readiness claim. Root Go
+adapter reporting remains root-only, without a duplicate root candidate. Child
+evidence does not change adapters, defaults, installation, gap counts or exit semantics.
+
+The bounded scan does not read marker contents or execute tools. Hidden directories
+and `node_modules`, `vendor`, `dist`, `build`, `target`, `__pycache__`, `venv` are
+uninspected by project policy. Deeper layouts (such as `services/api`), linked
+directories and linked/nonregular markers are uninspected, not evidence of no Go
+anywhere. Candidates use stable directory ordering with JSON-escaped names; no first
+winner is selected. Discovery errors report unknown/uninspected evidence, separate
+from existing required gaps. An absent marker only means absent at that inspected
+location. Existing root and recognised Vite script declarations remain visible.
+Missing required directory-open flags leave this evidence unknown/uninspected
+before filesystem inspection. Explicitly unsupported directory-fd or no-follow
+operations also leave affected evidence unknown/uninspected. Other-platform
+readiness remains unproven.
+
+Documented Go semantics: the official [Modules, packages, and versions](https://go.dev/ref/mod#modules-overview)
+reference locates a module root by `go.mod`; marker presence alone does not establish
+parsed validity or runnable code. The scan depth and exclusions above are this
+project's operating choices, not empirical findings or Go requirements. Inspect the
+candidate's documented commands, then supply its directory explicitly to the
+existing plan/preview/application path; Go commands remain unexecuted and unverified.
+
 Script reporting covers root `package.json` plus the single existing frontend
 selected by the fixed-directory Vite detector (root is deduplicated). Each entry
 labels source manifest/path, script name, literal command and working directory

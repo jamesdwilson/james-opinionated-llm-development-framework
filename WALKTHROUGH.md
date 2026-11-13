@@ -24,6 +24,19 @@ From the framework checkout:
 
 Keep an existing Makefile or other native owner. A Makefile is reported complete only when all six named task markers are present; that does not verify recipes. Use the manual route below for those owners or unsupported gate source. If no gate exists, consider the separate scaffolding alternative below only when an adapter matches. No adapter match is needed for explicit planning or supported existing-gate application.
 
+For a mixed layout, doctor additionally reports an immediate-child regular
+nonsymlink `backend/go.mod` with owning directory `backend` as unverified file
+presence. The root-only adapter summary can still say no Go adapter matched.
+Read the supplied `backend/README.md` (or the target's command authority), then
+use its exact documented command with `--command test backend 'go test ./...'`
+only if that is the reviewed declaration. Use the same selection in plain plan,
+preview and confirmed application below. Do not run the gate merely to inspect
+the mapping: this slice leaves Go commands unexecuted and unverified. Existing
+checks stay first and later changing applications retain their backups. See the
+[scope contract](quality-gate/README.md#immediate-child-go-marker-evidence): deeper,
+linked, hidden and dependency/build layouts are uninspected, and metadata failures
+remain unknown. This is directory evidence, not Go test success or native readiness.
+
 ## 2. Supply an explicit plan
 
 For a target whose reviewed native test is stdlib discovery from its root:
