@@ -26,6 +26,18 @@ The identifiers stay stable if priorities change. PostgreSQL is a reference-fixt
 
 These three are selected for strong component adoption, supported pairings and distinct native backend tooling. S02 also checks a non-React frontend early. That is our coverage judgement, not a statistical claim that these are the world's three most-used complete stacks.
 
+### Native check ownership before selecting commands
+
+Documentation checked 2026-11-13. These are selection constraints, not installed-SDK or executed-stack acceptance. Inspect the actual project and pinned versions before using a command; preserve a sound existing runner.
+
+- **Angular unit owner:** the [current Angular testing guide](https://angular.dev/guide/testing) describes Vitest with jsdom for new CLI projects and still supports existing Karma setups. Do not replace Karma just because a new-project default changed. A Node DOM emulator and a real browser are different execution modes, not interchangeable UI evidence.
+- **Angular command scope:** the [CLI reference](https://angular.dev/cli/test) takes a project name from `angular.json`; omitting it runs all projects. For a bounded non-watch run, select the actual project and make the watch setting explicit. Inspect its runner and browser configuration first: Vitest can use an installed DOM emulator, while Karma follows its configured browsers. The `headless` option alone does not guarantee a browser ran; with Vitest it has no effect unless browsers are configured. `list-tests` performs discovery without building or executing tests, so it cannot satisfy the test role.
+- **C# runner identity:** [Microsoft's test-driver documentation](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-test) distinguishes VSTest and Microsoft.Testing.Platform. SDK version, `global.json` and the selected runner affect command compatibility. Starting with .NET 11, a recognised `DOTNET_TEST_RUNNER` environment value overrides the file's runner selection. Record the intended effective choice rather than silently inheriting or changing it; do not copy flags from the other runner.
+- **C# restore boundary:** [VSTest driver documentation](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-test-vstest) describes implicit dependency restore and `--no-restore`. A test command is not automatically an offline or dependency-free action. Inspect the selected project, restored inputs and restore authority; a missing restore is setup failure, not meaningful behavioural RED.
+- **ASP.NET Core HTTP owner:** [Microsoft's integration-testing guide](https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-10.0) describes `WebApplicationFactory` and `TestServer` through `Microsoft.AspNetCore.Mvc.Testing`. Reuse an appropriate existing test host and runner rather than adding a second harness. This can exercise the request/response boundary with an in-memory server, but does not qualify a browser, real database, external dependencies or published-service lifecycle.
+
+For S01/S03, retain the inspected frontend and Node/Python owners described by their own project scripts and contracts. The qualified component proofs above do not supply an Angular, ASP.NET Core, Next.js or browser PASS. Native owner selection, actual execution, requirement coverage and whole-stack acceptance remain separate outcomes.
+
 ### Candidates four and five: conditional expansion
 
 - **S04: TypeScript + Vue + Node.js + PostgreSQL.** Include plain Vue and, separately, [Nuxt](https://nuxt.com/docs/4.x/getting-started/introduction) where actually present. Existing Vue profile evidence is manual mapping only; native Vue/Nuxt execution remains unproven. Do not infer Nuxt from Vue.
