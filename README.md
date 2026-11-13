@@ -75,6 +75,37 @@ A content-derived backup successor now addresses the observed manual relocation
 between changing applications. Independent review passed, and a fresh blind consumer
 completed three changing applications without moving any recovery history. This is bounded adoption evidence, not complete environment readiness. The [adoption-kit evidence](quality-gate/README.md) covers limited synthetic-fixture checks, not a complete consumer installation. Toybox has bounded independent acceptance for owned dependencies, a cold-copy installation and a no-recording journey, not automatic framework adoption. Kept's local acceptance is retained-record attribution because its referenced final review and raw evidence are unavailable in the current corpus. CFA's later setup remains partial. See [field evidence and limits](research/field-lessons.md) and the [supported/manual scope and proposed consumer capability map](CONSUMER-ADOPTION.md#consumer-capability-state-map).
 
+## Language and native feedback
+
+Static checking, written annotations and compiler diagnostics are separate inputs.
+In controlled Shplait repairs, richer type diagnostics helped agents. Specialised
+type-constrained decoding also improved benchmark outcomes in a TypeScript subset.
+An older token/line-completion study found small improvements when annotations
+were removed. These task-specific findings establish no universal language advantage.
+[[29]](https://arxiv.org/html/2606.01522v2) [[31]](https://arxiv.org/pdf/2504.09246v2) [[30]](https://arxiv.org/pdf/2304.12269)
+
+MultiPL-E associates language frequency with stronger average completion results,
+with niche-language exceptions. Longtail-SWE reports strong Haskell and Erlang
+subset outcomes, with task-selection and configuration limits. Popularity is a
+proxy for possible training exposure. Task mix and documentation quality need
+separate inspection, and low popularity supplies no documentation-quality verdict.
+[[32]](https://arxiv.org/html/2208.08227) [[33]](https://arxiv.org/html/2611.10304v2)
+
+Haskell is statically typed. Erlang is dynamically typed with specifications and
+Dialyzer analysis. BEAM is a virtual machine, and statically typed Gleam provides
+a BEAM-language contrast. The inspected evidence establishes no measured Gleam
+agent result. Official language definitions supply capability evidence.
+[[34]](https://www.haskell.org/) [[35]](https://www.erlang.org/doc/system/typespec.html) [[36]](https://gleam.run/frequently-asked-questions/)
+
+Our operational policy is to retain and use applicable project-native compiler,
+typechecker or analysis diagnostics alongside behavioral checks. Keep command
+mapping owner-reviewed through the existing explicit plan and reviewed application
+bridge. Review required checks before explicitly replacing a selected manual role.
+Language, typing and popularity labels alone never establish support, readiness or
+agent success. The [research note](research/language-and-feedback.md) separates
+strong typing, annotations, feedback, exposure and evidence limits. Transfer to
+the current pinned agent remains unknown.
+
 ## The workflow
 
 Our chosen sequence is **brief → examples → TDD → complementary checks → revision-bound evidence → independent review**. Research supports parts of it, not the complete package; see [the evidence and its limits](#what-the-research-does-and-does-not-prove).
