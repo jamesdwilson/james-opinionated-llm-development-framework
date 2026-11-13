@@ -10,6 +10,27 @@ These instructions govern the target repository. The playbook source repository'
 
 > **Diagnostics hosting is a user choice:** default to local GlitchTip with MCP; cloud requires an explicit choice. [DIAGNOSTICS.md](DIAGNOSTICS.md) defines the boundary. Deployment is not yet implemented or activated. Keep the Python 3.9+ adoption core dependency-free and native failure/recovery checks independent.
 
+## Standards and imperfect targets
+
+Define the template by target-independent quality outcomes: useful tests, failures
+that stop the gate, honest evidence, environment isolation and checks appropriate
+to the product. Reference projects, including Toybox, supply examples and failure
+cases. Their directory layouts, tools, version pins and historical workarounds do
+not become template requirements merely because they exist.
+
+For adoption, compare the target with those outcomes. Keep sound equivalents,
+adapt or explicitly replace unsound checks, add missing capabilities, and leave
+unresolved prerequisites visible. Preserve history and useful behaviour without
+preserving a known defect as a permanent requirement. A partial adoption must
+state which quality gaps remain; it does not lower the target standard or imply
+that an unrun check passed.
+
+The current reviewed literal-gate editor only appends missing commands. Repairing
+or replacing an existing bad command requires an explicitly reviewed manual
+native-owner change; appending a good command after a failing old one is not a
+repair. Test both a clean starter and imperfect targets against the same quality
+outcomes, rather than judging success by resemblance to a reference repository.
+
 ## The adoption path
 
 ```mermaid

@@ -66,6 +66,27 @@ The product is both readable guidance and code implementing that guidance. Manua
 
 A new project may use supported defaults. An established project keeps sound equivalents. Do not replace a working test runner merely because detection does not understand it.
 
+### Template quality and imperfect targets
+
+The [adoption standard](ADOPT.md#standards-and-imperfect-targets) defines quality
+outcomes independently of a reference project's tools, paths and historical pins.
+A reference such as Toybox is a test input, not the ideal specification. Adapting
+an imperfect target may require a reviewed native-owner repair; preserving useful
+checks and history does not require keeping a known defect active.
+
+A fresh public-only consumer exercised a small Python starter, a synthetic
+Bun-shaped target and an imperfect Python target with sound existing assertions.
+The starter used automatic reviewed append/reapplication. The other two required
+explicit manual native-owner adaptations: replacement of obsolete invocations
+and preservation of a nonliteral owner the editor refuses. All three adopted
+gates rejected controlled behavioral failures and passed after exact recovery;
+valid assertions and historical files remained unchanged. Parent checks bound the
+raw runs to final source/data and the frozen public snapshot. This supports the
+bounded guidance, not a new automatic replacement capability. The two Python cases
+share code; browser, dependency, broader product and sentinel-based isolation
+qualification remain unproven. No production-code expansion is justified by this
+trial alone.
+
 ## Consumer journey (eventual contract)
 
 The following describes the intended broader product. Only the supported/manual scope in [WALKTHROUGH.md](WALKTHROUGH.md) is delivered by this milestone; automatic mapping, broader application and full consumer setup verification below remain proposed.
