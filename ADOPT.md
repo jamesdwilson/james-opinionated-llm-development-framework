@@ -94,14 +94,26 @@ Create a short adoption map:
 
 Use the defaults in `STACK.md` for missing roles. Keep sound equivalents. Mark a role N/A only when the product or authorised change genuinely does not exercise it. Missing authorization, unavailable tooling, or an unexecuted required role is blocked or not run. Preserve every role and its disposition in the authoritative adoption map.
 
-Stack-role disposition remains manual. The [consumer capability map and mixed-stack example](CONSUMER-ADOPTION.md#consumer-capability-state-map) distinguish existing heuristics from proposed component mapping and native-command discovery. Current `doctor` uses file-derived inspection without version executables, preserves target files and labels versions unprobed and commands as unverified defaults. It now reports unexecuted package script declarations from root `package.json` and the single frontend selected by the existing Vite detector, with source path, script name, literal command and owning working directory. An absent root manifest is informational and root package-script discovery is not applicable unless Vite detection already identified it as expected. Missing expected manifests, present unreadable or malformed manifests and invalid script values remain unresolved; absent scripts are allowed. This bounded reporting does not select a package manager or verify commands. Installation still probes available tool versions for pins; its generation behaviour is unchanged, and inspection does not establish readiness.
+Stack-role disposition remains manual. The [consumer capability map and mixed-stack example](CONSUMER-ADOPTION.md#consumer-capability-state-map) distinguish existing heuristics from proposed component mapping and native-command discovery. Current `doctor` uses file-derived inspection without version executables, preserves target files and labels versions unprobed and commands as unverified defaults. It now reports unexecuted package script declarations from root `package.json` and the single frontend selected by the existing Vite detector, with source path, script name, literal command and owning working directory. An absent root manifest is informational and root package-script discovery is not applicable unless Vite detection already identified it as expected. Missing expected manifests, present unreadable or malformed manifests and invalid script values remain unresolved; absent scripts are allowed. This bounded reporting does not select a package manager or verify commands. Installation still probes available tool versions for pins; inspection does not establish readiness or qualify complete stacks.
 
 The same manifests also expose optional top-level `packageManager` as exact,
 JSON-quoted declared/unverified intent with source and owning directory. Absent or
-unusable optional declarations add no gaps. Root/Vite values are not reconciled;
-legacy adapters/scaffold defaults are not chosen from them. No format/pin/hash,
-installation, active-manager or trust claim follows. Use the inspected explicit
-native plan; see the [metadata contract](quality-gate/README.md#optional-package-manager-declaration-evidence).
+unusable optional declarations add no gaps. Root/Vite values are not reconciled.
+A declaration does not select a manager by itself; ambiguous metadata withholds
+optional Bun defaults. No format/pin/hash,
+installation, active-manager or trust claim follows; see the
+[metadata contract](quality-gate/README.md#optional-package-manager-declaration-evidence).
+
+`package.json` alone does not select Bun. Optional Bun defaults require an
+unconflicted text `bun.lock` and usable, non-conflicting metadata in the owning
+directory. Nested browser configs use the closest intervening manager metadata,
+including native or unresolved frontend ownership, rather than skipping to root
+Bun. npm, pnpm and Yarn retain native workflows through explicit manual command
+mapping; no native-manager adapters are generated. Marker selection does not
+validate native commands, versions, lock contents or trust. Existing `GATE.md`
+entries are preserved and need manual reconciliation. Optional `--ci` still copies
+the fixed Go/Bun/Node workflow and needs project-specific review; see
+[native ownership](quality-gate/README.md#native-javascript-ownership).
 
 The same already-read manifests expose optional literal `react`/`react-dom`
 declarations with exact manifest, owner, dependency section and JSON-quoted value.
@@ -111,7 +123,7 @@ usage can belong to a library; application/DOM target, license and integrity rem
 unknown. Optional absence or malformed dependency metadata adds no required gaps.
 A human or LLM maps requirements and this evidence to check purpose using the same
 explicit plan below; no broader product-discovery gate or automatic ideal toolchain
-selection follows. Existing adapters and scaffold defaults remain unchanged.
+selection follows. Optional Bun defaults remain subject to the ownership rule above.
 
 Audit/doctor also reports immediate-child Go marker candidates with exact owning
 directory and marker path as unverified file presence. Root Go adapters remain

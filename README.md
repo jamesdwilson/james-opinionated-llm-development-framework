@@ -31,7 +31,7 @@ Start with the target repository's instructions and **one authorised task**.
 
 Use the [consumer walkthrough](WALKTHROUGH.md) for the concise operator path: inspect, supply an explicit plan, apply reviewed commands, run the native test and report the scoped result.
 
-- **Prepare the environment:** use [`quality-gate/`](quality-gate/README.md). Its `doctor` reports recognised configuration; it does not certify readiness. For an existing supported literal `gate.py`, use explicit plan → reviewed diff → confirmation → separately authorised native check; no installer is needed. With no existing gate and a matched adapter, optional `install` creates missing scaffolding and regenerates `GATE.md` with remaining steps. The tool requires Python 3.9+, installation requires Git, and generated tasks require the project's native toolchains. Prefer no script? [Follow the manual procedure](quality-gate/README.md#do-it-by-hand).
+- **Prepare the environment:** use [`quality-gate/`](quality-gate/README.md). Its `doctor` reports recognised configuration; it does not certify readiness. For an existing supported literal `gate.py`, use explicit plan → reviewed diff → confirmation → separately authorised native check; no installer is needed. With no existing gate and a matched adapter, optional `install` creates missing scaffolding and creates `GATE.md` only when no entry exists. Existing entries are preserved; reconcile current doctor output and manual requirements yourself. The tool requires Python 3.9+, installation requires Git, and generated tasks require the project's native toolchains. Prefer no script? [Follow the manual procedure](quality-gate/README.md#do-it-by-hand).
 - **Apply the workflow:** follow [`ADOPT.md`](ADOPT.md), using [`STACK.md`](STACK.md) to map the roles to existing tools. Keep sound equivalents. Add a tool only when the task needs its role and installation is authorised.
 
 Audit/doctor also reports [bounded immediate-child Go marker evidence](quality-gate/README.md#immediate-child-go-marker-evidence)
@@ -41,8 +41,10 @@ or excluded layouts remain uninspected and Go execution remains unverified.
 
 Audit/doctor also shows [optional top-level `packageManager` intent](quality-gate/README.md#optional-package-manager-declaration-evidence)
 from the same root/recognised Vite manifests, quoted with its owning directory as
-declared/unverified. It does not select a manager or change scaffold defaults;
-absent/unusable optional values add no gaps. Use inspected explicit native plans.
+declared/unverified. It does not select a manager by itself; the
+[Bun marker rule](quality-gate/README.md#native-javascript-ownership) withholds optional
+Bun defaults when ownership is ambiguous. Absent/unusable optional values add no
+gaps. Use inspected explicit native plans.
 
 Audit/doctor also reports [optional declared React technical evidence](quality-gate/README.md#optional-declared-react-technical-evidence)
 from those same manifests, retaining dependency section and exact quoted value.
