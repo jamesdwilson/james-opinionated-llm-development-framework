@@ -50,6 +50,12 @@ Declarations do not qualify installation, execution, application versus library 
 browser applicability. A human or LLM maps requirements and evidence through the
 same explicit plan; the report selects no toolchain.
 
+Our [app-stack coverage register](research/app-stack-coverage.md) tracks ten
+research-informed reference combinations. The first targets are React/Node,
+Angular/ASP.NET Core and React/FastAPI; expansion to five is conditional.
+These are priorities, not measured global combination ranks or a support allowlist.
+Existing Go and other adoption work remains preserved.
+
 For a coding agent:
 
 ```text
