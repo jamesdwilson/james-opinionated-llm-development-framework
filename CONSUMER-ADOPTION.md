@@ -299,6 +299,46 @@ validator routes share the same validation logic; this is transfer/routing
 and preservation evidence, not independent algorithmic proof or universal
 runtime/supply-chain qualification. Existing Go and other work stays intact.
 
+### In-process native API and mixed-owner root workflow
+
+The next owned mock added a thin FastAPI projection over the same catalog data,
+without reimplementing Node's domain validator. Standard-library unittest and
+already-installed FastAPI 0.135.3, Starlette 1.0.0 and httpx 0.28.1 required no
+new package or server. An explicitly recorded empty-router fixture bootstrap
+allowed real HTTP assertion RED rather than import errors: ten methods produced
+29 failures including subtests before the route was implemented. Not every later
+request in a successful sequence was reached during that initial RED.
+
+The adapter then passed all ten methods. A separate API-only surface regression
+found three SDK-generated HTML documentation routes still exposed; one new test
+failed before disabling those routes for this fixture, retaining OpenAPI JSON.
+All eleven HTTP methods and the inherited nine Node cases passed; the original
+ten test bodies remained unchanged. This is a fixture scope choice, not a rule
+to remove other projects' documentation. A fresh static reviewer found no blocker;
+the parent executed all four independently authored HTTP challenges successfully,
+including UTF-8 errors, query/error precedence, live recovery and Unicode order.
+
+Before root adoption, a private three-case integration envelope exposed two more
+missing-wiring assertions: root `test` omitted the API suite and stayed green
+when its route was deliberately broken while Node stayed green. The original
+policy-stop control already passed. A fresh public-only consumer then completed
+seven CLI calls for inspect/plan/preview/confirmed application/no-change repeat.
+It appended the API owner from `api/`, kept policy and both Node commands first,
+and preserved all native source, earlier ADOPTION history and old recovery data.
+
+Parent native acceptance passed all three integration cases. The actual mixed
+root gate returned 0 for valid code, 1 for the broken API with Node still passing,
+and 0 after exact restoration. It executed nine Node cases and eleven HTTP methods
+without skips. The parent matched 31 public tracked files plus the Git pointer,
+17 protected target originals except the intended gate edit, both content-derived
+backups and exact repeat metadata. No framework code or new dependency was needed.
+
+This qualifies the owned API/Node component workflow, not complete S03, React,
+browser interaction, database, listening-service lifecycle, a clean installation
+or a resolved dependency/supply-chain lock. Empty `verify` and other unresolved
+roles are not PASS. SDK defaults and actual exposed surfaces matter more than a
+framework name when deciding which quality roles apply.
+
 Eight added `test_script_*` tests cover mixed Go-root/React-Vite declarations,
 custom names, deduplication, absent/empty scripts, malformed/wrong types,
 valid siblings, invalid encoding, control characters, unchanged fixture bytes,
