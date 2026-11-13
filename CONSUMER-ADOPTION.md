@@ -12,9 +12,44 @@ Historical evidence is bounded to its recorded fixtures or consumers. Source pre
 | Retain native tools and commands per component | Unexecuted package script declarations at root and one recognised Vite frontend; broader mapping remains manual | Evidence-based component mapping; no shipped native-runner discovery |
 | Resolve detected, configured and LLM proposals | Person/LLM explicit `--command` selections share a read-only preview; supplied provenance remains unverified | One reviewable mapping path, including a no-LLM route |
 | Review changes before applying them | Bounded independently reviewed literal gate diff preview and fingerprint-confirmed application with stale-byte/selection refusal; blind local use passed | Broader file-owner support remains proposed |
-| Reapply without losing existing work | Reviewed literal gate application appends missing commands with exact deduplication; accepted baseline repeat use required manual backup relocation; content-derived retained backups have bounded independent and fresh blind acceptance. Selected scaffolding preserved. `GATE.md` overwritten | Broader reapplication remains proposed |
+| Reapply without losing existing work | Reviewed literal gate application appends missing commands with exact deduplication; accepted baseline repeat use required manual backup relocation; content-derived retained backups have bounded independent and fresh blind acceptance. Selected scaffolding preserved. `GATE.md` now uses exclusive creation; existing entries are kept, not refreshed or validated | Broader reapplication remains proposed |
 | Run gates and expose failures | Synthetic Python native unittest and manually selected generated gate both passed; deliberate assertion produced gate exit 1; restored fixture passed | Native dependency installation, production builds and applicable journeys remain consumer-specific and unproven here |
 | Prove isolation, restart and closure; bind evidence | Manual procedures; templates require adaptation | Separate assertions, cleanup, counts, skips, revision and scope |
+
+### Ordinary JavaScript native ownership
+
+The Bun detector now requires unconflicted `bun.lock` marker evidence. Ordinary
+npm, pnpm and Yarn declarations/lock markers use the existing explicit native
+plan, preview and confirmed-application bridge. Unspecified and conflicting
+ownership stays manual. Bun-specific Vite/browser scaffold defaults are bounded
+by the [directory ownership rule](quality-gate/README.md#native-javascript-ownership).
+Other matched adapters retain their native scaffolding. This is a framework
+operating choice supported by synthetic local regression evidence. Native-manager
+installation, lock validity, declared versions and full stack readiness require
+separate evidence. Independent review of this candidate remains pending.
+
+### Scaffold instruction preservation
+
+The scaffold installer now creates `GATE.md` exclusively instead of truncating
+an existing path. It keeps owner-edited regular files, existing symbolic links,
+dangling links and directory entries without opening their contents for the
+document write. The report distinguishes a newly written guide from a preserved
+entry. Existing instructions are not refreshed or certified; reconcile current
+inspection and remaining requirements manually.
+
+Six owning stdlib tests use real owned filesystem entries while isolating Git
+and version-probe boundaries. Before the production change, five preservation
+assertions failed and the new-document control passed. Afterwards all six passed.
+The complete owning suite passed 110 tests. Four actual public scaffolder calls
+in separate owned Python-marked Git fixtures returned zero: fresh guide creation,
+repeat after owner edits, a link to an owned file outside the target, and a
+dangling link. Original gate bytes and relevant document bytes/modes/link entries
+were checked, not inferred from success messages.
+
+This is bounded local document-write evidence. No generated gate, dependency
+installation, browser, application service or held React/S02 attempt was executed.
+Other scaffold paths, hostile ancestor replacement, crash recovery and general
+cross-platform filesystem guarantees are not established by this slice.
 
 ### Mixed Go backend and React frontend example
 
@@ -494,7 +529,7 @@ terminal security. Exact JSON remains authoritative for byte copying.
 
 These are remaining product gaps, not implemented capabilities.
 
-1. **Repeat-use ergonomics:** backups, existing-gate guidance and direct diff review now have bounded acceptance. Multiline/quoted Python string interpretation remains manual; do not treat decoder-free review as general novice usability. Literal `gate.py` application has bounded acceptance; other file owners and general application remain proposed. Scaffold generation writes directly and overwrites `GATE.md`.
+1. **Repeat-use ergonomics:** backups, existing-gate guidance and direct diff review now have bounded acceptance. Multiline/quoted Python string interpretation remains manual; do not treat decoder-free review as general novice usability. Literal `gate.py` application has bounded acceptance; other file owners and general application remain proposed. Scaffold generation still writes missing files directly; existing `GATE.md` entries are now preserved rather than refreshed. This bounded document-write fix does not add conflict-preserving merging for other file owners.
 2. **Evidence-based component and native-runner mapping:** general monorepo detection, automatic declaration matching and detected/configured/LLM convergence remain proposed. Today commands are explicitly supplied and reviewed; limited marker/script reporting does not infer a runner.
 3. **Broader consumer verification:** actual dependency installation, production builds, applicable browser/restart/isolation checks and required stack-role evidence need separately authorised consumer runs. This stdlib fixture proves only the documented local path and failure propagation.
 4. **Portability:** other platforms and shells remain unsupported/unproven by this run. Review generated commands for the admitted environment before execution; no automatic portability guarantee exists.

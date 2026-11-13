@@ -128,7 +128,7 @@ If no gate exists, an adapter matches, Git is available and scaffold writes are 
 
 This public `install` writes scaffolding; it does not install project dependencies. It probes available matched tools and checks Git. The exercised Python-only fixture constrained probes to trusted local Python and Git, used no `--ci`, and exited 0, reporting `gate.py(generated:python)` and `GATE.md`. Generated **`gate.py install` can install dependencies and was not run**.
 
-Existing `gate.py` and Makefile are preserved; `GATE.md` is overwritten on every scaffold run. Keep manual notes in the adoption map. Without scaffold authority, use the [manual procedure](quality-gate/README.md#do-it-by-hand) and an existing native owner; that alternative was not exercised here.
+Existing `gate.py` and Makefile are preserved. The historical scaffold run regenerated `GATE.md`; the current preservation successor creates it only when missing and keeps any existing entry, including links and directories, without refreshing its instructions. Inspect existing guidance and reconcile remaining steps manually. This does not retroactively add preservation evidence to the historical run. Without scaffold authority, use the [manual procedure](quality-gate/README.md#do-it-by-hand) and an existing native owner; that alternative was not exercised here.
 
 ### Historical manual transfer and no-LLM alternative
 

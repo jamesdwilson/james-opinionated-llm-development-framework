@@ -132,8 +132,34 @@ nonstring script values are unresolved discovery; valid siblings remain visible.
 An absent or empty `scripts` object means no scripts declared, not malformed input.
 Unresolved items contribute to reported gaps; audit exit 0 means inspection completed,
 not ready. This does not scan general monorepos or choose a package manager:
-`package.json` alone does not establish Bun, even when the legacy Bun adapter matches.
-Generated defaults remain unverified; installation and gate generation are unchanged.
+`package.json` alone does not establish Bun. The Bun marker rule below gates optional
+scaffold defaults. Native commands remain explicitly supplied and unverified.
+
+### Native JavaScript ownership
+
+The existing explicit plan, preview and confirmed-application path accepts inspected
+npm, pnpm and Yarn commands under their native owner. A manifest alone leaves
+manager ownership manual. Optional Bun scaffolding requires `bun.lock` and the
+absence of `package-lock.json`, `npm-shrinkwrap.json`, `pnpm-lock.yaml` and `yarn.lock`
+entries in that directory. A present manifest must parse as a JSON object. A present
+`packageManager` must be a literal `bun@` string with a nonblank suffix. Conflicting,
+unknown or unusable declarations leave selection manual. These are conservative
+framework operating choices. Marker contents, installed tools, declared versions,
+hashes and trust still require native verification.
+
+Bun Vite defaults and isolation templates require the same directory's Bun markers.
+The selected Playwright config uses the closest directory containing manager
+metadata, checking its own directory and then ancestors up to the repository root.
+A config-only directory never skips an intervening native or unresolved frontend
+owner to inherit root Bun defaults. The closest owner's markers must independently
+satisfy the same Bun rule. Broader workspace ownership stays manual. Other matched adapters
+can still scaffold their own defaults while JavaScript commands need an explicit
+native plan. A JavaScript-only target without Bun markers uses the manual native
+gate route. Existing gates, Makefiles, manifests and locks retain their owners.
+This bounded rule supersedes earlier reporting-only descriptions of legacy Bun
+selection. It provides no native-manager command generation or installation.
+Optional `--ci` still copies the existing fixed Go/Bun/Node workflow and requires
+project-specific review.
 
 ## Optional package-manager declaration evidence
 
@@ -157,7 +183,8 @@ differ: no inheritance, merging, workspace precedence or conflict resolution is
 inferred. No lockfiles, `devEngines`, dependencies, registries or additional
 configuration are inspected for this evidence.
 
-Legacy root adapters and scaffold defaults are not chosen from this declaration.
+The declaration supplies no affirmative adapter selection. The Bun marker rule
+above uses it only to withhold Bun defaults when ownership remains ambiguous.
 Inspect the target's documented native workflow and supply an explicit plan through
 the existing preview/confirmed-application path. Declaration evidence selects no
 manager, runtime, installation or command and does not qualify readiness.
@@ -310,12 +337,16 @@ flowchart LR
 
 ## What the tool does, and never does
 
-Detects the stack, writes missing scaffold files, and regenerates `GATE.md`
-with remaining steps. Existing `gate.py`, Makefile and isolation-test files
-are preserved; **`GATE.md` is overwritten on each install**, so keep manual
-notes elsewhere. No deletion, transactions, journals or receipts. Whatever
-it cannot safely automate (safe dev commands, env wiring, the smoke, the
-acceptance run itself) lands in `GATE.md` as numbered instructions.
+Detects the stack, writes missing scaffold files, and creates `GATE.md` only
+when that path has no existing entry. Exclusive creation preserves existing
+regular files, symbolic links (including dangling links), and directories without
+opening their contents or following a link for the document write. Existing
+`gate.py`, Makefile and isolation-test files retain their preservation rules.
+No deletion, transactions, journals or receipts are added. Newly generated
+`GATE.md` contains numbered remaining steps; an existing entry is kept rather
+than refreshed or validated. Inspect it and reconcile current doctor output and
+manual requirements yourself. Preservation is not qualification or a claim that
+other scaffold paths have equivalent filesystem protection.
 
 ```mermaid
 flowchart LR
@@ -324,7 +355,7 @@ flowchart LR
     A -->|install| G{"contract file exists?"}
     G -->|yes| N["never modified<br/>gaps become instructions"]
     G -->|no| W["write gate.py<br/>version pins included"]
-    W --> M["write GATE.md<br/>found, installed, remaining steps"]
+    W --> M["GATE.md: create only if missing<br/>otherwise keep and reconcile manually"]
     N --> M
     M --> D["ordinary git diff<br/>you review, you commit"]
 ```
@@ -334,7 +365,7 @@ flowchart LR
 The tool is a convenience. Everything it does:
 
 **doctor** notes the OS; detects toolchains by marker files (`go.mod`,
-`bun.lock`/`package.json`, `pyproject.toml`/`requirements.txt`/`setup.py`/
+unconflicted `bun.lock` markers as described above, `pyproject.toml`/`requirements.txt`/`setup.py`/
 `Pipfile`, `Cargo.toml`, `vite.config.*` beside a `package.json` in
 `web/frontend/ui/app/apps/web/client` or root, `playwright*.config.*`
 within three levels); checks for `gate.py` or an equivalent Makefile and text
@@ -346,7 +377,8 @@ verify runtime isolation, safe startup or readiness.
 toolchains with version pins; with `--ci` writes one pinned Ubuntu
 workflow; with Vite+Vitest copies the env-isolation test template; writes
 `GATE.md` (what it found, what it installed, your numbered remaining
-steps). Existing scaffold files are preserved; `GATE.md` is regenerated.
+steps) only when absent. Existing scaffold files and any `GATE.md` entry are
+preserved; an existing guide is not refreshed or validated.
 Review tracked changes with `git diff` and new files with `git status`.
 
 ## Extend it

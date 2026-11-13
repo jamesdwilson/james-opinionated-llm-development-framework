@@ -76,10 +76,28 @@ def detect_go(t, probe_versions=True):
 
 
 def detect_bun(t, probe_versions=True):
-    if not (os.path.isfile(os.path.join(t, "bun.lock")) or os.path.isfile(os.path.join(t, "package.json"))):
+    # A generic JavaScript manifest supplies no Bun ownership evidence. Keep
+    # conflicting or unreadable metadata on the explicit native-plan path.
+    if not os.path.isfile(os.path.join(t, "bun.lock")):
         return None
-    facts = {"marker": "bun.lock" if os.path.isfile(os.path.join(t, "bun.lock")) else "package.json",
-             "lockfile": os.path.isfile(os.path.join(t, "bun.lock"))}
+    if any(os.path.lexists(os.path.join(t, name)) for name in
+           ("package-lock.json", "npm-shrinkwrap.json", "pnpm-lock.yaml", "yarn.lock")):
+        return None
+    manifest = os.path.join(t, "package.json")
+    if os.path.lexists(manifest):
+        try:
+            with open(manifest, encoding="utf-8") as fh:
+                package = json.load(fh)
+        except (OSError, UnicodeError, ValueError):
+            return None
+        if not isinstance(package, dict):
+            return None
+        if "packageManager" in package:
+            declaration = package["packageManager"]
+            if not isinstance(declaration, str) or not declaration.startswith("bun@") or not declaration[4:].strip():
+                return None
+    # These remain marker facts, without lockfile or declaration validation.
+    facts = {"marker": "bun.lock", "lockfile": True}
     facts["version"] = _tool_version(["bun", "--version"]) if probe_versions and shutil.which("bun") else ""
     return facts
 
@@ -895,7 +913,7 @@ def main(argv):
                       "Add missing targets manually where applicable; target-name matches do not verify recipes.")
             elif found:
                 print("Optional scaffolding for the missing gate requires Git and explicit write authority. "
-                      "Review generated defaults and GATE.md overwrite before use.")
+                      "Review generated defaults; existing GATE.md entries are preserved.")
                 print("Scaffolding command (JSON string; decode before use): " +
                       json.dumps(shlex.join(["python3", "quality-gate/install", target]), ensure_ascii=True))
             else:
@@ -915,15 +933,29 @@ def main(argv):
         return 1
     if not found:
         sys.stderr.write("refusing: no adapter matched; nothing to wire. "
-                         "Add an adapter entry in quality-gate/adopt.py for this stack.\n")
+                         "Inspect native tooling and use an explicit plan with a manual native gate owner.\n")
         return 1
 
+    # Bun-specific defaults belong only to the directory supplying Bun evidence.
+    # Other components retain their inspected native owner through explicit plans.
+    bun_vite = vite if vite and detect_bun(os.path.join(target, vite["dir"]), probe_versions=False) else None
+    bun_pw = None
+    if pw:
+        pw_directory = os.path.join(target, os.path.dirname(pw["configs"][0]))
+        # Inherit only from the closest directory with manager metadata. Never
+        # jump past a native or unresolved frontend owner to the root toolchain.
+        manager_markers = ("package.json", "bun.lock", "package-lock.json", "npm-shrinkwrap.json", "pnpm-lock.yaml", "yarn.lock")
+        while pw_directory != target and not any(
+                os.path.lexists(os.path.join(pw_directory, name)) for name in manager_markers):
+            pw_directory = os.path.dirname(pw_directory)
+        if detect_bun(pw_directory, probe_versions=False):
+            bun_pw = pw
     installed = []
     if has_gate_py or mf[0] is not None:
         missing_targets = [] if has_gate_py else mf[1]
     else:
         with open(os.path.join(target, "gate.py"), "w") as fh:
-            fh.write(emit_gate_py(found, pw, vite))
+            fh.write(emit_gate_py(found, bun_pw, bun_vite))
         installed.append("gate.py(generated:%s)" % "+".join(sorted(found)))
         missing_targets = []
 
@@ -939,13 +971,18 @@ def main(argv):
             fh.write(wf)
         installed.append(".github/workflows/native.yml")
 
-    if vite and vite["vitest"]:
+    if bun_vite and vite["vitest"]:
         dest = os.path.join(target, vite["dir"] or ".", "env-isolation.test.ts")
         if not os.path.isfile(dest):
             shutil.copyfile(os.path.join(SCRIPT_DIR, "templates", "env-isolation.test.ts"), dest)
             installed.append(os.path.relpath(dest, target) + "(template)")
 
     steps = []
+    if (vite and not bun_vite) or (pw and not bun_pw):
+        steps.append("Detected JavaScript configuration requires an explicit native plan. "
+                     "Inspect its owning directory, manager policy and documented commands; "
+                     "review and apply selections through the existing native gate owner. "
+                     "Bun-specific commands and isolation templates require unconflicted Bun markers.")
     if missing_targets:
         steps.append("Your existing Makefile was left untouched. Add the six contract steps "
                      "(`install`, `verify`, `test`, `build`, `test-e2e-install`, `test-e2e`) to it, "
@@ -957,11 +994,11 @@ def main(argv):
                      "bind `127.0.0.1`, use strict ports (fail if occupied, never reuse a foreign "
                      "service), absolute synthetic state paths, no provider credentials or household "
                      "config inherited, and never delete the local database on normal startup.")
-    if vite and not vite["env_isolated"]:
+    if bun_vite and not vite["env_isolated"]:
         steps.append("Set `envDir: false` in every Vite config in `%s`, run Bun-owned test workers "
                      "with `--no-env-file` (worker execArgv, not just the parent), and keep the "
                      "planted env-isolation regression green." % (vite["dir"] or "."))
-    if vite and vite["vitest"]:
+    if bun_vite and vite["vitest"]:
         steps.append("Adapt `env-isolation.test.ts` to this project: plant a parent-environment "
                      "sentinel, prove it does not leak into the test worker, prove `.env*` files "
                      "cannot alter results, and prove a deliberately failing assertion really fails.")
@@ -980,7 +1017,7 @@ def main(argv):
 
     gate_doc = [
         "# GATE.md", "",
-        "Generated by quality-gate/adopt.py on %s. Do not edit; rerun the script."
+        "Generated by quality-gate/adopt.py on %s. Review and adapt these steps; existing GATE.md is preserved on rerun."
         % datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "Standard: quality-gate/README.md in james-opinionated-llm-development-framework.", "",
         "## Detected state", "",
@@ -993,12 +1030,21 @@ def main(argv):
     gate_doc += ["", "Qualification is claimed only for the scope actually demonstrated (for example "
                     "\"local development on %s\"). Other platforms, containers, deployment and AI "
                     "services stay unclaimed until each gets its own run." % osname, ""]
-    with open(os.path.join(target, "GATE.md"), "w") as fh:
-        fh.write("\n".join(gate_doc))
+    guide_written = False
+    try:
+        with open(os.path.join(target, "GATE.md"), "x", encoding="utf-8") as fh:
+            fh.write("\n".join(gate_doc))
+        guide_written = True
+    except FileExistsError:
+        pass
 
     print("\n".join(lines))
     print("\ninstalled: %s" % (" ".join(installed) if installed else "nothing"))
-    print("wrote GATE.md with the remaining steps. Review everything as a normal git diff.")
+    if guide_written:
+        print("wrote GATE.md with the remaining steps. Review everything as a normal git diff.")
+    else:
+        print("preserved existing GATE.md entry; inspect it and reconcile remaining steps manually. "
+              "Review everything as a normal git diff.")
     return 0
 
 

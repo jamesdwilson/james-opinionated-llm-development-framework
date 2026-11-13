@@ -1087,7 +1087,7 @@ class AdoptionContracts(unittest.TestCase):
         fixtures = {
             "go": {"go.mod": "module example.invalid/fixture\n"},
             "bun-lock": {"bun.lock": "{}"},
-            "bun-package": {"package.json": "{}"},
+            "unspecified-javascript": {"package.json": "{}"},
             "rust": {"Cargo.toml": "[package]\nname='fixture'\n"},
             "vite": {"package.json": "{}", "vite.config.js": "export default {envDir: false};",
                      "playwright.config.ts": "throw new Error('must not execute');"},
@@ -1110,7 +1110,10 @@ class AdoptionContracts(unittest.TestCase):
                 self.assertEqual(before, self.snapshot(root))
                 text = output.getvalue()
                 self.assertIn("marker evidence:", text)
-                self.assertIn("version=unprobed", text)
+                if name in ("unspecified-javascript", "vite"):
+                    self.assertIn("adapters matched:          none", text)
+                else:
+                    self.assertIn("version=unprobed", text)
                 self.assertIn("commands: unverified defaults; no commands executed", text)
                 self.assertIn("readiness: unproven", text)
                 for path in files:
@@ -1141,7 +1144,7 @@ class AdoptionContracts(unittest.TestCase):
         self.assertIn("readiness: unproven", result.stdout)
 
     def test_install_preserves_explicit_version_probing_and_pins(self):
-        for marker in ("go.mod", "package.json", "requirements.txt", "Cargo.toml"):
+        for marker in ("go.mod", "package.json", "bun.lock", "requirements.txt", "Cargo.toml"):
             (self.root / marker).write_text("{}" if marker == "package.json" else "")
         versions = {"go": "go version go1.26.0 fixture", "bun": "1.4.4",
                     "python3": "Python 3.14.5", "cargo": "cargo 1.90.0"}
@@ -1444,7 +1447,7 @@ class ChildGoMarkers(unittest.TestCase):
                                  for p in self.root.rglob('*') if p.is_file()})
         text = output.getvalue()
         self.assertIn(self.candidate('backend'), text)
-        self.assertIn('adapters matched:          bun', text)
+        self.assertIn('adapters matched:          none', text)
         self.assertIn('script name="ui:check"; literal command="npm test"; working directory="frontend"', text)
         self.assertIn('script name="root:check"', text)
         self.assertIn('verdict: gate shape present.', text)
@@ -1842,7 +1845,7 @@ class PackageManagerEvidence(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
         self.assertEqual(result.stderr, '')
         self.assertIn(self.declaration('npm@10.0.0'), result.stdout)
-        self.assertIn('adapters matched:          bun', result.stdout)
+        self.assertIn('adapters matched:          none', result.stdout)
         self.assertIn('package manager: unresolved', result.stdout)
         self.assertIn('script name="check"; literal command="node --test"', result.stdout)
         self.assertIn('readiness: unproven', result.stdout)
@@ -2002,7 +2005,7 @@ class ReactDeclarationEvidence(unittest.TestCase):
         self.assertEqual((result.returncode, result.stderr), (0, ''))
         for name in ('react', 'react-dom'):
             self.assertIn(self.row('dependencies', name, '*'), result.stdout)
-        self.assertIn('adapters matched:          bun', result.stdout)
+        self.assertIn('adapters matched:          none', result.stdout)
         self.assertIn('readiness: unproven', result.stdout)
         self.assertEqual(before, (path.read_bytes(), path.stat().st_mode))
 
@@ -2167,7 +2170,7 @@ class ReactUnknownSectionR1(unittest.TestCase):
                                 capture_output=True, text=True, timeout=15)
         self.assertEqual((result.returncode, result.stderr), (0, ''))
         self.assertIn('dependency section="dependencies"; unknown: optional section must be an object', result.stdout)
-        self.assertIn('adapters matched:          bun', result.stdout)
+        self.assertIn('adapters matched:          none', result.stdout)
         self.assertIn('verdict: 7 gap group(s).', result.stdout)
         self.assertIn('readiness: unproven', result.stdout)
         self.assertEqual(before, (path.read_bytes(), path.stat().st_mode))
