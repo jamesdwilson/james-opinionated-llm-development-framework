@@ -162,6 +162,15 @@ A failed deterministic check remains a failure. Midscene findings are advisory u
 
 Keep independent review bounded. Repair concrete blockers and rerun affected evidence without starting an open-ended review programme.
 
+When isolation applies, use deliberately fake canaries to distinguish an unsafe
+inheritance or environment-file-loading control from the intended clean child
+invocation. Record exactly which runtime, loader and invocation were tested;
+a passing fixture does not qualify arbitrary application loaders. Keep these
+experiments separate from real credentials. Assert presence booleans and use
+allowlisted diagnostics: passing an entire environment mapping to an assertion
+can print its values on failure. Never treat synthetic test logging as proof
+that real environment values are safe to log.
+
 ## 5. Report the result
 
 Leave:

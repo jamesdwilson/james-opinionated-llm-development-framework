@@ -87,6 +87,18 @@ share code; browser, dependency, broader product and sentinel-based isolation
 qualification remain unproven. No production-code expansion is justified by this
 trial alone.
 
+A separate controlled invocation experiment then tested fake inherited-environment
+and owned `.env` canaries with Python 3.14.5 and Bun 1.4.4. Three unsafe controls
+failed their actual absence assertions; both explicitly isolated invocations
+passed. Independent review checked 29 executions of the actual envelope-guard
+statements, the five raw native controls and preservation. The initial harness
+stopped before tests on runtime-added metadata; its original failure remains
+retained beside the fresh technical recovery. The recovery permits one named
+metadata key without validating its value or origin. This establishes only the
+tested canaries and invocation protocol, not arbitrary application or dotenv
+library isolation. Failure output used a deliberately synthetic allowlisted
+environment and must not be treated as safe logging for real credentials.
+
 ## Consumer journey (eventual contract)
 
 The following describes the intended broader product. Only the supported/manual scope in [WALKTHROUGH.md](WALKTHROUGH.md) is delivered by this milestone; automatic mapping, broader application and full consumer setup verification below remain proposed.
