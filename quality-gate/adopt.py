@@ -285,6 +285,36 @@ def report_package_scripts(target, vite):
             lines.append("    %s; packageManager=%s; declared/unverified; not format/pin/hash checked, installed, active or trusted; not an instruction" %
                          (source, json.dumps(package["packageManager"])))
             lines.append("    legacy root adapters/scaffold defaults are not chosen from this declaration; inspect native workflow and supply an explicit plan")
+        # Reuse this parsed manifest; optional technical evidence adds no gaps.
+        react_source = "React declaration: manifest=%s; working directory=%s" % (
+            json.dumps(manifest), json.dumps(directory))
+        lines.append("    React evidence limits: version/installation/support/actual framework execution unverified; "
+                     "app vs library and DOM UI vs other target unknown; license/integrity unverified; "
+                     "no tool or browser classification selected")
+        declared = False
+        sections_known = True
+        for section in ("dependencies", "devDependencies", "peerDependencies", "optionalDependencies"):
+            if section not in package:
+                continue
+            dependencies = package[section]
+            section_source = "%s; dependency section=%s" % (react_source, json.dumps(section))
+            if not isinstance(dependencies, dict):
+                sections_known = False
+                lines.append("    %s; unknown: optional section must be an object" % section_source)
+                continue
+            for name in ("react", "react-dom"):
+                if name not in dependencies:
+                    continue
+                declared = True
+                declaration = "%s; package=%s" % (section_source, json.dumps(name))
+                value = dependencies[name]
+                if not isinstance(value, str):
+                    lines.append("    %s; unknown: declaration value must be a string" % declaration)
+                else:
+                    lines.append("    %s; value=%s; declaration only; not an instruction" %
+                                 (declaration, json.dumps(value)))
+        if not declared and sections_known:
+            lines.append("    %s; no literal react/react-dom declarations; optional/informational" % react_source)
         scripts = package.get("scripts", {})
         if not isinstance(scripts, dict):
             problem("scripts must be an object")

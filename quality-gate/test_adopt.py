@@ -1980,5 +1980,199 @@ class PackageManagerEvidence(unittest.TestCase):
                     self.assertNotIn(control, text)
                 self.assertIn('literal command="check"', text)
 
+
+class ReactDeclarationEvidence(unittest.TestCase):
+    # Reuse only the bounded read/preservation guard, without inheriting tests.
+    setUp = PackageManagerEvidence.setUp
+    report = PackageManagerEvidence.report
+
+    def row(self, section, name, value, directory='.'):
+        manifest = 'package.json' if directory == '.' else directory + '/package.json'
+        return 'React declaration: manifest=%s; working directory=%s; dependency section=%s; package=%s; value=%s; declaration only' % tuple(
+            json.dumps(x) for x in (manifest, directory, section, name, value))
+
+    def test_react_public_doctor_observed_omission(self):
+        path = self.root / 'package.json'
+        path.write_text(json.dumps({'dependencies': {'react': '*', 'react-dom': '*'},
+                                    'packageManager': 'npm@10.0.0', 'scripts': {'check': 'never-execute'}}))
+        path.chmod(0o640)
+        before = (path.read_bytes(), path.stat().st_mode)
+        result = subprocess.run([sys.executable, '-B', str(Path(__file__).with_name('doctor')), str(self.root)],
+                                capture_output=True, text=True, timeout=15)
+        self.assertEqual((result.returncode, result.stderr), (0, ''))
+        for name in ('react', 'react-dom'):
+            self.assertIn(self.row('dependencies', name, '*'), result.stdout)
+        self.assertIn('adapters matched:          bun', result.stdout)
+        self.assertIn('readiness: unproven', result.stdout)
+        self.assertEqual(before, (path.read_bytes(), path.stat().st_mode))
+
+    def test_react_sections_literals_scope_and_deduplicated_reads(self):
+        sections = ('dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies')
+        values = ('*', 'npm:other@1', 'https://example.invalid/a.tgz', 'x";$(touch NEVER);`false`\n\r\t\x00\x1b café\u202e')
+        package = {section: {'react': value, 'react-dom': value, 'React': 'IGNORE'}
+                   for section, value in zip(sections, values)}
+        (self.root / 'package.json').write_text(json.dumps(package))
+        (self.root / 'frontend').mkdir()
+        (self.root / 'frontend/package.json').write_text(json.dumps({'peerDependencies': {'react': '*'}}))
+        (self.root / '.env').write_text('NEVER_READ')
+        (self.root / 'other').mkdir()
+        (self.root / 'other/package.json').write_text('{"dependencies":{"react":"IGNORE"}}')
+        text, gaps = self.report({'dir': 'frontend'})
+        self.assertEqual(gaps, 0)
+        for section, value in zip(sections, values):
+            for name in ('react', 'react-dom'):
+                self.assertIn(self.row(section, name, value), text)
+        self.assertIn(self.row('peerDependencies', 'react', '*', 'frontend'), text)
+        self.assertEqual(text.count('React declaration: manifest='), 9)
+        self.assertNotIn('IGNORE', text)
+        for control in ('\x00', '\x1b', '\r', '\t', 'é', '\u202e'):
+            self.assertNotIn(control, text)
+        for vite in (None, {'dir': ''}):
+            text, gaps = self.report(vite)
+            self.assertEqual(text.count('React declaration: manifest='), 8)
+            self.assertEqual(gaps, 0)
+
+    def test_react_no_extra_discovery_or_target_import(self):
+        (self.root / 'package.json').write_text('{"dependencies":{"react":"*"}}')
+        with mock.patch.object(adopt.os, 'scandir', side_effect=AssertionError('scan forbidden')), \
+             mock.patch.object(adopt.os, 'listdir', side_effect=AssertionError('scan forbidden')), \
+             mock.patch.object(adopt.subprocess, 'run', side_effect=AssertionError('process forbidden')), \
+             mock.patch.object(adopt.subprocess, 'Popen', side_effect=AssertionError('process forbidden')), \
+             mock.patch.object(adopt, '_tool_version', side_effect=AssertionError('probe forbidden')), \
+             mock.patch.object(adopt.os, 'system', side_effect=AssertionError('shell forbidden')), \
+             mock.patch.object(adopt.os, 'execve', side_effect=AssertionError('exec forbidden')), \
+             mock.patch('builtins.exec', side_effect=AssertionError('target import forbidden')), \
+             mock.patch.object(socket, 'socket', side_effect=AssertionError('network forbidden')):
+            lines, gaps = adopt.report_package_scripts(str(self.root), None)
+        self.assertEqual(gaps, 0)
+        self.assertIn(self.row('dependencies', 'react', '*'), '\n'.join(lines))
+
+    def test_react_peer_library_ambiguity_and_limits(self):
+        (self.root / 'package.json').write_text('{"peerDependencies":{"react":"^19"}}')
+        text, gaps = self.report()
+        self.assertIn(self.row('peerDependencies', 'react', '^19'), text)
+        for limit in ('version/installation/support/actual framework execution unverified',
+                      'app vs library and DOM UI vs other target unknown',
+                      'license/integrity unverified', 'no tool or browser classification selected'):
+            self.assertIn(limit, text)
+        self.assertEqual(gaps, 0)
+
+    def test_react_optional_absence_and_invalid_types_preserve_gaps(self):
+        for section in ('dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'):
+            for value in (None, False, 123, [], {}, ''):
+                with self.subTest(section=section, value=value):
+                    package = {section: {'react': value, 'react-dom': '*'}, 'scripts': {'bad': False}}
+                    (self.root / 'package.json').write_text(json.dumps(package))
+                    text, gaps = self.report()
+                    if isinstance(value, str):
+                        self.assertIn(self.row(section, 'react', value), text)
+                    else:
+                        self.assertIn('package="react"; unknown: declaration value must be a string', text)
+                    self.assertIn(self.row(section, 'react-dom', '*'), text)
+                    self.assertEqual(gaps, 1)
+            for value in (None, False, 123, [], 'DO_NOT_DUMP'):
+                (self.root / 'package.json').write_text(json.dumps({section: value}))
+                text, gaps = self.report()
+                self.assertIn('dependency section=' + json.dumps(section) + '; unknown: optional section must be an object', text)
+                self.assertNotIn('DO_NOT_DUMP', text)
+                self.assertEqual(gaps, 0)
+        (self.root / 'package.json').write_text('{}')
+        text, gaps = self.report()
+        self.assertIn('no literal react/react-dom declarations; optional/informational', text)
+        self.assertEqual(gaps, 0)
+        (self.root / 'package.json').unlink()
+        self.assertEqual(self.report()[1], 0)
+
+    def test_react_existing_manifest_errors_and_bad_scripts(self):
+        (self.root / 'frontend').mkdir()
+        (self.root / 'frontend/package.json').write_text('{"dependencies":{"react":"*"}}')
+        for raw, reason in (('{bad', 'invalid JSON'), ('[]', 'manifest must be an object')):
+            (self.root / 'package.json').write_text(raw)
+            text, gaps = self.report({'dir': 'frontend'})
+            self.assertIn('unresolved discovery: ' + reason, text)
+            self.assertIn(self.row('dependencies', 'react', '*', 'frontend'), text)
+            self.assertEqual(gaps, 1)
+        (self.root / 'package.json').write_text('{"dependencies":{"react":"*"},"scripts":null}')
+        text, gaps = self.report()
+        self.assertIn(self.row('dependencies', 'react', '*'), text)
+        self.assertEqual(gaps, 1)
+
+class ReactUnknownSectionR1(unittest.TestCase):
+    setUp = PackageManagerEvidence.setUp
+    report = PackageManagerEvidence.report
+    row = ReactDeclarationEvidence.row
+    sections = ('dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies')
+    malformed = (None, False, 123, [], 'DO_NOT_DUMP')
+    absence = 'no literal react/react-dom declarations'
+
+    def test_r1_all_20_unknown_sections_forbid_absence(self):
+        for section in self.sections:
+            for value in self.malformed:
+                with self.subTest(section=section, value=value):
+                    (self.root / 'package.json').write_text(json.dumps({section: value}))
+                    text, gaps = self.report()
+                    self.assertEqual(gaps, 0)
+                    self.assertIn('dependency section=' + json.dumps(section) +
+                                  '; unknown: optional section must be an object', text)
+                    self.assertNotIn('DO_NOT_DUMP', text)
+                    self.assertNotIn(self.absence, text)
+
+    def test_r1_valid_nonreact_sibling_cannot_resolve_unknown(self):
+        for index, section in enumerate(self.sections):
+            sibling = self.sections[(index + 1) % len(self.sections)]
+            for value in self.malformed:
+                with self.subTest(section=section, value=value):
+                    package = {section: value, sibling: {'other': '*'}}
+                    (self.root / 'package.json').write_text(json.dumps(package))
+                    text, gaps = self.report()
+                    self.assertEqual(gaps, 0)
+                    self.assertIn('; unknown: optional section must be an object', text)
+                    self.assertNotIn(self.absence, text)
+
+    def test_r1_valid_react_script_manager_siblings_survive(self):
+        for index, section in enumerate(self.sections):
+            sibling = self.sections[(index + 1) % len(self.sections)]
+            for value in self.malformed:
+                with self.subTest(section=section, value=value):
+                    package = {section: value, sibling: {'react': '*', 'react-dom': 'literal'},
+                               'packageManager': 'synthetic@1',
+                               'scripts': {'check': 'never-execute', 'bad': False}}
+                    (self.root / 'package.json').write_text(json.dumps(package))
+                    text, gaps = self.report()
+                    self.assertEqual(gaps, 1)
+                    self.assertIn('; unknown: optional section must be an object', text)
+                    self.assertIn(self.row(sibling, 'react', '*'), text)
+                    self.assertIn(self.row(sibling, 'react-dom', 'literal'), text)
+                    self.assertIn('packageManager="synthetic@1"; declared/unverified', text)
+                    self.assertIn('script name="check"; literal command="never-execute"', text)
+                    self.assertEqual(text.count('source manifest='), 3)
+                    self.assertNotIn(self.absence, text)
+
+    def test_r1_known_absent_empty_and_nonreact_controls(self):
+        packages = [{}, {section: {} for section in self.sections},
+                    {section: {'other': '*'} for section in self.sections}]
+        for package in packages:
+            with self.subTest(package=package):
+                (self.root / 'package.json').write_text(json.dumps(package))
+                text, gaps = self.report()
+                self.assertEqual(gaps, 0)
+                self.assertEqual(text.count(self.absence), 1)
+                self.assertNotIn('; unknown:', text)
+
+    def test_r1_actual_public_minimal_doctor(self):
+        path = self.root / 'package.json'
+        path.write_bytes(b'{"dependencies":null}')
+        before = (path.read_bytes(), path.stat().st_mode)
+        result = subprocess.run([sys.executable, '-B', str(Path(__file__).with_name('doctor')), str(self.root)],
+                                capture_output=True, text=True, timeout=15)
+        self.assertEqual((result.returncode, result.stderr), (0, ''))
+        self.assertIn('dependency section="dependencies"; unknown: optional section must be an object', result.stdout)
+        self.assertIn('adapters matched:          bun', result.stdout)
+        self.assertIn('verdict: 7 gap group(s).', result.stdout)
+        self.assertIn('readiness: unproven', result.stdout)
+        self.assertEqual(before, (path.read_bytes(), path.stat().st_mode))
+        self.assertNotIn(self.absence, result.stdout)
+
+
 if __name__ == "__main__":
     unittest.main()

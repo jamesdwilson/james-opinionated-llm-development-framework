@@ -51,14 +51,20 @@ You need:
 
 ## 1. Inspect the target
 
-First identify the technical shape of the repository: languages and runtimes,
-application frameworks, component directories, manifests, lockfiles and existing
-native install/test/build/browser commands. Use that profile to map applicable
-stack roles, retain sound equivalents and choose only missing compatible tools.
-A mixed repository needs component-scoped choices, not one assumed toolchain.
-Report uncertain or contradictory technical evidence before choosing tools.
-The existing product brief still governs acceptance, but reconstructing broader
-product intent is not a prerequisite for this technical tooling map.
+First identify each component's exposed surface: browser UI, HTTP API, CLI,
+library or a combination. Then inspect languages and runtimes, optional framework
+and build details, component directories, manifests, lockfiles and existing
+native commands. Capability and intended behaviour determine applicable quality
+roles; framework details determine compatible wiring, not a separate quality bar.
+Keep sound equivalents and choose only missing compatible tools. Browser checks
+must not depend on finding React or Vite; an API-only component need not have UI
+checks, and a React dependency alone does not establish browser applicability.
+
+Surface and role classification remain explicit/manual in the adoption map;
+current marker/declaration reporting is not a general automatic classifier.
+Record supporting evidence and technical contradictions before choosing tools.
+The existing product brief governs acceptance without requiring a full product
+rediscovery exercise merely to map native tooling.
 
 Start from its normal install, test, build and dev commands. Check what those commands actually execute before adding tooling. Keep useful application and isolation repairs; do not make a historical assurance ledger or custom installer a prerequisite for ordinary development. [CFA and Kept field lessons](research/field-lessons.md) explain the boundary.
 
@@ -96,6 +102,16 @@ unusable optional declarations add no gaps. Root/Vite values are not reconciled;
 legacy adapters/scaffold defaults are not chosen from them. No format/pin/hash,
 installation, active-manager or trust claim follows. Use the inspected explicit
 native plan; see the [metadata contract](quality-gate/README.md#optional-package-manager-declaration-evidence).
+
+The same already-read manifests expose optional literal `react`/`react-dom`
+declarations with exact manifest, owner, dependency section and JSON-quoted value.
+This is [declared technical evidence](quality-gate/README.md#optional-declared-react-technical-evidence),
+not verified versions, installation, support or framework execution. Peer-only
+usage can belong to a library; application/DOM target, license and integrity remain
+unknown. Optional absence or malformed dependency metadata adds no required gaps.
+A human or LLM maps requirements and this evidence to check purpose using the same
+explicit plan below; no broader product-discovery gate or automatic ideal toolchain
+selection follows. Existing adapters and scaffold defaults remain unchanged.
 
 Audit/doctor also reports immediate-child Go marker candidates with exact owning
 directory and marker path as unverified file presence. Root Go adapters remain

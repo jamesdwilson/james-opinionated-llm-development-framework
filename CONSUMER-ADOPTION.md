@@ -238,6 +238,35 @@ catalogs and static receipt are not real Toybox, Bun-native QA or application
 interoperability evidence. Initial mock test failures caused by absent files do
 not establish behavioral TDD RED. Broader native/mock readiness remains unproven.
 
+### Declared React evidence and capability-first mapping
+
+The [bounded React declaration report](quality-gate/README.md#optional-declared-react-technical-evidence)
+reuses those already-loaded manifests. It reports exact literal `react` and
+`react-dom` names and values from four distinct dependency sections with manifest
+and owning directory. It adds no discovery, dependency resolution or execution,
+and selects no application/library, browser, runtime or tool classification.
+Malformed optional sections stay unknown and do not support a manifest-level
+absence claim. Optional evidence does not change existing gap arithmetic.
+
+The final candidate passed 104 owning tests with zero emitted warnings; all 99
+preceding test bodies stayed unchanged. Independent review closed the false-absence
+finding with 112 cases and exact public output comparisons. The original blind
+consumer used the prior valid-manifest snapshot to map root npm and frontend pnpm
+checks, retain policy first and exact history, and reapply without changes. Parent
+checks verified the private baseline and frozen public tree. Valid-manifest output
+and planner/editor paths are unchanged by the repair; this carries forward that
+bounded mapping evidence, not a new blind run on malformed inputs. Selected
+native commands remained unexecuted; complete readiness is unproven.
+
+A separate public-only examination mapped plain PHP/server-rendered browser UI,
+non-React Vue browser UI and a Go HTTP API through the existing manual role map
+and explicit planner. Six public calls completed with preserved inputs; no native
+command bodies or applications existed or ran in these minimal profile fixtures.
+README intent supplied the surfaces; the tool did not detect them automatically.
+Browser roles applied to both UI profiles and were explicitly N/A for the API-only
+scope. No blocking mapping gap or new classifier code was justified. Capabilities
+and intended behaviour govern quality roles; framework names only inform wiring.
+
 Eight added `test_script_*` tests cover mixed Go-root/React-Vite declarations,
 custom names, deduplication, absent/empty scripts, malformed/wrong types,
 valid siblings, invalid encoding, control characters, unchanged fixture bytes,

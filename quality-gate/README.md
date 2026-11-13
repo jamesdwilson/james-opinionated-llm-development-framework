@@ -162,6 +162,33 @@ Inspect the target's documented native workflow and supply an explicit plan thro
 the existing preview/confirmed-application path. Declaration evidence selects no
 manager, runtime, installation or command and does not qualify readiness.
 
+## Optional declared React technical evidence
+
+Audit/doctor reports literal `react` and `react-dom` keys from `dependencies`,
+`devDependencies`, `peerDependencies` and `optionalDependencies` in the same root
+and single recognised Vite manifests already loaded for script reporting. It adds
+no manifest reads, scan, dependency, registry lookup or target import. Each row has
+its exact manifest, owning working directory, dependency section, package name and
+JSON-quoted string value. Sections remain distinct; even empty, alias-like,
+URL-like, control-containing or non-ASCII strings are inert literal declarations.
+No grammar, URL, version or workspace resolution is attempted.
+
+This is declaration evidence only: version, installation, support and actual
+framework execution remain unverified. Presence does not establish application
+versus library, DOM UI versus another target, license or integrity. Peer-only
+usage does not select an application or browser classification. Absent optional
+data adds no gaps. Nonobject sections and nonstring package values report explicit
+unknowns without dumping arbitrary values or changing existing required gap counts
+or the reporter's tuple API. Existing malformed/unreadable manifest and script
+handling remains in force; usable declarations survive malformed scripts.
+
+A human or LLM later maps technical evidence and product requirements to check
+purpose through the same explicit plan, preview and confirmed application path.
+Broader product discovery is not a prerequisite for this bounded technical report.
+There is no automatic ideal-toolchain claim: evidence selects no package, manager,
+runtime, browser or native command, and changes no adapter, scaffold or editor
+default. Actual native/tool qualification requires separate evidence and authority.
+
 ## Choose the existing-gate route first
 
 Follow [WALKTHROUGH.md](../WALKTHROUGH.md): inspect → explicit plan → reviewed diff → confirm → separately authorised native check. An existing supported literal `gate.py` needs no installer or adapter match. Doctor observes file presence only; source shape stays unverified until the opt-in preview validates it. Unsupported source and existing Makefiles use reviewed manual transfer, preserving every required check.

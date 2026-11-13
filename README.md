@@ -44,6 +44,12 @@ from the same root/recognised Vite manifests, quoted with its owning directory a
 declared/unverified. It does not select a manager or change scaffold defaults;
 absent/unusable optional values add no gaps. Use inspected explicit native plans.
 
+Audit/doctor also reports [optional declared React technical evidence](quality-gate/README.md#optional-declared-react-technical-evidence)
+from those same manifests, retaining dependency section and exact quoted value.
+Declarations do not qualify installation, execution, application versus library or
+browser applicability. A human or LLM maps requirements and evidence through the
+same explicit plan; the report selects no toolchain.
+
 For a coding agent:
 
 ```text
