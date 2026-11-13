@@ -339,6 +339,29 @@ or a resolved dependency/supply-chain lock. Empty `verify` and other unresolved
 roles are not PASS. SDK defaults and actual exposed surfaces matter more than a
 framework name when deciding which quality roles apply.
 
+### S02 metadata refusal: adoption not completed
+
+A separate, deliberately non-runnable Angular/Karma and C#/MTP metadata fixture
+completed public doctor and explicit planning, then reviewed preview refused with
+exit 2: `unsupported COMMANDS reference or mutation`. No fingerprint, application,
+backup or repeat was produced. Parent read-back matched all eight original target
+files and 31 public files plus the Git pointer, including permission modes.
+No Angular, .NET, browser or root-gate command ran.
+
+The fixture preparation was incompatible with the published editor contract. It
+used a membership read of `COMMANDS` outside task iteration, and its task vocabulary
+included keys outside the six supported tasks. Read-only inspection identified
+both issues; this was not evidence of an Angular/.NET runtime defect. The private
+checker also assumed a simpler command wrapper than the real public plan emits,
+so it cannot establish successful application in its current form.
+
+The governed attempt stopped at the source-policy refusal. Neither the editor
+policy, target source nor checker was changed to force a passing result. A future
+authorised compatibility correction must use the documented source contract and
+check the private oracle against actual producer output before another consumer
+attempt. Native compatibility, application, repeat and full S02 remain unproven.
+See the [bounded reviewed-application contract](quality-gate/README.md#reviewed-gate-application-contract).
+
 Eight added `test_script_*` tests cover mixed Go-root/React-Vite declarations,
 custom names, deduplication, absent/empty scripts, malformed/wrong types,
 valid siblings, invalid encoding, control characters, unchanged fixture bytes,
