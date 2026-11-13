@@ -267,6 +267,38 @@ Browser roles applied to both UI profiles and were explicitly N/A for the API-on
 scope. No blocking mapping gap or new classifier code was justified. Capabilities
 and intended behaviour govern quality roles; framework names only inform wiring.
 
+### Dependency-free native Node owner transfer
+
+A further owned synthetic consumer used the same accepted validator under the
+ordinary installed Node v26.0.0 runtime, with no package installation. Nine
+Node-built-in test cases passed. Its original root gate ran only the retained
+policy check: a private three-case integration envelope exposed two meaningful
+failures before adoption, while the policy-stop control already passed.
+
+A fresh consumer received only the frozen public product and target. Seven
+public CLI calls completed inspection, explicit plan, preview, confirmed
+application and a confirmed no-change repeat. Both native service commands were
+appended to root `test` after policy; their working directory remained `service/`.
+No framework, application source, tests, manifest or input edits were needed.
+Parent checks matched all 31 public files, the private protected originals and
+the content-derived original-gate backup. Repeat metadata was unchanged.
+
+The parent then executed the actual adopted gate: valid input passed, same-count
+invalid eligibility failed, and exact restoration passed (raw exits 0/1/0).
+All three private integration cases passed, including nine executed Node cases
+with zero skips and the original policy failing before Node. The validator ran
+after the native suite on valid input; native failure stopped the command chain.
+The validation logic was not reimplemented for Node. One parent evidence readback
+guessed the legacy backup name after the native checks; it was corrected to the
+actual content-derived backup without rerunning those unchanged checks.
+
+This proves a dependency-free Node-owned validation layer and existing-gate
+adoption, not React/Next.js/Express, a browser, database, production build or
+complete S01 readiness. Empty `verify` remains unresolved. Native test and
+validator routes share the same validation logic; this is transfer/routing
+and preservation evidence, not independent algorithmic proof or universal
+runtime/supply-chain qualification. Existing Go and other work stays intact.
+
 Eight added `test_script_*` tests cover mixed Go-root/React-Vite declarations,
 custom names, deduplication, absent/empty scripts, malformed/wrong types,
 valid siblings, invalid encoding, control characters, unchanged fixture bytes,
