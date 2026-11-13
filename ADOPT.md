@@ -51,13 +51,14 @@ You need:
 
 ## 1. Inspect the target
 
-First establish what the product is meant to accomplish, for whom, and under
-which constraints. Use the brief, documented examples, owner decisions and tests
-as evidence; existing code and tests may encode mistakes. Distinguish stated
-intent, inferred intent and observed behaviour. Record material contradictions
-or unknowns in the existing brief/adoption map, and confirm consequential
-ambiguities before changing product behaviour. Do not silently redefine success
-to match a broken implementation or redesign the product during tooling adoption.
+First identify the technical shape of the repository: languages and runtimes,
+application frameworks, component directories, manifests, lockfiles and existing
+native install/test/build/browser commands. Use that profile to map applicable
+stack roles, retain sound equivalents and choose only missing compatible tools.
+A mixed repository needs component-scoped choices, not one assumed toolchain.
+Report uncertain or contradictory technical evidence before choosing tools.
+The existing product brief still governs acceptance, but reconstructing broader
+product intent is not a prerequisite for this technical tooling map.
 
 Start from its normal install, test, build and dev commands. Check what those commands actually execute before adding tooling. Keep useful application and isolation repairs; do not make a historical assurance ledger or custom installer a prerequisite for ordinary development. [CFA and Kept field lessons](research/field-lessons.md) explain the boundary.
 
