@@ -22,6 +22,13 @@ From the framework checkout:
 
 `doctor` inspects file evidence without version executables. Exit 0 means inspection completed; readiness remains unproven. An existing `gate.py` is only a file-presence observation: doctor does not parse its commands or verify source shape. Package-script declarations are unexecuted candidates, limited to root and one recognised Vite frontend. Keep every reported gap for applicability and safety assessment in the adoption map; adding commands does not resolve all gaps or decide whether services are required.
 
+Optional top-level `packageManager` evidence from those same manifests quotes
+exact declared/unverified intent and its owning directory. It does not select or
+verify a manager or command; legacy adapters/scaffold defaults are not chosen
+from it. Absent/unusable optional declarations add no gaps. Inspect the documented
+native commands before supplying the explicit plan. See the
+[metadata boundary](quality-gate/README.md#optional-package-manager-declaration-evidence).
+
 Keep an existing Makefile or other native owner. A Makefile is reported complete only when all six named task markers are present; that does not verify recipes. Use the manual route below for those owners or unsupported gate source. If no gate exists, consider the separate scaffolding alternative below only when an adapter matches. No adapter match is needed for explicit planning or supported existing-gate application.
 
 For a mixed layout, doctor additionally reports an immediate-child regular

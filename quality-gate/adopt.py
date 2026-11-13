@@ -275,6 +275,16 @@ def report_package_scripts(target, vite):
             problem("manifest must be an object")
             unresolved += 1
             continue
+        if "packageManager" not in package:
+            lines.append("    manifest=%s; working directory=%s; packageManager absent; optional/informational" %
+                         (json.dumps(manifest), json.dumps(directory)))
+        elif not isinstance(package["packageManager"], str) or not package["packageManager"].strip():
+            reason = "blank string" if isinstance(package["packageManager"], str) else "value must be a nonblank string"
+            lines.append("    %s; packageManager unusable optional declaration: %s" % (source, reason))
+        else:
+            lines.append("    %s; packageManager=%s; declared/unverified; not format/pin/hash checked, installed, active or trusted; not an instruction" %
+                         (source, json.dumps(package["packageManager"])))
+            lines.append("    legacy root adapters/scaffold defaults are not chosen from this declaration; inspect native workflow and supply an explicit plan")
         scripts = package.get("scripts", {})
         if not isinstance(scripts, dict):
             problem("scripts must be an object")

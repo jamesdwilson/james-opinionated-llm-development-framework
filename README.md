@@ -39,6 +39,11 @@ with exact owning directories as unverified file presence. Root adapters remain
 root-only; inspect documented commands before supplying an explicit plan. Deeper
 or excluded layouts remain uninspected and Go execution remains unverified.
 
+Audit/doctor also shows [optional top-level `packageManager` intent](quality-gate/README.md#optional-package-manager-declaration-evidence)
+from the same root/recognised Vite manifests, quoted with its owning directory as
+declared/unverified. It does not select a manager or change scaffold defaults;
+absent/unusable optional values add no gaps. Use inspected explicit native plans.
+
 For a coding agent:
 
 ```text

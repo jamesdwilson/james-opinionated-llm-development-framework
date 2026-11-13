@@ -175,6 +175,36 @@ siblings remain reported. Missing or empty scripts are allowed. Marker matches,
 including the legacy Bun match on `package.json`, do not establish Bun as fact.
 Installation probing, generated defaults and gate generation remain unchanged.
 
+The [optional metadata contract](quality-gate/README.md#optional-package-manager-declaration-evidence)
+adds top-level `packageManager` evidence from those same loaded objects, before
+script validation. Exact JSON-quoted strings carry source/owning directory and
+are declared/unverified, not format/pin/hash checked, installed, active, trusted or
+instructions. Absent and unusable optional values add no gaps; root and Vite
+values are not reconciled. Legacy adapters/scaffold defaults are not chosen from
+this metadata. No additional discovery, execution or URL fetch is introduced.
+The inspected explicit native-plan workflow remains the command authority.
+
+This optional declaration slice passed 93 owning tests without emitted warnings,
+with all 87 preceding test bodies preserved. Independent source review retained
+308 differential observations, unchanged gap arithmetic and manifest reads, inert
+literal output, and public application/preservation checks. A fresh public-only
+consumer mapped distinct root npm and frontend pnpm intentions from their own
+READMEs, preserved the original check first and recovery history, and reapplied
+without changes. Parent checks matched the frozen public tree and private target
+baseline, surrounding gate source, ordered selections and content/mode backups.
+Those selected npm/pnpm commands remained unexecuted.
+
+The same consumer increased complexity through four read-only synthetic source
+catalogs and passing Python data checks, with deliberate failure/restoration and
+stale-confirmation refusal. Later Bun-shaped stages demonstrated mapping and
+narrow static checks only: the ordinary Bun preflight stopped in the environment's
+Safe Chain listener with `EPERM`, before returning a Bun version. No framework
+defect was established by that runtime boundary. The mock lacks qualified
+installed dependencies, a native lock and browser execution; its invented
+catalogs and static receipt are not real Toybox, Bun-native QA or application
+interoperability evidence. Initial mock test failures caused by absent files do
+not establish behavioral TDD RED. Broader native/mock readiness remains unproven.
+
 Eight added `test_script_*` tests cover mixed Go-root/React-Vite declarations,
 custom names, deduplication, absent/empty scripts, malformed/wrong types,
 valid siblings, invalid encoding, control characters, unchanged fixture bytes,

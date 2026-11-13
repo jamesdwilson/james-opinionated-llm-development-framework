@@ -60,6 +60,13 @@ Use the defaults in `STACK.md` for missing roles. Keep sound equivalents. Mark a
 
 Stack-role disposition remains manual. The [consumer capability map and mixed-stack example](CONSUMER-ADOPTION.md#consumer-capability-state-map) distinguish existing heuristics from proposed component mapping and native-command discovery. Current `doctor` uses file-derived inspection without version executables, preserves target files and labels versions unprobed and commands as unverified defaults. It now reports unexecuted package script declarations from root `package.json` and the single frontend selected by the existing Vite detector, with source path, script name, literal command and owning working directory. An absent root manifest is informational and root package-script discovery is not applicable unless Vite detection already identified it as expected. Missing expected manifests, present unreadable or malformed manifests and invalid script values remain unresolved; absent scripts are allowed. This bounded reporting does not select a package manager or verify commands. Installation still probes available tool versions for pins; its generation behaviour is unchanged, and inspection does not establish readiness.
 
+The same manifests also expose optional top-level `packageManager` as exact,
+JSON-quoted declared/unverified intent with source and owning directory. Absent or
+unusable optional declarations add no gaps. Root/Vite values are not reconciled;
+legacy adapters/scaffold defaults are not chosen from them. No format/pin/hash,
+installation, active-manager or trust claim follows. Use the inspected explicit
+native plan; see the [metadata contract](quality-gate/README.md#optional-package-manager-declaration-evidence).
+
 Audit/doctor also reports immediate-child Go marker candidates with exact owning
 directory and marker path as unverified file presence. Root Go adapters remain
 root-only. The [bounded scope and exclusions](quality-gate/README.md#immediate-child-go-marker-evidence)

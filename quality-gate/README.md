@@ -135,6 +135,33 @@ not ready. This does not scan general monorepos or choose a package manager:
 `package.json` alone does not establish Bun, even when the legacy Bun adapter matches.
 Generated defaults remain unverified; installation and gate generation are unchanged.
 
+## Optional package-manager declaration evidence
+
+Audit/doctor reports only top-level `packageManager` in the same already-read root
+and single recognised Vite manifests. Each nonblank string is JSON-quoted exactly,
+with source manifest and owning working directory, as declared/unverified metadata.
+It is not format/pin/hash checked, installed, active or trusted, and is not an
+instruction. Whitespace and literal identifiers are preserved; URL-like values
+are never fetched or executed. This is official capability metadata semantics,
+not an empirical finding: Corepack's [When Authoring Packages documentation](https://raw.githubusercontent.com/nodejs/corepack/main/README.md)
+describes manager/version/hash and URL forms. This does not establish that Corepack
+is bundled, enabled, supported or installed in the target environment.
+
+An absent field is optional/informational. Blank/whitespace-only and nonstring
+values (including null) are labelled unusable optional declarations, without
+printing arbitrary values or adding gaps. Valid declarations appear before any
+malformed-script diagnostic; valid script siblings remain visible. Malformed or
+nonobject manifests retain their existing unresolved discovery status. Existing
+script/gap counts and audit exits are unchanged. Root and Vite declarations can
+differ: no inheritance, merging, workspace precedence or conflict resolution is
+inferred. No lockfiles, `devEngines`, dependencies, registries or additional
+configuration are inspected for this evidence.
+
+Legacy root adapters and scaffold defaults are not chosen from this declaration.
+Inspect the target's documented native workflow and supply an explicit plan through
+the existing preview/confirmed-application path. Declaration evidence selects no
+manager, runtime, installation or command and does not qualify readiness.
+
 ## Choose the existing-gate route first
 
 Follow [WALKTHROUGH.md](../WALKTHROUGH.md): inspect → explicit plan → reviewed diff → confirm → separately authorised native check. An existing supported literal `gate.py` needs no installer or adapter match. Doctor observes file presence only; source shape stays unverified until the opt-in preview validates it. Unsupported source and existing Makefiles use reviewed manual transfer, preserving every required check.

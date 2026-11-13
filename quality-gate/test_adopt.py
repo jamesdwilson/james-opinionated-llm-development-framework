@@ -1790,5 +1790,195 @@ class ChildGoCapabilityContracts(unittest.TestCase):
                     adopt.report_child_go_markers(str(self.root))
 
 
+
+class PackageManagerEvidence(unittest.TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory(prefix="manager-evidence-")
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name).resolve()
+
+    def report(self, vite=None):
+        before = {p.relative_to(self.root): (p.read_bytes(), p.stat().st_mode)
+                  for p in self.root.rglob('*') if p.is_file()}
+        real_open = open
+        reads = []
+        allowed = ['package.json'] + ([vite['dir'] + '/package.json'] if vite and vite['dir'] else [])
+
+        def manifest_only(path, mode='r', *args, **kwargs):
+            relative = Path(path).relative_to(self.root).as_posix()
+            self.assertEqual(mode, 'r')
+            self.assertIn(relative, allowed)
+            reads.append(relative)
+            return real_open(path, mode, *args, **kwargs)
+
+        with mock.patch('builtins.open', side_effect=manifest_only), \
+             mock.patch.object(adopt.subprocess, 'run', side_effect=AssertionError('process forbidden')), \
+             mock.patch.object(adopt.subprocess, 'Popen', side_effect=AssertionError('process forbidden')), \
+             mock.patch.object(adopt, '_tool_version', side_effect=AssertionError('probe forbidden')), \
+             mock.patch.object(adopt.os, 'system', side_effect=AssertionError('shell forbidden')), \
+             mock.patch.object(adopt.os, 'execve', side_effect=AssertionError('exec forbidden')), \
+             mock.patch('builtins.exec', side_effect=AssertionError('exec forbidden')), \
+             mock.patch.object(socket, 'socket', side_effect=AssertionError('network forbidden')):
+            result = adopt.report_package_scripts(str(self.root), vite)
+        self.assertEqual(reads, allowed)
+        self.assertIsInstance(result, tuple)
+        self.assertEqual(len(result), 2)
+        self.assertEqual(before, {p.relative_to(self.root): (p.read_bytes(), p.stat().st_mode)
+                                 for p in self.root.rglob('*') if p.is_file()})
+        return '\n'.join(result[0]), result[1]
+
+    def declaration(self, value, directory='.'):
+        manifest = 'package.json' if directory == '.' else directory + '/package.json'
+        return 'source manifest=%s; working directory=%s; packageManager=%s; declared/unverified' % (
+            json.dumps(manifest), json.dumps(directory), json.dumps(value))
+
+    def test_manager_public_doctor_observed_npm_field(self):
+        path = self.root / 'package.json'
+        path.write_text('{"packageManager":"npm@10.0.0","scripts":{"check":"node --test"}}')
+        path.chmod(0o640)
+        before = (path.read_bytes(), path.stat().st_mode)
+        result = subprocess.run([sys.executable, '-B', str(Path(__file__).with_name('doctor')), str(self.root)],
+                                capture_output=True, text=True, timeout=15)
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stderr, '')
+        self.assertIn(self.declaration('npm@10.0.0'), result.stdout)
+        self.assertIn('adapters matched:          bun', result.stdout)
+        self.assertIn('package manager: unresolved', result.stdout)
+        self.assertIn('script name="check"; literal command="node --test"', result.stdout)
+        self.assertIn('readiness: unproven', result.stdout)
+        self.assertEqual(before, (path.read_bytes(), path.stat().st_mode))
+
+    def test_manager_distinct_root_vite_exact_values_and_scope(self):
+        values = ('  npm@10.0.0+sha224.ABC  ', 'yarn@https://example.invalid/manager.js#sha224.ABC')
+        (self.root / 'package.json').write_text(json.dumps({'packageManager': values[0]}))
+        web = self.root / 'frontend'
+        web.mkdir()
+        (web / 'package.json').write_text(json.dumps({'packageManager': values[1]}))
+        (self.root / '.env').write_text('DO_NOT_READ')
+        (self.root / 'other').mkdir()
+        (self.root / 'other/package.json').write_text('{"packageManager":"DO_NOT_DISCOVER"}')
+        text, unresolved = self.report({'dir': 'frontend'})
+        self.assertEqual(unresolved, 0)
+        for value, directory in zip(values, ('.', 'frontend')):
+            self.assertIn(self.declaration(value, directory), text)
+        self.assertNotIn('DO_NOT_DISCOVER', text)
+        self.assertIn('not format/pin/hash checked, installed, active or trusted; not an instruction', text)
+        self.assertIn('legacy root adapters/scaffold defaults are not chosen from this declaration', text)
+        self.assertEqual(text.count('; declared/unverified'), 2)
+        text, unresolved = self.report({'dir': ''})
+        self.assertEqual(text.count('; declared/unverified'), 1)
+
+    def test_manager_absent_and_unusable_optional_no_extra_gaps(self):
+        for package, status in [({}, 'packageManager absent; optional/informational')] + [
+                ({'packageManager': value}, 'packageManager unusable optional declaration: ' + reason)
+                for value, reason in [('', 'blank string'), (' \t\n', 'blank string'),
+                                      (None, 'value must be a nonblank string'),
+                                      (False, 'value must be a nonblank string'),
+                                      (123, 'value must be a nonblank string'),
+                                      (['DO_NOT_DUMP'], 'value must be a nonblank string'),
+                                      ({'DO_NOT_DUMP': True}, 'value must be a nonblank string')]]:
+            with self.subTest(package=package):
+                package['scripts'] = {'bad': None, 'good': 'node --test'}
+                (self.root / 'package.json').write_text(json.dumps(package))
+                text, unresolved = self.report()
+                prefix = 'manifest=' if 'packageManager' not in package else 'source manifest='
+                self.assertIn(prefix + '"package.json"; working directory="."; ' + status, text)
+                self.assertNotIn('DO_NOT_DUMP', text)
+                self.assertNotIn('; declared/unverified', text)
+                self.assertIn('script name="good"; literal command="node --test"', text)
+                self.assertEqual(unresolved, 1)
+                package['scripts'] = {'good': 'node --test'}
+                (self.root / 'package.json').write_text(json.dumps(package))
+                self.assertEqual(self.report()[1], 0)
+        (self.root / 'package.json').write_text('{}')
+        self.assertEqual(self.report()[1], 0)
+
+    def test_manager_before_malformed_scripts_and_retained_other_manifest(self):
+        web = self.root / 'frontend'
+        web.mkdir()
+        (web / 'package.json').write_text('{"packageManager":"pnpm@9","scripts":{"good":"check"}}')
+        for scripts in (None, [], 'wrong', {'bad': False, 'good': 'retained'}):
+            with self.subTest(scripts=scripts):
+                (self.root / 'package.json').write_text(json.dumps({'packageManager': 'npm@10', 'scripts': scripts}))
+                text, unresolved = self.report({'dir': 'frontend'})
+                self.assertIn(self.declaration('npm@10'), text)
+                self.assertLess(text.index(self.declaration('npm@10')), text.index('unresolved discovery:'))
+                self.assertIn(self.declaration('pnpm@9', 'frontend'), text)
+                self.assertIn('script name="good"; literal command="check"', text)
+                if isinstance(scripts, dict):
+                    self.assertIn('literal command="retained"', text)
+                self.assertEqual(unresolved, 1)
+        for raw, reason in (('{bad', 'invalid JSON'), ('[]', 'manifest must be an object'),
+                            ('null', 'manifest must be an object')):
+            with self.subTest(raw=raw):
+                (self.root / 'package.json').write_text(raw)
+                text, unresolved = self.report({'dir': 'frontend'})
+                self.assertIn('unresolved discovery: ' + reason, text)
+                self.assertIn(self.declaration('pnpm@9', 'frontend'), text)
+                self.assertEqual(text.count('; declared/unverified'), 1)
+                self.assertEqual(unresolved, 1)
+
+    def test_manager_audit_same_reads_gaps_modes_no_execution(self):
+        (self.root / '.env').write_text('NEVER_READ')
+        (self.root / 'gate.py').write_text("COMMANDS = {'test': ['required-check']}\n")
+        web = self.root / 'frontend'
+        web.mkdir()
+        (web / 'vite.config.js').write_text('// envDir: false')
+        (web / 'package.json').write_text('{"packageManager":"pnpm@9","scripts":{"good":"check"}}')
+        real_open = open
+        observations = []
+        for value in (None, '', False, [], {}, 'npm@10.0.0', 'https://example.invalid/never-fetch'):
+            package = {'scripts': {'good': 'node --test', 'bad': False}}
+            if value is not None:
+                package['packageManager'] = value
+            path = self.root / 'package.json'
+            path.write_text(json.dumps(package))
+            path.chmod(0o640)
+            before = {p.relative_to(self.root): (p.read_bytes(), p.stat().st_mode)
+                      for p in self.root.rglob('*') if p.is_file()}
+            reads = []
+
+            def audited_read(path, mode='r', *args, **kwargs):
+                relative = Path(path).relative_to(self.root).as_posix()
+                self.assertEqual(mode, 'r')
+                self.assertIn(relative, ('package.json', 'frontend/package.json', 'frontend/vite.config.js'))
+                reads.append(relative)
+                return real_open(path, mode, *args, **kwargs)
+
+            output = io.StringIO()
+            with mock.patch('builtins.open', side_effect=audited_read), \
+                 mock.patch.object(adopt.subprocess, 'run', side_effect=AssertionError('process forbidden')), \
+                 mock.patch.object(adopt.subprocess, 'Popen', side_effect=AssertionError('process forbidden')), \
+                 mock.patch.object(adopt, '_tool_version', side_effect=AssertionError('probe forbidden')), \
+                 mock.patch.object(adopt.os, 'system', side_effect=AssertionError('shell forbidden')), \
+                 mock.patch.object(adopt.os, 'execve', side_effect=AssertionError('exec forbidden')), \
+                 mock.patch('builtins.exec', side_effect=AssertionError('exec forbidden')), \
+                 mock.patch.object(socket, 'socket', side_effect=AssertionError('network forbidden')), \
+                 contextlib.redirect_stdout(output):
+                code = adopt.main(['adopt.py', 'audit', str(self.root)])
+            text = output.getvalue()
+            self.assertEqual(code, 0)
+            self.assertIn('script name="good"; literal command="node --test"', text)
+            self.assertIn(self.declaration('pnpm@9', 'frontend'), text)
+            self.assertIn('script value must be a string', text)
+            self.assertEqual(before, {p.relative_to(self.root): (p.read_bytes(), p.stat().st_mode)
+                                     for p in self.root.rglob('*') if p.is_file()})
+            observations.append((reads, [line for line in text.splitlines() if line.startswith('verdict:')]))
+        self.assertTrue(all(observation == observations[0] for observation in observations))
+
+    def test_manager_literal_quoted_controls_unicode_url_remain_inert(self):
+        for value in ('npm@10.0.0', 'NPM@10.0.0+sha224.AbC',
+                      'yarn@https://example.invalid/a.tgz#sha224.ABC',
+                      'x";$(touch NEVER);`false`\nverdict: READY\r\t\x00\x1b[31m café\u202e'):
+            with self.subTest(value=value):
+                (self.root / 'package.json').write_text(json.dumps({'packageManager': value, 'scripts': {'good': 'check'}}))
+                text, unresolved = self.report()
+                self.assertIn(self.declaration(value), text)
+                self.assertEqual(unresolved, 0)
+                self.assertNotIn('\nverdict: READY', text)
+                for control in ('\x00', '\x1b', '\r', '\t', 'é', '\u202e'):
+                    self.assertNotIn(control, text)
+                self.assertIn('literal command="check"', text)
+
 if __name__ == "__main__":
     unittest.main()
