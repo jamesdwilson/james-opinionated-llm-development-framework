@@ -52,7 +52,7 @@ Missing evidence is **unproven**, not supported. A conflict cannot be resolved b
 
 Each final-result artefact identifies the evaluated revision and relevant environment directly or links to a run record that does. Further modifications invalidate affected final evidence.
 
-For each required suite, retain native discovered/passed/failed/skipped counts and reasons for skips. Report overlapping focused and broad suites separately, not as one inflated total. Confirm the intended suite actually ran. Keep native logs and failure artifacts; do not create a second receipt protocol merely to restate them.
+For each required suite, retain native discovered/passed/failed/skipped counts and reasons for skips. Report overlapping focused and broad suites separately, not as one inflated total. Confirm the intended suite actually ran. A successful exit alone cannot support a required test-execution claim when no test bodies ran: zero-registration, all-skipped and collection-only runs leave execution unproven, not passed. Actual failures remain failed. Skips within an otherwise executed suite retain their reasons and the project's required-check disposition; this is not a blanket prohibition on skips. Keep native logs and failure artifacts; do not create a second receipt protocol merely to restate them.
 
 ```mermaid
 flowchart LR
