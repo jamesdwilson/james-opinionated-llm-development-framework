@@ -6,7 +6,8 @@ Replace each placeholder that applies. Unused command lines may be removed. Keep
 
 - **Product or service:** `<name>`
 - **Purpose:** `<one sentence>`
-- **Project Brief:** `<path>`
+- **Project Brief:** `<path; reuse the current authoritative brief or North Star>`
+- **Compass:** `<current brief authority/version: users, outcome, desired experience and exclusions>`
 - **BDD journeys:** `<path>`
 - **Verification and validation record:** `<path>`
 - **Authoritative adoption stack map:** `<path>`
@@ -40,6 +41,11 @@ Missing authorization, unavailable tooling, or an unexecuted required role is `b
 ## Working rules
 
 - Read the affected requirements and BDD examples before editing.
+- Select a batch that advances the current compass or removes a demonstrated blocker to it. State its contribution, sufficient evidence and stopping condition in the existing task; do not add a separate ledger.
+- After a handback, interruption or compaction, reconcile that same compass, accepted results and next eligible action. Do not repeat unchanged green checks or restart product discovery without a material reason.
+- Repair concrete findings and rerun affected evidence. Stop when the agreed claims are supported; change scope through the responsible authority rather than moving the finish line.
+- Keep optional-tool and criterion-specific blockers scoped. A missing Midscene integration is not a reason to stop independent acceptance; actual failures, refusals and protected-action permissions still apply.
+- Distinguish measured research, stakeholder intent, field experience, assumptions and chosen engineering policy. Do not invent research support for a practical rule.
 - Identify consequential ambiguity and seek clarification from the responsible authority.
 - Use RED, GREEN, REFACTOR for changed behaviour.
 - Use a verified characterisation baseline for behaviour-preserving work.

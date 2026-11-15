@@ -49,6 +49,18 @@ You need:
 - authority to inspect files and run existing checks;
 - approval under the target repository's rules before adding dependencies, services, credentials, or release actions.
 
+## Keep the compass in charge
+
+Use the target's existing brief or North Star as the compass: intended users, the job or need, desired experience, observable success and anti-goals. Record its current authority and version in the existing task or acceptance record. Do not create a second constitution or rediscover settled product intent merely to adopt tools.
+
+Before selecting a batch, state the outcome it advances or the demonstrated setup, safety or launch blocker it removes. Define the smallest sufficient evidence and stopping condition for that batch. If neither contribution is clear, choose a better batch or resolve the consequential ambiguity with its responsible owner; do not substitute check volume or process activity for progress.
+
+After a handback, interruption or compaction, reconcile the same compass, accepted results and next eligible action. Reuse unchanged valid evidence. Repair demonstrated failures and rerun affected checks rather than restart the whole verification programme. At acceptance, distinguish a functioning environment, a compliant change and an observed user journey; stop when the agreed claims are supported. Scope changes belong to the responsible authority, not an agent's expanding checklist.
+
+A missing optional tool, including Midscene, does not block independent work or require a tool migration. Use an adequate authorised equivalent and disclose the limit. Necessary deterministic failures, protected actions and actual refusals remain binding. These rules reduce drift; they do not lower the quality bar or grant execution permission.
+
+This is an explicit engineering convention informed by James's field experience, not a research-proven optimum. Stakeholder intent and practical experience may justify policy without an experiment. Preserve dated empirical findings and label assumptions, extrapolations and policy separately.
+
 ## 1. Inspect the target
 
 First identify each component's exposed surface: browser UI, HTTP API, CLI,
